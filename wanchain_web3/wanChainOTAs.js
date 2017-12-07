@@ -1,7 +1,6 @@
 //cranelv wanchain OTA database 2017-11-19
 const logger = require('./utils/logger');
-const db = global.db = require('./db');
-
+const db = global.db =require('./db');
 /*
 OTAsCollection struct
     adress:
