@@ -1,10 +1,14 @@
 /* license */
 
+const config = require('../config');
+
 const log = require('./utils/logger').create('nodeScanOta');
 const SolidityCoder = require('web3/lib/solidity/coder');
 let wanUtil = require('wanchain-util');
 const wanchainDB = require('./wanChainOTAs');
-
+const Web3 = require("web3");
+const net = require('net');
+const web3 = new Web3(new Web3.providers.IpcProvider( config.rpcIpcPath, net));
 
 let scanBlockIndex = 0;
 let lastBlockNumber = 0;
@@ -53,42 +57,40 @@ class nodeScanOta  {
     }
 
     scanBlock() {
-        ethereumNode.send('eth_blockNumber', [])
-            .then(async (ret) => {
-                lastBlockNumber = parseInt(ret.result);
-                let count = 0;
-                console.log("scanBlockIndex, lastBlockNumber :",scanBlockIndex, lastBlockNumber);
-                while(scanBlockIndex < lastBlockNumber && count < burst) {
-                    let paramArrary = ['0x'+scanBlockIndex.toString(16), true];
-                    await ethereumNode.send('eth_getBlockByNumber', paramArrary)
-                        .then((retBlock) => {
-                            const block = retBlock.result;
-                            retBlock.result.transactions.forEach((tx) => {
-                                if (tx.to == coinContractAddr) {
-                                    let cmd = tx.input.slice(2, 10).toString('hex');
-                                    if (cmd != fhs_buyCoinNote) {
-                                        return;
-                                    }
-                                    let inputPara = tx.input.slice(10);
-                                    let paras = parseContractMethodPara(inputPara, wanUtil.coinSCAbi, 'buyCoinNote');
-                                    wanchainDB.insertOtabyWaddr('', paras.OtaAddr, tx.value, 0, block.timeStamp, tx.from, scanBlockIndex);
-                                    console.log("new ota found:", paras.OtaAddr, scanBlockIndex);
+        web3.eth.getBlockNumber((n)=>{
+            lastBlockNumber = n;
+            let count = 0;
+            console.log("scanBlockIndex, lastBlockNumber :",scanBlockIndex, lastBlockNumber);
+            while(scanBlockIndex < lastBlockNumber && count < burst) {
+                let paramArrary = ['0x'+scanBlockIndex.toString(16), true];
+                web3.eth.getBlock('0x'+scanBlockIndex.toString(16), true, (err, block)=>{
+                    if(err){
+                        console.log("Error:", err);
+                    }else {
+                        block.transactions.forEach((tx) => {
+                            if (tx.to == coinContractAddr) {
+                                let cmd = tx.input.slice(2, 10).toString('hex');
+                                if (cmd != fhs_buyCoinNote) {
+                                    return;
                                 }
-                            });
-                        })
-                        .catch((error)=>{
-                            console.log("failed to get BlockNumber. geth exit?");
+                                let inputPara = tx.input.slice(10);
+                                let paras = parseContractMethodPara(inputPara, wanUtil.coinSCAbi, 'buyCoinNote');
+                                wanchainDB.insertOtabyWaddr('', paras.OtaAddr, tx.value, 0, block.timeStamp, tx.from, scanBlockIndex);
+                                console.log("new ota found:", paras.OtaAddr, scanBlockIndex);
+                            }
                         });
-                    count += 1;
-                    scanBlockIndex += 1;
-                }
-                wanchainDB.setScanedByWaddr(null, scanBlockIndex);
-                if(count === burst){
-                    scanTimer = setTimeout(self.scanBlock,10);
-                }else {
-                    scanTimer = setTimeout(self.scanBlock,10000);
-                }
-            });
+                    }
+                });
+                count += 1;
+                scanBlockIndex += 1;
+            }
+            wanchainDB.setScanedByWaddr(null, scanBlockIndex);
+            if(count === burst){
+                scanTimer = setTimeout(self.scanBlock,10);
+            }else {
+                scanTimer = setTimeout(self.scanBlock,10000);
+            }
+        });
     }
     start() {
         scanBlockIndex = this.getScanedBlock();
@@ -101,8 +103,8 @@ class nodeScanOta  {
         }
     }
     restart( ) {
-        this.stop();
-        this.start();
+        self.stop();
+        self.start();
     }
 }
 

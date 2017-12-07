@@ -2,4 +2,6 @@
 
 
 const nodeSyncOta = require('../wanchain_web3/nodeScanOta');
-nodeSyncOta.restart();
+global.db.init().then(
+    nodeSyncOta.restart
+);
