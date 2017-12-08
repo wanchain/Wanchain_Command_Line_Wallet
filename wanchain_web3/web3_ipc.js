@@ -73,7 +73,7 @@ const web3Require ={
     },
     initOTAsCollection()
     {
-        collections.OTAsCollection = Db.getCollection('OTAs','OTAHash');
+        collections.OTAsCollection = Db.getCollection('OTAsCollection');
     },
     run(func)
     {
