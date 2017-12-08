@@ -1,7 +1,7 @@
 
 var config = require('../config');
 
-var web3Require = require('../wanchain_web3/web3_ipc');
+const web3Require = global.web3Require = require('../wanchain_web3/web3_ipc');
 // Start the prompt
 web3Require.addSchema(web3Require.schemaAll.keyPasswordSchema, function (result) {
     if(result.password.length<2)

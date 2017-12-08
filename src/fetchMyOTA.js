@@ -1,5 +1,5 @@
 const fetchMyOta = require('../wanchain_web3/nodeScan.js');
-var web3Require = require('../wanchain_web3/web3_ipc');
+const web3Require = global.web3Require = require('../wanchain_web3/web3_ipc');
 let transaction = require('../wanchain_web3/Transaction');
 transaction.addCurAccount();
 web3Require.addSchema(web3Require.schemaAll.PasswordSchema, function (result) {

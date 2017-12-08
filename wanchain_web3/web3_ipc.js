@@ -9,7 +9,7 @@ var optimist = require('optimist');
 var schema = require('../Schema/SchemaAll');
 let wanUtil = require('wanchain-util');
 const Db = require('./db.js');
-
+let collections = require('./collection.js');
 const logDebug = require('log4js');
 let log4jsOptions = {
     appenders: {
@@ -52,8 +52,6 @@ const web3Require ={
     runUseDb: false,
 //    curAccount : '',
     schemaIndex : 0,
-    transCollection : null,
-    OTAsCollection : null,
     logger: logDebug.getLogger('wanchain'),
 
     //prompt functions
@@ -71,11 +69,11 @@ const web3Require ={
     },
     initTransCollection()
     {
-        web3Require.transCollection = Db.getCollection('transaction','transHash');
+        collections.transCollection = Db.getCollection('transaction','transHash');
     },
     initOTAsCollection()
     {
-        web3Require.OTAsCollection = Db.getCollection('OTAs','OTAHash');
+        collections.OTAsCollection = Db.getCollection('OTAs','OTAHash');
     },
     run(func)
     {
@@ -119,7 +117,7 @@ const web3Require ={
             prompt.override = null;
             if(!err)
             {
-                web3Require.logger.debug(result);
+                temp.logger.debug(result);
                 if(schema.optionalArray && schema.optionalArray.length>0) {
                     for (var key in result) {
                         var val = result[key];
@@ -263,7 +261,7 @@ const web3Require ={
     {
         var temp = this;
         this.promptGet(schema, function (result) {
-            web3Require.logger.debug(result);
+            temp.logger.debug(result);
             if(result[1].FeeSel<schema.optionalArray.length)
             {
                 temp.schemaIndex += 1;
@@ -291,7 +289,7 @@ const web3Require ={
     },
     getWAddress(address)
     {
-        let keyStore = web3Require.getKeystoreJSON(address);
+        let keyStore = this.getKeystoreJSON(address);
         if(keyStore) {
             return keyStore.waddress;
         }

@@ -1,7 +1,8 @@
 
 var config = require('../config');
 const secp256k1 = require('secp256k1');
-var web3Require = require('./web3_ipc');
+const web3Require = global.web3Require = require('./web3_ipc');
+let collections = require('./collection.js');
 let wanUtil = require('wanchain-util');
 const Transaction = {
     curAddress: null,
@@ -224,7 +225,7 @@ const Transaction = {
         web3Require.addSchema(web3Require.schemaAll.TransListSchema('Input the transaction No. :',
             'The Number is invalid or nonexistent.',function (schema) {
                 schema.optionalArray = [];
-                var data = web3Require.transCollection.find({'from': Transaction.curAddress});
+                var data = collections.transCollection.find({'from': Transaction.curAddress});
                 if(data)
                 {
                     data.forEach(function (item, index) {
@@ -234,9 +235,11 @@ const Transaction = {
             }), function (result) {
             if(result)
             {
-                Transaction.curTransaction = result[0];
+                collections.curTransaction = result[0];
                 web3Require.logger.debug(result);
-                web3Require.runschemaStep();
+                Transaction.consoleTransactionInfo(collections.curTransaction.transHash,function(){
+                    web3Require.runschemaStep()
+                });
             }
             else
             {
@@ -251,7 +254,7 @@ const Transaction = {
                 let wAddress = web3Require.getWAddress(Transaction.curAddress);
                 if(wAddress)
                 {
-                    var data = web3Require.OTAsCollection.find({'address': wAddress});
+                    var data = collections.OTAsCollection.find({'address': wAddress});
                     if(data)
                     {
                         data.forEach(function (item, index) {
@@ -271,6 +274,20 @@ const Transaction = {
             {
                 web3Require.exit('This account have no OTA!');
             }
+        });
+    },
+    consoleTransactionInfo(transHash,callback)
+    {
+        web3Require.web3_ipc.eth.getTransactionReceipt(transHash,function (err,result) {
+           if(!err)
+           {
+               console.log(result);
+           }
+           else
+           {
+               console.log(err);
+           }
+            callback();
         });
     },
 
@@ -299,9 +316,9 @@ function getCollectionItem(item) {
 };
 function insertTransaction(transhash,from,to,value,p)
 {
-    var found = web3Require.transCollection.findOne({'transHash': transhash});
+    var found = collections.transCollection.findOne({'transHash': transhash});
     if(found == null) {
-        web3Require.transCollection.insert({
+        collections.transCollection.insert({
             transHash: transhash,
             from: from,
             to:to,
@@ -315,9 +332,9 @@ function insertTransaction(transhash,from,to,value,p)
 };
 function insertOTAs(OTAHash,address,value,timeStamp,otaFrom,status)
 {
-    var found = web3Require.OTAsCollection.findOne({'OTAHash': OTAHash});
+    var found = collections.OTAsCollection.findOne({'OTAHash': OTAHash});
     if(found == null) {
-        web3Require.OTAsCollection.insert({
+        collections.OTAsCollection.insert({
             OTAHash: OTAHash,
             address: address,
             value:value,
