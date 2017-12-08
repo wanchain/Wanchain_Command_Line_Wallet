@@ -67,7 +67,7 @@ class nodeScanOta  {
             console.log("scanBlockIndex, lastBlockNumber :",scanBlockIndex, lastBlockNumber);
             while(scanBlockIndex < lastBlockNumber && count < burst) {
                 let paramArrary = ['0x'+scanBlockIndex.toString(16), true];
-                web3.eth.getBlock('0x'+scanBlockIndex.toString(16), true, (err, block)=>{
+                web3.eth.getBlock(scanBlockIndex, true, (err, block)=>{
                     if(err){
                         console.log("getBlock Error:", err);
                         scanTimer = setTimeout(self.scanBlock,10000);
