@@ -50,9 +50,8 @@ function parseContractMethodPara(paraData, abi,method)
 }
 
 
-class nodeScan extends EventEmitter {
+class nodeScan {
     constructor() {
-        super();
         self = this;
     }
     getScanedBlock(waddr) {
@@ -61,26 +60,29 @@ class nodeScan extends EventEmitter {
     setScanedBlock(waddr, scaned) {
         wanchainDB.setScanedByWaddr(waddr, scaned);
     }
-    start(waddr, privB) {
+    check(waddr, privB) {
         console.log('check ota by addr:', waddr);
         currentScanAddress = waddr;
         const myPub = wanUtil.recoverPubkeyFromWaddress(waddr);
         privKeyB = privB;
         pubKeyA = myPub.A;
-        var nodesc = this;
-        scanBlockIndex = nodesc.getScanedBlock(waddr);
-        nodesc.checkOtainDb();
-
+        scanBlockIndex = self.getScanedBlock(waddr);
+        self.checkOtainDb();
     }
 
-    stop() {
-        if (scanBlockIndex ) {
-            wanchainDB.setScanedByWaddr(currentScanAddress, scanBlockIndex);
+    start(keystore, keyPassword){
+        let keyBObj = {version:keystore.version, crypto:keystore.crypto2};
+        let keyAObj = {version:keystore.version, crypto:keystore.crypto};
+        let privKeyA;
+        let privKeyB;
+        try {
+            privKeyA = keythereum.recover(keyPassword, keyAObj);
+            privKeyB = keythereum.recover(keyPassword, keyBObj);
+        }catch(error){
+            console.log('wan_refundCoin', 'wrong password');
+            return;
         }
-    }
-    restart(waddr, privB) {
-        this.stop();
-        this.start(waddr, privB);
+        self.check(keystore.waddress, privKeyB);
     }
     compareOta(ota) {
         let otaPub = wanUtil.recoverPubkeyFromWaddress(ota._id);
@@ -93,22 +95,11 @@ class nodeScan extends EventEmitter {
         return false;
     }
     checkOtainDb() {
-        let checkinterval = 60000;
         lastBlockNumber = wanchainDB.getScanedByWaddr(null);
         console.log("scanBlockIndex,lastBlockNumber:",scanBlockIndex,lastBlockNumber);
-        if(lastBlockNumber === scanBlockIndex && scanBlockIndex !== 0 ) {
-            setTimeout(self.checkOtainDb, checkinterval);
-            return;
-        }
-        let blockEnd = lastBlockNumber;
-        if(scanBlockIndex + checkBurst < lastBlockNumber){
-            checkinterval = 100;
-            blockEnd = scanBlockIndex + checkBurst;
-        }
-        wanchainDB.checkOta(self.compareOta, scanBlockIndex+1, blockEnd);
-        wanchainDB.setScanedByWaddr(currentScanAddress, blockEnd);
-        scanBlockIndex = blockEnd;
-        setTimeout(self.checkOtainDb, checkinterval);
+        wanchainDB.checkOta(self.compareOta, scanBlockIndex+1, lastBlockNumber);
+        wanchainDB.setScanedByWaddr(currentScanAddress, lastBlockNumber);
+        console.log('done');
     }
 }
 
