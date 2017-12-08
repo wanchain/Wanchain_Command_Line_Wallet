@@ -3,7 +3,6 @@ var config = require('../config');
 
 var web3Require = require('./web3_ipc');
 let wanUtil = require('wanchain-util');
-let contractCoinAddress = '0x0000000000000000000000000000000000000064';
 let curAddress;
 let toAddress;
 let curTransaction;
@@ -21,9 +20,16 @@ const Transaction = {
             });
 //        schema.optionalArray = web3Require.accountArray;
         web3Require.addSchema(schema, function (result) {
-            curAddress = result[0];
-            console.log(result);
-            web3Require.stepNext();
+            if(result)
+            {
+                curAddress = result[0];
+                console.log(result);
+                web3Require.stepNext();
+            }
+            else
+            {
+                web3Require.exit('No account created. You could create new one or import one from a keystore file.');
+            }
         });
     },
     addToAccount(){
@@ -146,18 +152,66 @@ const Transaction = {
                     });
                 }
             }), function (result) {
-            curTransaction = result[0];
-            console.log(result);
-            web3Require.stepNext();
+            if(result)
+            {
+                curTransaction = result[0];
+                console.log(result);
+                web3Require.runschemaStep();
+            }
+            else
+            {
+                web3Require.exit('This account have no transaction!');
+            }
+        });
+    },
+    addOTAsSelectList(){
+        web3Require.addSchema(web3Require.schemaAll.OTAsListSchema('Select transaction fee for per transaction by inputting No.:',
+            'The Number is invalid or nonexistent.',function (schema) {
+                schema.optionalArray = [];
+                let keyStore = web3Require.getFromKeystoreFile(curAddress);
+                if(keyStore)
+                {
+                    var data = web3Require.OTAsCollection.find({'address': keyStore.waddress});
+                    if(data)
+                    {
+                        data.forEach(function (item, index) {
+                            schema.optionalArray.push(getCollectionItem(item));
+                        });
+                    }
+
+                }
+            }), function (result) {
+            if(result)
+            {
+                curTransaction = result[0];
+                console.log(result);
+                web3Require.stepNext();
+            }
+            else
+            {
+                web3Require.exit('This account have no OTA!');
+            }
         });
     },
 
     run()
     {
+        web3Require.initFunction.push(function () {
+            web3Require.initTransCollection();
+        })
         web3Require.getAccounts(function(){
             web3Require.runschema();
         });
     },
+    runOTAs()
+    {
+        web3Require.initFunction.push(function () {
+            web3Require.initOTAsCollection();
+        })
+        web3Require.getAccounts(function(){
+            web3Require.runschema();
+        });
+    }
 
 };
 function getCollectionItem(item) {
@@ -182,6 +236,22 @@ function insertTransaction(transhash,from,to,value,p)
             value:value,
             time:getNowFormatDate(),
             p:p
+        });
+    } else {
+        console.log(transhash + 'is already existed!');
+    }
+};
+function insertOTAs(OTAHash,address,value,timeStamp,otaFrom,status)
+{
+    var found = web3Require.OTAsCollection.findOne({'OTAHash': OTAHash});
+    if(found == null) {
+        web3Require.OTAsCollection.insert({
+            OTAHash: OTAHash,
+            address: address,
+            value:value,
+            timeStamp:timeStamp,
+            otaFrom:otaFrom,
+            status:status
         });
     } else {
         console.log(transhash + 'is already existed!');

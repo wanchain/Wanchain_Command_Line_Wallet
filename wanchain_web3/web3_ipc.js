@@ -1,5 +1,6 @@
 var config = require('../config');
 const Web3 = require("web3");
+const fs = require('fs');
 //const web3Admin = require('web3Admin.js');
 var net = require('net');
 const prompt = require('prompt');
@@ -13,24 +14,33 @@ const web3Require ={
     web3_ipc : new Web3(new Web3.providers.IpcProvider( config.rpcIpcPath, net.Socket())),
     schemaArray: [],
     accountArray: [],
+    initFunction:[],
     runUseDb: false,
 //    curAccount : '',
     schemaIndex : 0,
     transCollection : null,
+    OTAsCollection : null,
 
     //prompt functions
     init()
     {
+        this.initFunction.forEach(function (func) {
+            func();
+        });
         prompt.override = optimist.argv;
         this.web3_ipc.wan = new wanUtil.web3Wan(this.web3_ipc);
         prompt.start();
         prompt.message = colors.blue("wanWallet");
         prompt.delimiter = colors.green(">>");
         this.schemaIndex = 0;
-        if(this.runUseDb)
-        {
-            this.transCollection = Db.getCollection('transaction','transHash');
-        }
+    },
+    initTransCollection()
+    {
+        this.transCollection = Db.getCollection('transaction','transHash');
+    },
+    initOTAsCollection()
+    {
+        this.OTAsCollection = Db.getCollection('OTAs','OTAHash');
     },
     run(func)
     {
@@ -55,11 +65,19 @@ const web3Require ={
         {
             schema.preLoad(schema);
         }
-        if(schema.optionalArray && schema.optionalArray.length>0)
+        if(schema.optionalArray)
         {
-            schema.optionalArray.forEach(function (item, index) {
-                console.log(index+1 + '.    ' + JSON.stringify(item));
-            });
+            if(schema.optionalArray.length>0)
+            {
+                schema.optionalArray.forEach(function (item, index) {
+                    console.log(index+1 + '.    ' + JSON.stringify(item));
+                });
+            }
+            else
+            {
+                callback(null);
+                return;
+            }
         }
         prompt.get(schema,function(err,result)
         {
@@ -172,11 +190,6 @@ const web3Require ={
         else
         {
             process.exit();
-
-        }
-        if(err)
-        {
-            console.log(err);
         }
     },
 
@@ -239,7 +252,46 @@ const web3Require ={
         this.addSchema(this.schemaAll.feeInputSchema(),function (result) {
             callback(result);
         })
-    }
+    },
+    getFromKeystoreFile(address)
+    {
+        let fileName = this.getKeystoreFile(address);
+        if(fileName)
+        {
+            let keystoreStr = fs.readFileSync(fileName, "utf8");
+            return JSON.parse(keystoreStr);
+        }
+        return null;
+    },
+    getKeystoreFile(address)
+    {
+        if(address.substr(0,2) == '0x' || address.substr(0,2) == '0X')
+            address = address.substr(2);
+        let keyStorePath = this.getKeystorePath();
+        let files = fs.readdirSync(keyStorePath);
+        for(var i in files) {
+            var item = files[i];
+            if(item.indexOf(address)>=0)
+            {
+                return keyStorePath + item;
+            }
+        }
+    },
+    getKeystorePath()
+    {
+        let curPath = config.rpcIpcPath;
+        let nPos = curPath.lastIndexOf('/');
+        if(nPos<0)
+        {
+            nPos = curPath.lastIndexOf('\\');
+        }
+        if(nPos>= 0)
+        {
+            curPath = curPath.substr(0,nPos+1);
+        }
+        curPath += 'keystore/';
+        return curPath;
+    },
 
 };
 module.exports = web3Require;

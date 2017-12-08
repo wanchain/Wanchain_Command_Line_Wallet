@@ -1,14 +1,26 @@
 var colors = require("colors/safe");
+function Qmsg(desc) {
+    return colors.magenta(desc+'[Q\\q to exit]:');
+};
+function CheckProcessExit(value) {
+    if(value == 'Q' || value == 'q')
+    {
+        console.log('You have quit command!');
+        process.exit();
+    }
+    return true;
+};
 var SchemaAll = {
     properties: {
         password: {
             pattern: '[^\u4e00-\u9fa5]+',
             message: "Password invalid or too short!",
-            description: colors.magenta("Input password: "),
+            description: Qmsg("Input password: "),
             hidden: true,
             replace: '*',
             required: true,
             conform : function (value) {
+                CheckProcessExit(value);
                 var aaa = new String(value);
                 return aaa.length>5;
             }
@@ -16,53 +28,61 @@ var SchemaAll = {
         repeatPass:{
             pattern: '[^\u4e00-\u9fa5]+',
             message: "Password invalid",
-            description: colors.magenta("repeat password: "),
+            description: Qmsg("repeat password: "),
             hidden: true,
             replace: '*',
+            conform : CheckProcessExit,
             required: true,
         },
         address: {
             pattern: /^(0x)?[0-9a-fA-F]{40}$/,
             message: 'Address invalid!',
-            description: colors.magenta("Input address: "),
+            description: Qmsg("Input address: "),
+            conform : CheckProcessExit,
             required: true
         },
         waddress: {
             pattern: /^(0x)?[0-9a-fA-F]{132}$/,
             message: "Waddress invalid",
-            description: colors.magenta("Input waddress: "),
+            description: Qmsg("Input waddress: "),
+            conform : CheckProcessExit,
             required: true
         },
         YesNo: {
             pattern: /^y$|^Y$|^n$|^N$/,
             message: "you should input y(Y) or n(N)",
-            description: colors.magenta("Input: "),
+            description: Qmsg("Input: "),
+            conform : CheckProcessExit,
             required: true
         },
         floatValue: {
             pattern: /^[+]{0,1}(\d+)$|^[+]{0,1}(\d+\.\d+)$/,
             message: "value invalid!",
-            description: colors.magenta("Input: "),
+            description: Qmsg("Input: "),
+            conform : CheckProcessExit,
             required: true
         },
         intValue: {
             pattern: /^[1-9]\d*$/,
             message: "Value invalid!(you should input positive integer)",
-            description: colors.magenta("Input: "),
+            description: Qmsg("Input: "),
+            conform : CheckProcessExit,
             required: true
         },
         gasLimit:{
             pattern: /^[1-9]\d*$/,
             message: "Gas limit invalid!",
-            description: colors.magenta("Input gas limit: "),
+            description: Qmsg("Input gas limit: "),
+            conform : CheckProcessExit,
             required: true
         },
         gasPrice:{
             pattern: /^[1-9]\d*$/,
             message: "Price invalid!",
-            description: colors.magenta("Input gas price (Price limit is between 1win-60win): "),
+            description: Qmsg("Input gas price (Price limit is between 1win-60win): "),
             required: true,
             conform : function (value) {
+                CheckProcessExit(value);
                 return value>=1 && value<=60;
             }
         },
@@ -89,7 +109,7 @@ function cloneSchema(Schema) {
 function modifyDesc(Schema, desc,message) {
     Schema = cloneSchema(Schema);
     if(desc && desc.length>0) {
-        Schema.description = colors.magenta(desc);
+        Schema.description = Qmsg(desc);
     }
     if(message && message.length>0){
         Schema.message = message;
@@ -166,7 +186,8 @@ exports.YesNoSchema = function (key,desc,message) {
     Schema.properties[key] = {
                 pattern: /^y$|^Y$|^n$|^N$/,
                 message: message,
-                description: colors.magenta(desc),
+                description: Qmsg(desc),
+                conform:CheckProcessExit,
                 required: true
             };
     return Schema;
@@ -177,6 +198,14 @@ exports.TransListSchema = function (desc,message,preLoad) {
         properties:{}
     };
     Schema.properties.TransNo = modifyDesc(SchemaAll.properties.intValue,desc,message);
+    return Schema;
+};
+exports.OTAsListSchema = function (desc,message,preLoad) {
+    let Schema = {
+        preLoad: preLoad,
+        properties:{}
+    };
+    Schema.properties.OTAsNo = modifyDesc(SchemaAll.properties.intValue,desc,message);
     return Schema;
 };
 
