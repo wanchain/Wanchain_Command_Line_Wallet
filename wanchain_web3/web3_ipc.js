@@ -253,6 +253,15 @@ const web3Require ={
             callback(result);
         })
     },
+    getWAddress(address)
+    {
+        let keyStore = web3Require.getFromKeystoreFile(address);
+        if(keyStore) {
+            return keyStore.waddress;
+        }
+        return null;
+    },
+
     getFromKeystoreFile(address)
     {
         let fileName = this.getKeystoreFile(address);

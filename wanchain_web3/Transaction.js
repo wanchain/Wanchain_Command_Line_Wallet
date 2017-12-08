@@ -23,7 +23,8 @@ const Transaction = {
             if(result)
             {
                 curAddress = result[0];
-                console.log(result);
+                console.log('address: ' + curAddress);
+                console.log('waddress: ' + web3Require.getWAddress(curAddress));
                 web3Require.stepNext();
             }
             else
@@ -168,10 +169,10 @@ const Transaction = {
         web3Require.addSchema(web3Require.schemaAll.OTAsListSchema('Select transaction fee for per transaction by inputting No.:',
             'The Number is invalid or nonexistent.',function (schema) {
                 schema.optionalArray = [];
-                let keyStore = web3Require.getFromKeystoreFile(curAddress);
-                if(keyStore)
+                let wAddress = web3Require.getWAddress(curAddress);
+                if(wAddress)
                 {
-                    var data = web3Require.OTAsCollection.find({'address': keyStore.waddress});
+                    var data = web3Require.OTAsCollection.find({'address': wAddress});
                     if(data)
                     {
                         data.forEach(function (item, index) {
