@@ -293,6 +293,8 @@ const web3Require ={
     },
     getKeystorePath()
     {
+        return config.keyStorePath;
+        /*
         let curPath = config.rpcIpcPath;
         let nPos = curPath.lastIndexOf('/');
         if(nPos<0)
@@ -305,6 +307,7 @@ const web3Require ={
         }
         curPath += 'keystore/';
         return curPath;
+        */
     },
 
 };

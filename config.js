@@ -2,7 +2,30 @@ const config = {};
 
 // web3 parameter
 config.host = '// http://localhost'; // http://localhost
-config.rpcIpcPath = '/home/cranelv/.wanchain/gwan.ipc';
+config.rpcIpcPath = process.env.HOME;
+if (process.platform === 'darwin') {
+    config.rpcIpcPath += '/Library/Wanchain/gwan.ipc';
+} else if (process.platform === 'freebsd' ||
+    process.platform === 'linux' ||
+    process.platform === 'sunos') {
+    config.rpcIpcPath += '/.wanchain/gwan.ipc';
+} else if (process.platform === 'win32') {
+    config.rpcIpcPath = '\\\\.\\pipe\\gwan.ipc';
+}
+config.keyStorePath = process.env.HOME;
+if (process.platform === 'darwin') {
+    config.keyStorePath += '/Library/wanchain/keystore/';
+}
+
+if (process.platform === 'freebsd' ||
+    process.platform === 'linux' ||
+    process.platform === 'sunos') {
+    config.keyStorePath += '/.wanchain/keystore/';
+}
+
+if (process.platform === 'win32') {
+    config.keyStorePath = process.env.APPDATA + '\\wanchain\\keystore\\';
+}
 // config.host = 'http://192.168.1.77'; // http://localhost
 config.port = 8545;
 
