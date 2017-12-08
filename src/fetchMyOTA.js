@@ -15,7 +15,11 @@ web3Require.addSchema(web3Require.schemaAll.PasswordSchema, function (result) {
         {
             fetchMyOta.start(keystore, result.password);
         }
-        web3Require.exit();
+        else
+        {
+            web3Require.logger.debug('Keystore is null');
+            web3Require.exit();
+        }
     }
 });
 transaction.run();
