@@ -8,5 +8,7 @@ transaction.addCurAccount();
 transaction.addToAccount();
 transaction.addFee();
 transaction.addSend(transaction.sendTo);
-transaction.run(web3Require.initTransCollection);
+transaction.run(function(){
+    web3Require.initTransCollection();
+});
 

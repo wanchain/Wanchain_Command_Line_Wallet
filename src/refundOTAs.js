@@ -5,5 +5,7 @@ transaction.addCurAccount();
 transaction.addOTAsSelectList();
 transaction.addFee();
 transaction.addSend(transaction.sendTo);
-transaction.run(web3Require.initOTAsCollection);
+transaction.run(function () {
+    web3Require.initOTAsCollection();
+});
 

@@ -22,4 +22,6 @@ web3Require.addSchema(web3Require.schemaAll.PasswordSchema, function (result) {
         web3Require.exit();
     }
 });
-transaction.run();
+transaction.run(function () {
+    web3Require.initOTAsCollection();
+});

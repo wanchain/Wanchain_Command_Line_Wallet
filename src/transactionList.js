@@ -3,5 +3,8 @@ const web3Require = global.web3Require = require('../wanchain_web3/web3_ipc');
 
 transaction.addCurAccount();
 transaction.addSelectList();
-transaction.run(web3Require.initTransCollection);
+transaction.run(function()
+{
+    web3Require.initTransCollection();
+});
 
