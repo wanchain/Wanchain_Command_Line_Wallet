@@ -57,15 +57,20 @@ class nodeScanOta  {
     }
 
     scanBlock() {
-        web3.eth.getBlockNumber((n)=>{
+        web3.eth.getBlockNumber((err, n)=>{
+            if(err){
+                console.log("getBlockNumber error:", err);
+                scanTimer = setTimeout(self.scanBlock,10000);
+            }
             lastBlockNumber = n;
             let count = 0;
             console.log("scanBlockIndex, lastBlockNumber :",scanBlockIndex, lastBlockNumber);
             while(scanBlockIndex < lastBlockNumber && count < burst) {
                 let paramArrary = ['0x'+scanBlockIndex.toString(16), true];
-                web3.eth.getBlock('0x'+scanBlockIndex.toString(16), true, (err, block)=>{
+                web3.eth.getBlock(scanBlockIndex, true, (err, block)=>{
                     if(err){
-                        console.log("Error:", err);
+                        console.log("getBlock Error:", err);
+                        scanTimer = setTimeout(self.scanBlock,10000);
                     }else {
                         block.transactions.forEach((tx) => {
                             if (tx.to == coinContractAddr) {
