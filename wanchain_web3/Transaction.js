@@ -1,6 +1,6 @@
 
 var config = require('../config');
-
+const secp256k1 = require('secp256k1');
 var web3Require = require('./web3_ipc');
 let wanUtil = require('wanchain-util');
 const Transaction = {
@@ -8,6 +8,7 @@ const Transaction = {
     toAddress: null,
     curTransaction: null,
     toWAddress: null,
+    OTAAddress: null,
     amount: null,
     gasPrice: null,
     gasLimit: null,
@@ -35,7 +36,7 @@ const Transaction = {
     },
     addToAccount(){
         web3Require.addSchema(web3Require.schemaAll.sendSchema(),function (result) {
-            console.log(result);
+            web3Require.logger.debug(result);
             Transaction.toAddress = result.toaddress;
             Transaction.amount = result.amount;
             web3Require.stepNext();
@@ -44,21 +45,21 @@ const Transaction = {
     //privacy
     addToWAddress(){
         web3Require.addSchema(web3Require.schemaAll.sendPrivacySchema(),function (result) {
-            console.log(result);
+            web3Require.logger.debug(result);
             Transaction.toWAddress = result.waddress;
             web3Require.stepNext();
         });
     },
     addToPrivacyAmount(){
         web3Require.addSchema(web3Require.schemaAll.sendPrivacyAmount(),function (result) {
-            console.log(result);
+            web3Require.logger.debug(result);
             Transaction.amount = result[0];
             web3Require.stepNext();
         });
     },
     addFee(){
         web3Require.addfeeSchema(function (result) {
-            console.log(result);
+            web3Require.logger.debug(result);
             if(result.FeeSel)
             {
 
@@ -86,7 +87,7 @@ const Transaction = {
     addSend(callback)
     {
         web3Require.addSchema(web3Require.schemaAll.YesNoSchema('submit','Do you confirm to send transaction? [Y]es or [N]o : '),function (result) {
-            console.log(result);
+            web3Require.logger.debug(result);
             if(result.submit == 'Y' || result.submit == 'y')
             {
                 web3Require.stepNext();
@@ -112,7 +113,7 @@ const Transaction = {
             gas: Transaction.gasLimit
         },result.password,function (err,result) {
             if(!err){
-                console.log(result);
+                console.log('Transaction hash: ' + result);
                 insertTransaction(result,Transaction.curAddress,Transaction.toAddress,Transaction.amount,'');
             }
             web3Require.exit(err);
@@ -135,14 +136,92 @@ const Transaction = {
             data: txBuyData
         }, result.password, function (err, result) {
             if (!err) {
-                console.log(result);
+                console.log('Transaction hash: ' + result);
                 insertTransaction(result,Transaction.curAddress,Transaction.toWAddress,Transaction.amount,'p');
             }
             web3Require.exit(err);
         })
     },
+    sendRefundOTA(result)
+    {
+        let CoinContractAddr = wanUtil.contractCoinAddress;
+        let CoinContract = web3Require.web3_ipc.eth.contract(wanUtil.coinSCAbi);
+        Transaction.password = result.password;
+        web3Require.web3_ipc.wan.getOTAMixSet([Transaction.OTAAddress, config.OTAMixNumber],function (err,otaSet) {
+            if(!err)
+            {
+                let keystore = web3Require.getKeystoreJSON();
+                let keyBObj = {version:keystore.version, crypto:keystore.crypto2};
+                let keyAObj = {version:keystore.version, crypto:keystore.crypto};
+                let privKeyA;
+                let privKeyB;
+                try {
+                    privKeyA = keythereum.recover(Transaction.password, keyAObj);
+                    privKeyB = keythereum.recover(Transaction.password, keyBObj);
+                }catch(error){
+                    console.log('wan_refundCoin', 'wrong password');
+                    web3Require.exit();
+                }
+
+                //let otaSetr = await ethereumNode.send('eth_getOTAMixSet', [otaDestAddress, number]);
+                //let otaSet = otaSetr.result;
+                web3Require.logger.debug("otaSetr:",otaSetr);
+                let otaSetBuf = [];
+                for(let i=0; i<otaSet.length; i++){
+                    let rpkc = new Buffer(otaSet[i].slice(2,68),'hex');
+                    let rpcu = secp256k1.publicKeyConvert(rpkc, false);
+                    otaSetBuf.push(rpcu);
+                }
+                web3Require.logger.debug('fetch  ota set: ', otaSet);
+                let otaSk = wanUtil.computeWaddrPrivateKey(Transaction.OTAAddress, privKeyA,privKeyB);
+                let otaPub = wanUtil.recoverPubkeyFromWaddress(Transaction.OTAAddress);
+                let otaPubK = otaPub.A;
+
+                let M = new Buffer(Transaction.curAddress,'hex');
+                let ringArgs = wanUtil.getRingSign(M, otaSk,otaPubK,otaSetBuf);
+                let KIWQ = generatePubkeyIWQforRing(ringArgs.PubKeys,ringArgs.I, ringArgs.w, ringArgs.q);
+                web3Require.logger.debug("KIWQ:", KIWQ);
+
+                let CoinContractInstance = CoinContract.at(CoinContractAddr);
+
+                let all = CoinContractInstance.refundCoin.getData(KIWQ,Transaction.amount);
+                web3Require.web3_ipc.eth.getTransactionCount(Transaction.curAddress,'latest',function (err,result) {
+                    if(!err)
+                    {
+                        let serial = '0x'+result;
+                        web3Require.logger.debug("serial:", serial);
+                        web3Require.web3_ipc.personal.sendTransaction({
+                            Txtype: '0x00',
+                            nonce: serial,
+                            gasPrice: Transaction.gasPrice,
+                            gasLimit: Transaction.gasLimit,
+                            to: CoinContractAddr,//contract address
+                            value: '0x00',
+                            data: all
+                        }, Transaction.password, function (err, result) {
+                            if (!err) {
+                                console.log('Transaction hash: ' + result);
+                                insertTransaction(result,Transaction.OTAAddress,Transaction.curAddress,'0x00','OTA');
+                            }
+                            web3Require.exit(err);
+                        });
+                    }
+                    else{
+                        web3Require.exit(err);
+                    }
+                })
+
+
+            }
+            else {
+                web3Require.exit(err);
+            }
+
+        });
+
+    },
     addSelectList(){
-        web3Require.addSchema(web3Require.schemaAll.TransListSchema('Input the No. to print the transaction details:',
+        web3Require.addSchema(web3Require.schemaAll.TransListSchema('Input the transaction No. :',
             'The Number is invalid or nonexistent.',function (schema) {
                 schema.optionalArray = [];
                 var data = web3Require.transCollection.find({'from': Transaction.curAddress});
@@ -156,7 +235,7 @@ const Transaction = {
             if(result)
             {
                 Transaction.curTransaction = result[0];
-                console.log(result);
+                web3Require.logger.debug(result);
                 web3Require.runschemaStep();
             }
             else
@@ -166,7 +245,7 @@ const Transaction = {
         });
     },
     addOTAsSelectList(){
-        web3Require.addSchema(web3Require.schemaAll.OTAsListSchema('Select transaction fee for per transaction by inputting No.:',
+        web3Require.addSchema(web3Require.schemaAll.OTAsListSchema('Input the OTAs No. :',
             'The Number is invalid or nonexistent.',function (schema) {
                 schema.optionalArray = [];
                 let wAddress = web3Require.getWAddress(Transaction.curAddress);
@@ -184,8 +263,8 @@ const Transaction = {
             }), function (result) {
             if(result)
             {
-                Transaction.curTransaction = result[0];
-                console.log(result);
+                Transaction.OTAAddress = result[0];
+                web3Require.logger.debug(result);
                 web3Require.stepNext();
             }
             else
@@ -228,10 +307,10 @@ function insertTransaction(transhash,from,to,value,p)
             to:to,
             value:value,
             time:getNowFormatDate(),
-            p:p
+            Type:p
         });
     } else {
-        console.log(transhash + 'is already existed!');
+        web3Require.logger.debug(transhash + 'is already existed!');
     }
 };
 function insertOTAs(OTAHash,address,value,timeStamp,otaFrom,status)
@@ -266,6 +345,28 @@ function getNowFormatDate() {
         + " " + date.getHours() + seperator2 + date.getMinutes()
         + seperator2 + date.getSeconds();
     return currentdate;
+};
+function generatePubkeyIWQforRing(Pubs, I, w, q){
+    let length = Pubs.length;
+    let sPubs  = [];
+    for(let i=0; i<length; i++){
+        sPubs.push(Pubs[i].toString('hex'));
+    }
+    let ssPubs = sPubs.join('&');
+    let ssI = I.toString('hex');
+    let sw  = [];
+    for(let i=0; i<length; i++){
+        sw.push('0x'+w[i].toString('hex').replace(/(^0*)/g,""));
+    }
+    let ssw = sw.join('&');
+    let sq  = [];
+    for(let i=0; i<length; i++){
+        sq.push('0x'+q[i].toString('hex').replace(/(^0*)/g,""));
+    }
+    let ssq = sq.join('&');
+
+    let KWQ = [ssPubs,ssI,ssw,ssq].join('+');
+    return KWQ;
 };
 module.exports = Transaction;
 

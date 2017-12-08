@@ -10,6 +10,35 @@ var schema = require('../Schema/SchemaAll');
 let wanUtil = require('wanchain-util');
 const Db = require('./db.js');
 
+const logDebug = require('log4js');
+let log4jsOptions = {
+    appenders: {
+        ruleConsole: {type: 'console'},
+        ruleFile: {
+            type: 'dateFile',
+            filename: 'logs/server-',
+            pattern: 'yyyy-MM-dd.log',
+            maxLogSize: 10 * 1000 * 1000,
+            numBackups: 3,
+            alwaysIncludePattern: true
+        }
+    },
+    categories: {
+        default: {appenders: ['ruleConsole', 'ruleFile'], level: (config.loglevel || 'info')}
+    }
+};
+if(config.logfile)
+{
+    log4jsOptions.appenders.ruleFile = {
+        type: 'dateFile',
+        filename: config.logfile,
+        maxLogSize: 10 * 1000 * 1000,
+        alwaysIncludePattern: true
+    };
+    log4jsOptions.categories.default.appenders.push('ruleFile');
+}
+logDebug.configure(log4jsOptions);
+
 process.on('exit', function () {
     //handle your on exit code
     web3Require.exit('waiting for exiting process ...');
@@ -25,6 +54,7 @@ const web3Require ={
     schemaIndex : 0,
     transCollection : null,
     OTAsCollection : null,
+    logger: logDebug.getLogger('wanchain'),
 
     //prompt functions
     init()
@@ -41,11 +71,11 @@ const web3Require ={
     },
     initTransCollection()
     {
-        this.transCollection = Db.getCollection('transaction','transHash');
+        web3Require.transCollection = Db.getCollection('transaction','transHash');
     },
     initOTAsCollection()
     {
-        this.OTAsCollection = Db.getCollection('OTAs','OTAHash');
+        web3Require.OTAsCollection = Db.getCollection('OTAs','OTAHash');
     },
     run(func)
     {
@@ -89,6 +119,7 @@ const web3Require ={
             prompt.override = null;
             if(!err)
             {
+                web3Require.logger.debug(result);
                 if(schema.optionalArray && schema.optionalArray.length>0) {
                     for (var key in result) {
                         var val = result[key];
@@ -177,7 +208,7 @@ const web3Require ={
         {
             console.log(err);
         }
-        console.log('process.exit');
+        this.logger.debug('process.exit');
         if(this.runUseDb)
         {
             Db.close().then(function (value) {
@@ -232,7 +263,7 @@ const web3Require ={
     {
         var temp = this;
         this.promptGet(schema, function (result) {
-            console.log(result);
+            web3Require.logger.debug(result);
             if(result[1].FeeSel<schema.optionalArray.length)
             {
                 temp.schemaIndex += 1;
@@ -260,14 +291,14 @@ const web3Require ={
     },
     getWAddress(address)
     {
-        let keyStore = web3Require.getFromKeystoreFile(address);
+        let keyStore = web3Require.getKeystoreJSON(address);
         if(keyStore) {
             return keyStore.waddress;
         }
         return null;
     },
 
-    getFromKeystoreFile(address)
+    getKeystoreJSON(address)
     {
         let fileName = this.getKeystoreFile(address);
         if(fileName)

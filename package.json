@@ -5,7 +5,6 @@
   "dependencies": {
     "bluebird": "^3.5.1",
     "bn.js": "^4.11.8",
-    "ethereumjs-util": "^5.1.2",
     "keccakjs": "^0.2.1",
     "keythereum": "^1.0.2",
     "log4js": "^2.3.12",
@@ -13,6 +12,7 @@
     "net": "^1.0.2",
     "prompt": "^1.0.0",
     "scryptsy": "^2.0.0",
+    "secp256k1": "^3.4.0",
     "solc": "^0.4.16",
     "tty": "^1.0.1",
     "underscore": "^1.8.3",

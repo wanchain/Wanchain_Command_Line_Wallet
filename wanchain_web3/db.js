@@ -10,7 +10,7 @@ let db;
 
 exports.init = () => {
     const filePath = __dirname + '/../LocalDb/wanchain.db';
-    console.log(filePath);
+//    web3Require.logger.debug(filePath);
 
     return Q.try(() => {
         // if db file doesn't exist then create it

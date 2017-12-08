@@ -10,7 +10,7 @@ web3Require.addSchema(web3Require.schemaAll.PasswordSchema, function (result) {
     }
 
     else {
-        let keystore = web3Require.getFromKeystoreFile(transaction.curAddress);
+        let keystore = web3Require.getKeystoreJSON(transaction.curAddress);
         if (keystore)
         {
             fetchMyOta.start(keystore, result.password);
