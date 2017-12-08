@@ -18,8 +18,8 @@ web3Require.addSchema(web3Require.schemaAll.PasswordSchema, function (result) {
         else
         {
             web3Require.logger.debug('Keystore is null');
-            web3Require.exit();
         }
+        web3Require.exit();
     }
 });
 transaction.run();

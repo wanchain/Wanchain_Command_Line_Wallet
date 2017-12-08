@@ -114,7 +114,12 @@ const web3Require ={
         }
         prompt.get(schema,function(err,result)
         {
-            prompt.override = null;
+            for (var key in result) {
+                if(prompt.override[key])
+                {
+                    delete prompt.override[key];
+                }
+            }
             if(!err)
             {
                 temp.logger.debug(result);

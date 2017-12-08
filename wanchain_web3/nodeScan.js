@@ -10,6 +10,7 @@ const nodeScanOta = require('./nodeScanOta');
 const SolidityCoder = require('web3/lib/solidity/coder');
 let wanUtil = require('wanchain-util');
 const wanchainDB = require('./wanChainOTAs');
+var keythereum = require("keythereum");
 let checkBurst = 500;
 let scanBlockIndex = 0;
 let lastBlockNumber = 0;
