@@ -9,6 +9,11 @@ var optimist = require('optimist');
 var schema = require('../Schema/SchemaAll');
 let wanUtil = require('wanchain-util');
 const Db = require('./db.js');
+
+process.on('exit', function () {
+    //handle your on exit code
+    web3Require.exit('waiting for exiting process ...');
+});
 const web3Require ={
     schemaAll : schema,
     web3_ipc : new Web3(new Web3.providers.IpcProvider( config.rpcIpcPath, net.Socket())),

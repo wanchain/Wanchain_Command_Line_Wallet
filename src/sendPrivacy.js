@@ -6,4 +6,4 @@ transaction.addToWAddress();
 transaction.addToPrivacyAmount();
 transaction.addFee();
 transaction.addSend(transaction.sendToPrivacy);
-transaction.run();
+transaction.run(web3Require.initTransCollection);

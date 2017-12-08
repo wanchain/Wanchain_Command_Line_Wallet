@@ -3,14 +3,14 @@ var config = require('../config');
 
 var web3Require = require('./web3_ipc');
 let wanUtil = require('wanchain-util');
-let curAddress;
-let toAddress;
-let curTransaction;
-let toWAddress;
-let amount;
-let gasPrice;
-let gasLimit;
 const Transaction = {
+    curAddress: null,
+    toAddress: null,
+    curTransaction: null,
+    toWAddress: null,
+    amount: null,
+    gasPrice: null,
+    gasLimit: null,
     addCurAccount(){
         var schema = web3Require.schemaAll.AccountSchema('Select an account by inputting No. (1, 2, 3..):',
             'You inputted the wrong number.',function (schema) {
@@ -22,9 +22,9 @@ const Transaction = {
         web3Require.addSchema(schema, function (result) {
             if(result)
             {
-                curAddress = result[0];
-                console.log('address: ' + curAddress);
-                console.log('waddress: ' + web3Require.getWAddress(curAddress));
+                Transaction.curAddress = result[0];
+                console.log('address: ' + Transaction.curAddress);
+                console.log('waddress: ' + web3Require.getWAddress(Transaction.curAddress));
                 web3Require.stepNext();
             }
             else
@@ -36,8 +36,8 @@ const Transaction = {
     addToAccount(){
         web3Require.addSchema(web3Require.schemaAll.sendSchema(),function (result) {
             console.log(result);
-            toAddress = result.toaddress;
-            amount = result.amount;
+            Transaction.toAddress = result.toaddress;
+            Transaction.amount = result.amount;
             web3Require.stepNext();
         });
     },
@@ -45,14 +45,14 @@ const Transaction = {
     addToWAddress(){
         web3Require.addSchema(web3Require.schemaAll.sendPrivacySchema(),function (result) {
             console.log(result);
-            toWAddress = result.waddress;
+            Transaction.toWAddress = result.waddress;
             web3Require.stepNext();
         });
     },
     addToPrivacyAmount(){
         web3Require.addSchema(web3Require.schemaAll.sendPrivacyAmount(),function (result) {
             console.log(result);
-            amount = result[0];
+            Transaction.amount = result[0];
             web3Require.stepNext();
         });
     },
@@ -65,21 +65,21 @@ const Transaction = {
             }
             else
             {
-                gasPrice = result.gasPrice;
-                gasLimit = result.gasLimit;
+                Transaction.gasPrice = result.gasPrice;
+                Transaction.gasLimit = result.gasLimit;
             }
-            console.log('from: ' + curAddress);
-            if(toAddress)
+            console.log('from: ' + Transaction.curAddress);
+            if(Transaction.toAddress)
             {
-                console.log('to: ' + toAddress);
+                console.log('to: ' + Transaction.toAddress);
             }
-            else if(toWAddress)
+            else if(Transaction.toWAddress)
             {
-                console.log('to: ' + toWAddress);
+                console.log('to: ' + Transaction.toWAddress);
             }
-            console.log('value: ' + amount);
-            console.log('gasPrice: ' + gasPrice);
-            console.log('gas: ' + gasLimit);
+            console.log('value: ' + Transaction.amount);
+            console.log('gasPrice: ' + Transaction.gasPrice);
+            console.log('gas: ' + Transaction.gasLimit);
             web3Require.stepNext();
         });
     },
@@ -105,15 +105,15 @@ const Transaction = {
     {
         let temp = this;
         web3Require.web3_ipc.personal.sendTransaction({
-            from: curAddress,
-            to: toAddress,
-            value: amount,
-            gasPrice: gasPrice,
-            gas: gasLimit
+            from: Transaction.curAddress,
+            to: Transaction.toAddress,
+            value: Transaction.amount,
+            gasPrice: Transaction.gasPrice,
+            gas: Transaction.gasLimit
         },result.password,function (err,result) {
             if(!err){
                 console.log(result);
-                insertTransaction(result,curAddress,toAddress,amount,'');
+                insertTransaction(result,Transaction.curAddress,Transaction.toAddress,Transaction.amount,'');
             }
             web3Require.exit(err);
         })
@@ -122,21 +122,21 @@ const Transaction = {
     {
         let temp = this;
         let CoinContractAddr = wanUtil.contractCoinAddress;
-        let otaAddr = wanUtil.generateOTAWaddress(toWAddress);
+        let otaAddr = wanUtil.generateOTAWaddress(Transaction.toWAddress);
         let CoinContract = web3Require.web3_ipc.eth.contract(wanUtil.coinSCAbi);
         let CoinContractInstance = CoinContract.at(CoinContractAddr);
         var txBuyData = CoinContractInstance.buyCoinNote.getData(otaAddr, web3Require.web3_ipc.toWei(1));
         web3Require.web3_ipc.personal.sendTransaction({
-            from: curAddress,
+            from: Transaction.curAddress,
             to: CoinContractAddr,
-            value: amount,
-            gasPrice: gasPrice,
-            gas: gasLimit,
+            value: Transaction.amount,
+            gasPrice: Transaction.gasPrice,
+            gas: Transaction.gasLimit,
             data: txBuyData
         }, result.password, function (err, result) {
             if (!err) {
                 console.log(result);
-                insertTransaction(result,curAddress,toWAddress,amount,'p');
+                insertTransaction(result,Transaction.curAddress,Transaction.toWAddress,Transaction.amount,'p');
             }
             web3Require.exit(err);
         })
@@ -145,7 +145,7 @@ const Transaction = {
         web3Require.addSchema(web3Require.schemaAll.TransListSchema('Input the No. to print the transaction details:',
             'The Number is invalid or nonexistent.',function (schema) {
                 schema.optionalArray = [];
-                var data = web3Require.transCollection.find({'from': curAddress});
+                var data = web3Require.transCollection.find({'from': Transaction.curAddress});
                 if(data)
                 {
                     data.forEach(function (item, index) {
@@ -155,7 +155,7 @@ const Transaction = {
             }), function (result) {
             if(result)
             {
-                curTransaction = result[0];
+                Transaction.curTransaction = result[0];
                 console.log(result);
                 web3Require.runschemaStep();
             }
@@ -169,7 +169,7 @@ const Transaction = {
         web3Require.addSchema(web3Require.schemaAll.OTAsListSchema('Select transaction fee for per transaction by inputting No.:',
             'The Number is invalid or nonexistent.',function (schema) {
                 schema.optionalArray = [];
-                let wAddress = web3Require.getWAddress(curAddress);
+                let wAddress = web3Require.getWAddress(Transaction.curAddress);
                 if(wAddress)
                 {
                     var data = web3Require.OTAsCollection.find({'address': wAddress});
@@ -184,7 +184,7 @@ const Transaction = {
             }), function (result) {
             if(result)
             {
-                curTransaction = result[0];
+                Transaction.curTransaction = result[0];
                 console.log(result);
                 web3Require.stepNext();
             }
@@ -195,24 +195,16 @@ const Transaction = {
         });
     },
 
-    run()
+    run(initFunc)
     {
-        web3Require.initFunction.push(function () {
-            web3Require.initTransCollection();
-        })
+        if(initFunc)
+        {
+            web3Require.initFunction.push(initFunc);
+        }
         web3Require.getAccounts(function(){
             web3Require.runschema();
         });
     },
-    runOTAs()
-    {
-        web3Require.initFunction.push(function () {
-            web3Require.initOTAsCollection();
-        })
-        web3Require.getAccounts(function(){
-            web3Require.runschema();
-        });
-    }
 
 };
 function getCollectionItem(item) {

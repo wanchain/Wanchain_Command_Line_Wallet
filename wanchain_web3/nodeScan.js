@@ -6,9 +6,7 @@ Scan the chain block.
 */
 
 const EventEmitter = require('events').EventEmitter;
-const ethereumNode = require('../ethereumNode');
 const nodeScanOta = require('./nodeScanOta');
-const log = require('../utils/logger').create('nodeScan');
 const SolidityCoder = require('web3/lib/solidity/coder');
 let wanUtil = require('wanchain-util');
 const wanchainDB = require('./wanChainOTAs');
