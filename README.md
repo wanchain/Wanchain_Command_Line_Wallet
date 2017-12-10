@@ -3,27 +3,29 @@ Wanchain Command Line Wallet
 
 ## How to use Wanchain Command Line Wallet
 
-download geth from web
-run geth
-
 ## run in windows x64
-download wanChainClient_win64.zip
-run wanchain_client.cmd
+- download http://47.104.60.142/win_geth.zip
+- unzip and run geth.exe
+- download http://47.104.60.142/wanchainclient_cli_win64.zip
+- unzip and run wanchain_client.cmd
 
 ## run in linux and mac
+- Environment nodejs v8+
+- download http://47.104.60.142/linux_geth.tar.gz
+- unzip and run geth.exe
 
 dowload Wanchain_Command_Line_Wallet from https://github.com/wanchain/Wanchain_Command_Line_Wallet
 
     $ git clone https://github.com/wanchain/Wanchain_Command_Line_Wallet.git
-    $ Wanchain_Command_Line_Wallet cd npm install
+    $ cd Wanchain_Command_Line_Wallet npm install
 
 ## run  Wanchain Command Line Wallet
 
     $ cd src
 
-    #### If you want fetch OTAs, please run node ..\backend\syncOta.js to Scan OTAs in new terminal first.
+#### If you want fetch OTAs, please run node ..\backend\syncOta.js to Scan OTAs in new terminal first.
 
-        $ node ..\backend\syncOta.js
+    $ node ..\backend\syncOta.js
 
 
 run *.js file as node *.js in command line. For example
