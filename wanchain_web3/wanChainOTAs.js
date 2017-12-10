@@ -1,6 +1,7 @@
 //cranelv wanchain OTA database 2017-11-19
-const logger = require('./utils/logger');
-const db = global.db =require('./db');
+//const logger = require('./utils/logger');
+const db = require('./collection.js').walletDB;
+const scanOTA = require('./scanOTADB');
 /*
 OTAsCollection struct
     adress:
@@ -19,7 +20,7 @@ exports.getScanedByWaddr = function(waddr){
     const begin = Index.length === 0 ? 0:Index[0].index;
     return begin;
 }
-exports.setScanedByWaddr = function (waddr, scaned) {
+setScanedByWaddr = function (waddr, scaned) {
     if (!waddr){
         waddr = '0x0000000000000000000000000000000000000000';
     }
@@ -55,21 +56,31 @@ exports.insertOtabyWaddr = function(waddr, ota, value, state,timeStamp,from,bloc
     }
 }
 
-exports.checkOta = function( cb, blockFrom, blockEnd) {
+exports.checkOta = function(cb,currentScanAddress, blockFrom) {
     let OTAsCollection = db.getCollection('OTAsCollection');
+    let lastBlockNumber = scanOTA.getScanedIndex();
+
     let where = {};
-    where.blockNumber = {'$gte': blockFrom, '$lte':blockEnd};
-    where.address = {'$eq':''};
+    where.blockNumber = {'$gte': blockFrom, '$lte':lastBlockNumber};
     where.state = {'$eq': 0};
-    let otaSet = OTAsCollection.find(where);
+    let otaSet = scanOTA.requireOTAs(where);
     console.log('checkOta otaSet length:', otaSet.length);
     otaSet.forEach((ota) => {
        let changed = cb(ota);
        if (changed) {
-           OTAsCollection.update(ota);
+           var found = OTAsCollection.findOne({'_id': ota._id});
+           if(!found)
+           {
+               OTAsCollection.insert(ota);
+           }
+           else
+           {
+               OTAsCollection.update(ota);
+           }
            console.log("find new ota by waddress:", ota);
        }
     });
+    setScanedByWaddr(currentScanAddress, lastBlockNumber);
 }
 
 
@@ -93,3 +104,4 @@ exports.requireAccountName = (address) =>
     var accountCollection = db.getCollection('firstNewAccount');
     return accountCollection.find({'address': address});
 }
+exports.setScanedByWaddr = setScanedByWaddr;

@@ -94,10 +94,7 @@ class nodeScan {
         return false;
     }
     checkOtainDb() {
-        lastBlockNumber = wanchainDB.getScanedByWaddr(null);
-        console.log("scanBlockIndex,lastBlockNumber:",scanBlockIndex,lastBlockNumber);
-        wanchainDB.checkOta(self.compareOta, scanBlockIndex+1, lastBlockNumber);
-        wanchainDB.setScanedByWaddr(currentScanAddress, lastBlockNumber);
+        wanchainDB.checkOta(self.compareOta,currentScanAddress, scanBlockIndex+1);
         console.log('done');
     }
 }

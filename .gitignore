@@ -1,5 +1,5 @@
 node_modules/
 .idea/
 *.db
-
+logs/
 LocalDb/wanchain\.db~

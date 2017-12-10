@@ -8,8 +8,9 @@ var colors = require("colors/safe");
 var optimist = require('optimist');
 var schema = require('../Schema/SchemaAll');
 let wanUtil = require('wanchain-util');
-const Db = require('./db.js');
-let collections = require('./collection.js');
+const Db = require('./collection.js').walletDB;
+const scanDb = require('./collection.js').scanOTADB;
+
 const logDebug = require('log4js');
 let log4jsOptions = {
     appenders: {
@@ -43,12 +44,49 @@ process.on('exit', function () {
     //handle your on exit code
     web3Require.exit('waiting for exiting process ...');
 });
+function initDbStack(dbArray,index,thenFunc,catchFunc)
+{
+    if(index<dbArray.length-1)
+        dbArray[index].init().then(function () {
+            initDbStack(dbArray,index+1,thenFunc,catchFunc);
+        }).catch((err) => {
+            catchFunc(err);
+        });
+    else
+    {
+        dbArray[index].init().then(function () {
+            thenFunc();
+        }).catch((err) => {
+            catchFunc(err);
+        });
+    }
+};
+function closeDbStack(dbArray,index,thenFunc,catchFunc)
+{
+    if(index<dbArray.length-1)
+        dbArray[index].close().then(function () {
+            return closeDbStack(dbArray,index+1,thenFunc,catchFunc);
+        }).catch((err) => {
+            catchFunc(err);
+        });
+    else
+    {
+        dbArray[index].close().then(function () {
+            thenFunc();
+        }).catch((err) => {
+            catchFunc(err);
+        });
+    }
+};
 const web3Require ={
     schemaAll : schema,
     web3_ipc : new Web3(new Web3.providers.IpcProvider( config.rpcIpcPath, net.Socket())),
+    dbArray : [],
     schemaArray: [],
     accountArray: [],
     initFunction:[],
+    transCollection : null,
+    OTAsCollection : null,
     runUseDb: false,
 //    curAccount : '',
     schemaIndex : 0,
@@ -67,29 +105,61 @@ const web3Require ={
         prompt.delimiter = colors.green(">>");
         this.schemaIndex = 0;
     },
+    //database
+    initDatabase(thenFunc)
+    {
+        var temp = this;
+        if(temp.dbArray.length>0)
+        {
+            initDbStack(temp.dbArray,0,thenFunc,function (err) {
+                temp.exit(e);
+            });
+        }
+
+    },
+
+    closeDatabase(thenFunc)
+    {
+        if(this.dbArray.length>0)
+        {
+            return closeDbStack(this.dbArray,0,thenFunc,function (err) {
+                temp.exit(e);
+            });
+        }
+
+    },
+
     initTransCollection()
     {
-        collections.transCollection = Db.getCollection('transaction','transHash');
+        this.transCollection = Db.getCollection('transaction','transHash');
     },
     initOTAsCollection()
     {
-        collections.OTAsCollection = Db.getCollection('OTAsCollection');
+        this.OTAsCollection = Db.getCollection('OTAsCollection');
     },
     run(func)
     {
         try {
-            var temp = this;
-            Db.init().then(function () {
-                    temp.runUseDb = true;
-                    temp.init();
-                    func();
-                }).catch((err) => {
-                    temp.exit(err);
-            });
+            if(this.dbArray.length>0)
+            {
+                var temp = this;
+                this.initDatabase(function () {
+                    temp.runWithOutDB(func);
+                });
+            }
+            else
+            {
+                this.runWithOutDB(func);
+            }
         }
         catch (e){
             this.exit(e);
         }
+    },
+    runWithOutDB(func)
+    {
+        this.init();
+        func();
     },
     promptGet(schema, callback)
     {
@@ -152,19 +222,16 @@ const web3Require ={
     },
     runschema()
     {
+
         var temp = this;
-        Db.init().then(function () {
-            temp.runUseDb = true;
+        this.run(function () {
             temp.runschemaWithoutDB();
-        }).catch((err) => {
-            temp.exit(err);
-        });
+        })
     },
     runschemaWithoutDB()
     {
         try
         {
-            this.init();
             this.runschemaStep();
         }
         catch (e)
@@ -212,19 +279,11 @@ const web3Require ={
             console.log(err);
         }
         this.logger.debug('process.exit');
-        if(this.runUseDb)
+        if(this.dbArray.length)
         {
-            Db.close().then(function (value) {
+            this.closeDatabase(function () {
                       process.exit();
-                },
-                function (err) {
-                    if(err)
-                    {
-                        console.log(err);
-                    }
-                    process.exit();
-                }
-            );
+                });
         }
         else
         {
@@ -292,6 +351,9 @@ const web3Require ={
             callback(result);
         })
     },
+
+
+    //sync functions
     getWAddress(address)
     {
         let keyStore = this.getKeystoreJSON(address);

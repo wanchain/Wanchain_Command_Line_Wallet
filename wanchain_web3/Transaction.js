@@ -2,8 +2,9 @@
 var config = require('../config');
 const secp256k1 = require('secp256k1');
 const web3Require = global.web3Require = require('./web3_ipc');
-let collections = require('./collection.js');
 let wanUtil = require('wanchain-util');
+const Db = require('./collection.js').walletDB;
+const scanDb = require('./collection.js').scanOTADB;
 const Transaction = {
     curAddress: null,
     toAddress: null,
@@ -13,6 +14,14 @@ const Transaction = {
     amount: null,
     gasPrice: null,
     gasLimit: null,
+    useWalletDb()
+    {
+        web3Require.dbArray.push(Db);
+    },
+    useScanOTADb()
+    {
+        web3Require.dbArray.push(scanDb);
+    },
     addCurAccount(){
         var schema = web3Require.schemaAll.AccountSchema('Select an account by inputting No. (1, 2, 3..):',
             'You inputted the wrong number.',function (schema) {
@@ -222,10 +231,11 @@ const Transaction = {
 
     },
     addSelectList(){
+        var Temp = web3Require;
         web3Require.addSchema(web3Require.schemaAll.TransListSchema('Input the transaction No. :',
             'The Number is invalid or nonexistent.',function (schema) {
                 schema.optionalArray = [];
-                var data = collections.transCollection.find({'from': Transaction.curAddress});
+                var data = Temp.transCollection.find({'from': Transaction.curAddress});
                 if(data)
                 {
                     data.forEach(function (item, index) {
@@ -235,10 +245,10 @@ const Transaction = {
             }), function (result) {
             if(result)
             {
-                collections.curTransaction = result[0];
+                Temp.curTransaction = result[0];
                 web3Require.logger.debug(result);
-                Transaction.consoleTransactionInfo(collections.curTransaction.transHash,function(){
-                    web3Require.runschemaStep()
+                Transaction.consoleTransactionInfo(Temp.curTransaction.transHash,function(){
+                    Temp.runschemaStep()
                 });
             }
             else
@@ -248,13 +258,14 @@ const Transaction = {
         });
     },
     addOTAsSelectList(){
+        var Temp = web3Require;
         web3Require.addSchema(web3Require.schemaAll.OTAsListSchema('Input the OTAs No. :',
             'The Number is invalid or nonexistent.',function (schema) {
                 schema.optionalArray = [];
                 let wAddress = web3Require.getWAddress(Transaction.curAddress);
                 if(wAddress)
                 {
-                    var data = collections.OTAsCollection.find({'address': wAddress});
+                    var data = Temp.OTAsCollection.find({'address': wAddress});
                     if(data)
                     {
                         data.forEach(function (item, index) {
@@ -316,9 +327,9 @@ function getCollectionItem(item) {
 };
 function insertTransaction(transhash,from,to,value,p)
 {
-    var found = collections.transCollection.findOne({'transHash': transhash});
+    var found = web3Require.transCollection.findOne({'transHash': transhash});
     if(found == null) {
-        collections.transCollection.insert({
+        web3Require.transCollection.insert({
             transHash: transhash,
             from: from,
             to:to,
@@ -332,9 +343,9 @@ function insertTransaction(transhash,from,to,value,p)
 };
 function insertOTAs(OTAHash,address,value,timeStamp,otaFrom,status)
 {
-    var found = collections.OTAsCollection.findOne({'OTAHash': OTAHash});
+    var found = web3Require.OTAsCollection.findOne({'OTAHash': OTAHash});
     if(found == null) {
-        collections.OTAsCollection.insert({
+        web3Require.OTAsCollection.insert({
             OTAHash: OTAHash,
             address: address,
             value:value,

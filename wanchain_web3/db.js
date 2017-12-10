@@ -8,8 +8,12 @@ const log = require('./utils/logger').create('Db');
 let db;
 
 
-exports.init = () => {
-    const filePath = __dirname + '/../LocalDb/wanchain.db';
+exports.init = (db) => {
+    let filePath = __dirname + '/../LocalDb/wanchain.db';
+    if(db)
+    {
+        filePath = __dirname + '/../LocalDb/' + db;
+    }
 //    web3Require.logger.debug(filePath);
 
     return Q.try(() => {

@@ -5,7 +5,7 @@ const config = require('../config');
 const log = require('./utils/logger').create('nodeScanOta');
 const SolidityCoder = require('web3/lib/solidity/coder');
 let wanUtil = require('wanchain-util');
-const wanchainDB = require('./wanChainOTAs');
+const wanchainDB = require('./scanOTADB');
 const Web3 = require("web3");
 const net = require('net');
 const web3 = new Web3(new Web3.providers.IpcProvider( config.rpcIpcPath, net));
@@ -50,10 +50,10 @@ class nodeScanOta  {
         self = this;
     }
     getScanedBlock() {
-        return wanchainDB.getScanedByWaddr(null);
+        return wanchainDB.getScanedIndex();
     }
     setScanedBlock(scaned) {
-        wanchainDB.setScanedByWaddr(null, scaned);
+        wanchainDB.setScanedIndex(scaned);
     }
 
     scanBlock() {
@@ -80,7 +80,7 @@ class nodeScanOta  {
                                 }
                                 let inputPara = tx.input.slice(10);
                                 let paras = parseContractMethodPara(inputPara, wanUtil.coinSCAbi, 'buyCoinNote');
-                                wanchainDB.insertOtabyWaddr('', paras.OtaAddr, tx.value, 0, block.timeStamp, tx.from, scanBlockIndex);
+                                wanchainDB.insertOtas( paras.OtaAddr, tx.value, 0, block.timeStamp, tx.from, scanBlockIndex);
                                 console.log("new ota found:", paras.OtaAddr, scanBlockIndex);
                             }
                         });
@@ -89,7 +89,7 @@ class nodeScanOta  {
                 count += 1;
                 scanBlockIndex += 1;
             }
-            wanchainDB.setScanedByWaddr(null, scanBlockIndex);
+            wanchainDB.setScanedIndex( scanBlockIndex);
             if(count === burst){
                 scanTimer = setTimeout(self.scanBlock,10);
             }else {

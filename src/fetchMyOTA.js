@@ -1,6 +1,8 @@
 const fetchMyOta = require('../wanchain_web3/nodeScan.js');
 const web3Require = global.web3Require = require('../wanchain_web3/web3_ipc');
 let transaction = require('../wanchain_web3/Transaction');
+transaction.useWalletDb();
+transaction.useScanOTADb();
 transaction.addCurAccount();
 web3Require.addSchema(web3Require.schemaAll.PasswordSchema, function (result) {
     if(result.password.length<2)
