@@ -25,11 +25,17 @@ input a parameter value 'Q' or 'q' to exit;
 
 ## command details
 - createKeystore.js: create new account
+
     command parameters: --password  --repeatPass
+
 - send.js: send a transaction
+
     command parameters: --AccountNo  --toAddress --amount --FeeSel  --gasLimit --gasPrice --submit --password
+
 - sendPrivacy.js: send with privacy
+
     command parameters: --AccountNo  --waddress --amount --FeeSel  --gasLimit --gasPrice --submit --password
+
 - transactionList.js: Print transaction list and transaction details
     command parameters: --AccountNo --TransNo
 - fetchMyOTA.js: fetch account OTA. please run node ..\backend\syncOta.js in new terminal first.
