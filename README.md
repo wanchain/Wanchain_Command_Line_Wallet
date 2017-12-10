@@ -24,17 +24,17 @@ you can input command parameters as default parameters
 input a parameter value 'Q' or 'q' to exit;
 
 ## command details
-createKeystore.js: create new account
+- createKeystore.js: create new account
     command parameters: --password  --repeatPass
-send.js: send a transaction
+- send.js: send a transaction
     command parameters: --AccountNo  --toAddress --amount --FeeSel  --gasLimit --gasPrice --submit --password
-sendPrivacy.js: send with privacy
+- sendPrivacy.js: send with privacy
     command parameters: --AccountNo  --waddress --amount --FeeSel  --gasLimit --gasPrice --submit --password
-transactionList.js: Print transaction list and transaction details
+- transactionList.js: Print transaction list and transaction details
     command parameters: --AccountNo --TransNo
-fetchMyOTA.js: fetch account OTA. please run node ..\backend\syncOta.js in new terminal first.
+- fetchMyOTA.js: fetch account OTA. please run node ..\backend\syncOta.js in new terminal first.
     command parameters: --AccountNo --password
-refundOTAs.js: refund OTA
+- refundOTAs.js: refund OTA
     command parameters: --AccountNo  --OTAsNo --FeeSel  --gasLimit --gasPrice --submit --password
-version.js: print Wanchain_Command_Line_Wallet version
-keystorePath.js: print Wanchain keystore path
+- version.js: print Wanchain_Command_Line_Wallet version
+- keystorePath.js: print Wanchain keystore path
