@@ -3,6 +3,7 @@ const fs = require('fs');
 const Q = require('bluebird');
 const Loki = require('lokijs');
 const log = require('./utils/logger').create('Db');
+const path = require('path');
 module.exports = class wandb
 {
     constructor(dbName) {
@@ -13,7 +14,10 @@ module.exports = class wandb
         var temp = this;
         let filePath = __dirname + '/../LocalDb/' + this.dbName;
     //    web3Require.logger.debug(filePath);
-
+        if(!fs.existsSync(__dirname + '/../LocalDb/'))
+        {
+            fs.mkdir(__dirname + '/../LocalDb/');
+        }
         return Q.try(() => {
             // if db file doesn't exist then create it
             try {
