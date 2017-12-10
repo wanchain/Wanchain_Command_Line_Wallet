@@ -136,7 +136,7 @@ const Transaction = {
         let otaAddr = wanUtil.generateOTAWaddress(Transaction.toWAddress);
         let CoinContract = web3Require.web3_ipc.eth.contract(wanUtil.coinSCAbi);
         let CoinContractInstance = CoinContract.at(CoinContractAddr);
-        var txBuyData = CoinContractInstance.buyCoinNote.getData(otaAddr, web3Require.web3_ipc.toWei(1));
+        var txBuyData = CoinContractInstance.buyCoinNote.getData(otaAddr, web3Require.web3_ipc.toWei(Transaction.amount));
         web3Require.web3_ipc.personal.sendTransaction({
             from: Transaction.curAddress,
             to: CoinContractAddr,
@@ -317,11 +317,10 @@ const Transaction = {
 function getCollectionItem(item) {
     var newItem = {};
     for (var key in item) {
-        if(key == 'meta')
+        if(key !== 'meta' && key !== '$loki')
         {
-            break;
+            newItem[key] = item[key];
         }
-        newItem[key] = item[key];
     }
     return newItem;
 };

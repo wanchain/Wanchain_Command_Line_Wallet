@@ -17,9 +17,12 @@ web3Require.addSchema(web3Require.schemaAll.keyPasswordSchema, function (result)
     else
     {
         web3Require.web3_ipc.personal.newAccount(String(result.password),function (err,result) {
-            console.log('address: ' + result);
-            console.log('waddress: ' + web3Require.getWAddress(result));
-            web3Require.exit(null);
+            if(!err)
+            {
+                console.log('address: ' + result);
+                console.log('waddress: ' + web3Require.getWAddress(result));
+            }
+            web3Require.exit(err);
         })
     }
 });

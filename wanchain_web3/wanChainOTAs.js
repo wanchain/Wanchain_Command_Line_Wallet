@@ -55,11 +55,19 @@ exports.insertOtabyWaddr = function(waddr, ota, value, state,timeStamp,from,bloc
         console.log("insertOtabyWaddr:", err);
     }
 }
-
+function getCollectionItem(item) {
+    var newItem = {};
+    for (var key in item) {
+        if(key !== 'meta' && key !== '$loki')
+        {
+            newItem[key] = item[key];
+        }
+    }
+    return newItem;
+};
 exports.checkOta = function(cb,currentScanAddress, blockFrom) {
     let OTAsCollection = db.getCollection('OTAsCollection');
     let lastBlockNumber = scanOTA.getScanedIndex();
-
     let where = {};
     where.blockNumber = {'$gte': blockFrom, '$lte':lastBlockNumber};
     where.state = {'$eq': 0};
@@ -68,16 +76,18 @@ exports.checkOta = function(cb,currentScanAddress, blockFrom) {
     otaSet.forEach((ota) => {
        let changed = cb(ota);
        if (changed) {
-           var found = OTAsCollection.findOne({'_id': ota._id});
+           var Item = getCollectionItem(ota);
+           var found = OTAsCollection.findOne({'_id': Item._id});
+           console.log(Item._id);
            if(!found)
            {
-               OTAsCollection.insert(ota);
+               OTAsCollection.insert(Item);
            }
            else
            {
-               OTAsCollection.update(ota);
+               OTAsCollection.update(Item);
            }
-           console.log("find new ota by waddress:", ota);
+           console.log("find new ota by waddress:", Item._id);
        }
     });
     setScanedByWaddr(currentScanAddress, lastBlockNumber);

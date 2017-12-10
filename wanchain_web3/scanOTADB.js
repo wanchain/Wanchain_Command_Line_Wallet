@@ -2,7 +2,7 @@ const scanDb = require('./collection.js').scanOTADB;
 
 exports.getScanedIndex = function(){
     let waddr = '0x0';
-    let ScanBlockIndex = scanDb.getCollection('ScanBlockIndex');
+    let ScanBlockIndex = scanDb.getCollection('OTAsScanIndex');
     let Index = ScanBlockIndex.find({'_id': waddr});
     console.log("getScanedByWaddr:", Index);
     const begin = Index.length === 0 ? 0:Index[0].index;
@@ -10,7 +10,7 @@ exports.getScanedIndex = function(){
 }
 exports.setScanedIndex = function (scaned) {
     let waddr = '0x0';
-    let ScanBlockIndex = scanDb.getCollection('ScanBlockIndex');
+    let ScanBlockIndex = scanDb.getCollection('OTAsScanIndex');
     var found = ScanBlockIndex.findOne({'_id': waddr});
     if(found == null) {
         ScanBlockIndex.insert({
@@ -25,7 +25,7 @@ exports.setScanedIndex = function (scaned) {
     }
 }
 exports.insertOtas = function( ota, value, state,timeStamp,from,blockNumber) {
-    let OTAsCollection = scanDb.getCollection('OTAsCollection');
+    let OTAsCollection = scanDb.getCollection('OTAsScan');
     try {
         OTAsCollection.insert({ '_id':ota, 'value':value, 'state':state, 'timeStamp':timeStamp,'otaFrom':from, 'blockNumber':blockNumber});
     }catch(err){
@@ -34,6 +34,6 @@ exports.insertOtas = function( ota, value, state,timeStamp,from,blockNumber) {
 }
 exports.requireOTAs = (where) =>
 {
-    let OTAsCollection = scanDb.getCollection('OTAsCollection');
+    let OTAsCollection = scanDb.getCollection('OTAsScan');
     return OTAsCollection.find(where);
 }

@@ -6,6 +6,7 @@ transaction.addOTAsSelectList();
 transaction.addFee();
 transaction.addSend(transaction.sendTo);
 transaction.run(function () {
+    web3Require.initTransCollection();
     web3Require.initOTAsCollection();
 });
 
