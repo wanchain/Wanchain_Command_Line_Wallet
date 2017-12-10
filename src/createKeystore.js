@@ -23,5 +23,5 @@ web3Require.addSchema(web3Require.schemaAll.keyPasswordSchema, function (result)
         })
     }
 });
-web3Require.runschemaWithoutDB();
+web3Require.runschema();
 
