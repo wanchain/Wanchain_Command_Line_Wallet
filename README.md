@@ -37,10 +37,18 @@ input a parameter value 'Q' or 'q' to exit;
     command parameters: --AccountNo  --waddress --amount --FeeSel  --gasLimit --gasPrice --submit --password
 
 - transactionList.js: Print transaction list and transaction details
+
     command parameters: --AccountNo --TransNo
-- fetchMyOTA.js: fetch account OTA. please run node ..\backend\syncOta.js in new terminal first.
+
+- fetchMyOTA.js: fetch account OTA.
+
     command parameters: --AccountNo --password
+
+    please run node ..\backend\syncOta.js in new terminal first.
+
 - refundOTAs.js: refund OTA
+
     command parameters: --AccountNo  --OTAsNo --FeeSel  --gasLimit --gasPrice --submit --password
+
 - version.js: print Wanchain_Command_Line_Wallet version
 - keystorePath.js: print Wanchain keystore path
