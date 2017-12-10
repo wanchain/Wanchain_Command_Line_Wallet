@@ -13,13 +13,23 @@ run wanchain_client.cmd
 ## run in linux and mac
 
 dowload Wanchain_Command_Line_Wallet from https://github.com/wanchain/Wanchain_Command_Line_Wallet
-run npm install first
+
+    $ git clone https://github.com/wanchain/Wanchain_Command_Line_Wallet.git
+    $ Wanchain_Command_Line_Wallet cd npm install
 
 ## run  Wanchain Command Line Wallet
 
-run node ..\backend\syncOta.js to Scan OTAs
+    $ cd src
 
-run *.js file as node *.js in command line
+    #### If you want fetch OTAs, please run node ..\backend\syncOta.js to Scan OTAs in new terminal first.
+
+        $ node ..\backend\syncOta.js
+
+
+run *.js file as node *.js in command line. For example
+
+    $ node createKeystore.js
+
 you can input command parameters as default parameters
 input a parameter value 'Q' or 'q' to exit;
 
