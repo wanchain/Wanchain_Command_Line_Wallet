@@ -285,7 +285,7 @@ const Transaction = {
                     {
                         data.forEach(function (item, index) {
                             var value = getCollectionItem(item);
-                            value.value = web3Require.web3_ipc.toWei(value.value);
+                            value.value = web3Require.web3_ipc.fromWei(value.value);
                             schema.optionalArray.push(value);
                         });
                     }
