@@ -2,6 +2,10 @@
 //const logger = require('./utils/logger');
 const db = require('./collection.js').walletDB;
 const scanOTA = require('./scanOTADB');
+const config = require('../config');
+const Web3 = require("web3");
+const net = require('net');
+const web3 = new Web3(new Web3.providers.IpcProvider( config.rpcIpcPath, net));
 /*
 OTAsCollection struct
     adress:
@@ -87,7 +91,7 @@ exports.checkOta = function(cb,currentScanAddress, blockFrom) {
            {
                OTAsCollection.update(Item);
            }
-           console.log("find new OTA:" + Item._id + '  ,value: ' + web3.toWei(Item.value));
+           console.log("find new OTA:" + Item._id + '  ,value: ' + web3.fromWei(Item.value));
        }
     });
     setScanedByWaddr(currentScanAddress, lastBlockNumber);
