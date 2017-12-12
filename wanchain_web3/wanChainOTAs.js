@@ -87,7 +87,7 @@ exports.checkOta = function(cb,currentScanAddress, blockFrom) {
            {
                OTAsCollection.update(Item);
            }
-           console.log("find new ota by waddress:", Item._id);
+           console.log("find new OTA:" + Item._id + '  ,value: ' + web3.toWei(Item.value));
        }
     });
     setScanedByWaddr(currentScanAddress, lastBlockNumber);

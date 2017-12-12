@@ -79,7 +79,7 @@ var SchemaAll = {
         gasPrice:{
             pattern: /^[1-9]\d*$/,
             message: "Price invalid!",
-            description: Qmsg("Input gas price (Price limit is between 1win-60win): "),
+            description: Qmsg("Input gas price (Price limit is between 1Gwin-60Gwin): "),
             required: true,
             conform : function (value) {
                 CheckProcessExit(value);
@@ -158,7 +158,7 @@ exports.sendSchema = function () {
         properties:{}
     };
     Schema.properties.toaddress = modifyDesc(SchemaAll.properties.address,'Input recipient address:','The address inputted is invalid. ');
-    Schema.properties.amount = modifyDesc(SchemaAll.properties.intValue, 'Input amount you want to send: ','The amount inputted is invalid');
+    Schema.properties.amount = modifyDesc(SchemaAll.properties.floatValue, 'Input amount you want to send: ','The amount inputted is invalid');
     return Schema;
 };
 exports.sendPrivacySchema = function () {

@@ -5,7 +5,8 @@ const fs = require('fs');
 var net = require('net');
 const prompt = require('prompt');
 var colors = require("colors/safe");
-var optimist = require('optimist');
+var optimist = require('optimist')
+        .string(['password', 'repeatPass', 'toaddress' ,'waddress']);
 var schema = require('../Schema/SchemaAll');
 let wanUtil = require('wanchain-util');
 const Db = require('./collection.js').walletDB;
