@@ -7,7 +7,9 @@ transaction.useWalletDb();
 transaction.addCurAccount();
 transaction.addToAccount();
 transaction.addFee();
-transaction.addSend(transaction.sendTo);
+transaction.addSend(function(result) {
+    transaction.sendTo(result);
+});
 transaction.run(function(){
     web3Require.initTransCollection();
 });

@@ -125,6 +125,8 @@ const Transaction = {
     sendTo(result)
     {
         let self = this;
+        web3Require.logger.debug(self.curAddress);
+        web3Require.logger.debug(self.toAddress);
         web3Require.web3_ipc.personal.sendTransaction({
             from: self.curAddress,
             to: self.toAddress,

@@ -6,7 +6,9 @@ transaction.addCurAccount();
 transaction.addToWAddress();
 transaction.addToPrivacyAmount();
 transaction.addFee();
-transaction.addSend(transaction.sendToPrivacy);
+transaction.addSend(function(result){
+    transaction.sendToPrivacy(result);
+});
 transaction.run(function() {
     web3Require.initTransCollection();
 });

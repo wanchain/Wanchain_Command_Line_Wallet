@@ -4,7 +4,9 @@ transaction.useWalletDb();
 transaction.addCurAccount();
 transaction.addOTAsSelectList();
 transaction.addFee();
-transaction.addSend(transaction.sendTo);
+transaction.addSend(function(result) {
+    transaction.sendTo(result);
+});
 transaction.run(function () {
     web3Require.initTransCollection();
     web3Require.initOTAsCollection();
