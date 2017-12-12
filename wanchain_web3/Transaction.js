@@ -23,8 +23,8 @@ const Transaction = {
         web3Require.dbArray.push(scanDb);
     },
     addCurAccount(){
-        var schema = web3Require.schemaAll.AccountSchema('Select an account by inputting No. (1, 2, 3..):',
-            'You inputted the wrong number.',function (schema) {
+        var schema = web3Require.schemaAll.AccountSchema('Enter the index of the Source address(1, 2, 3..):',
+            'You entered an invalid number.',function (schema) {
                 if(web3Require.accountArray.length>0) {
                     schema.optionalArray = web3Require.accountArray;
                 }
@@ -72,7 +72,8 @@ const Transaction = {
             web3Require.logger.debug(result);
             if(result.FeeSel)
             {
-
+                Transaction.gasPrice = 30000;
+                Transaction.gasLimit = 30;
             }
             else
             {
@@ -96,7 +97,7 @@ const Transaction = {
     },
     addSend(callback)
     {
-        web3Require.addSchema(web3Require.schemaAll.YesNoSchema('submit','Do you confirm to send transaction? [Y]es or [N]o : '),function (result) {
+        web3Require.addSchema(web3Require.schemaAll.YesNoSchema('submit','Proceed with the transaction? [Y]es or [N]o : '),function (result) {
             web3Require.logger.debug(result);
             if(result.submit == 'Y' || result.submit == 'y')
             {
