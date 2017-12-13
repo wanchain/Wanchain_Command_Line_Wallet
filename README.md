@@ -42,7 +42,7 @@ input a parameter value 'Q' or 'q' to exit;
 
 - send.js: send a transaction
 
-    command parameters: --AccountNo  --toAddress --amount --FeeSel  --gasLimit --gasPrice --submit --password
+    command parameters: --AccountNo  --toaddress --amount --FeeSel  --gasLimit --gasPrice --submit --password
 
 - sendPrivacy.js: send with privacy
 
@@ -61,6 +61,10 @@ input a parameter value 'Q' or 'q' to exit;
 - refundOTAs.js: refund OTA
 
     command parameters: --AccountNo  --OTAsNo --FeeSel  --gasLimit --gasPrice --submit --password
+
+- ordinaryBalance.js: fetch ordinaray balance info.
+
+    command parameters: --AccountNo
 
 - version.js: print Wanchain_Command_Line_Wallet version
 - keystorePath.js: print Wanchain keystore path
