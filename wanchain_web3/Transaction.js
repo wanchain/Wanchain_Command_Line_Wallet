@@ -130,10 +130,10 @@ const Transaction = {
                 {
                     console.log('to: ' + self.toWAddress);
                 }
-                console.log('value: ' + web3Require.web3_ipc.toWei(self.amount));
+                console.log('value: ' + self.amount);
             }
 
-            console.log('gasPrice: ' + self.gasPrice);
+            console.log('gasPrice: ' + self.gasPrice/1000000000);
             console.log('gas: ' + self.gasLimit);
             web3Require.stepNext();
         });

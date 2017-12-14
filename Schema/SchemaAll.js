@@ -79,11 +79,11 @@ var SchemaAll = {
         gasPrice:{
             pattern: /^[1-9]\d*$/,
             message: "Price invalid!",
-            description: Qmsg("Input gas price (Price limit is between 1Gwin-60Gwin): "),
+            description: Qmsg("Input gas price (Price limit is between 18Gwin-60Gwin): "),
             required: true,
             conform : function (value) {
                 CheckProcessExit(value);
-                return value>=1 && value<=60;
+                return value>=18 && value<=60;
             }
         },
     }
