@@ -3,10 +3,19 @@ const web3Require = global.web3Require = require('../wanchain_web3/web3_ipc');
 transaction.useWalletDb();
 transaction.addCurAccountFunc(function (result) {
     console.log(result);
-    web3Require.web3_ipc.eth.getBalance(result[0],function (err,result) {
+    var curAddress;
+    if(Array.isArray(result))
+    {
+        curAddress = result[0];
+    }
+    else
+    {
+        curAddress = result.curaddress;
+    }
+    web3Require.web3_ipc.eth.getBalance(curAddress,function (err,result) {
         if(!err)
         {
-            console.log(web3Require.web3_ipc.fromWei(result.toString()));
+            console.log('balance : ' + web3Require.web3_ipc.fromWei(result.toString()));
         }
         //web3Require.runschemaStep();
         web3Require.exit(err);

@@ -44,7 +44,7 @@ config.to_waddress = '0x0340721B2B6C7970A443B215951C7BAa4c41c35E2b591EA51016Eae5
 config.transferValue = 1000000000000000000;
 
 config.loglevel = 'debug';
-//config.listAccount = true;
+config.listAccount = true;
 //config.noLogAccount = true;
 // console color
 config.consoleColor = {
