@@ -173,9 +173,12 @@ const web3Require ={
         {
             if(schema.optionalArray.length>0)
             {
-                schema.optionalArray.forEach(function (item, index) {
-                    console.log(index+1 + '.    ' + JSON.stringify(item));
-                });
+                if(!config.noLogAccount)
+                {
+                    schema.optionalArray.forEach(function (item, index) {
+                        console.log(index+1 + '.    ' + JSON.stringify(item));
+                    });
+                }
             }
             else
             {

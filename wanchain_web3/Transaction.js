@@ -60,7 +60,12 @@ const Transaction = {
                 }
                 console.log('address: ' + self.curAddress);
                 console.log('waddress: ' + web3Require.getWAddress(self.curAddress));
-                web3Require.stepNext();
+                web3Require.web3_ipc.eth.getBalance(self.curAddress,function (err,result) {
+                    if (!err) {
+                        console.log('balance: ' + web3Require.web3_ipc.fromWei(result.toString()));
+                    }
+                    web3Require.stepNext();
+                });
             }
             else
             {
@@ -229,8 +234,9 @@ const Transaction = {
                 let otaPub = wanUtil.recoverPubkeyFromWaddress(self.OTAAddress);
                 let otaPubK = otaPub.A;
 
-                let M = new Buffer(self.curAddress,'hex');
+                let M = new Buffer(self.curAddress.slice(2),'hex');
                 let ringArgs = wanUtil.getRingSign(M, otaSk,otaPubK,otaSetBuf);
+                wanUtil.verifyRinSign(ringArgs);
                 let KIWQ = generatePubkeyIWQforRing(ringArgs.PubKeys,ringArgs.I, ringArgs.w, ringArgs.q);
                 web3Require.logger.debug("KIWQ:", KIWQ);
 
@@ -247,7 +253,7 @@ const Transaction = {
                             Txtype: '0x00',
                             nonce: serial,
                             gasPrice: self.gasPrice,
-                            gasLimit: self.gasLimit,
+                            gas: self.gasLimit,
                             to: CoinContractAddr,//contract address
                             value: '0x00',
                             data: all
@@ -332,6 +338,7 @@ const Transaction = {
                 if(result)
                 {
                     self.OTAAddress = result[0]._id;
+                    self.amount = web3Require.web3_ipc.toWei(result[0].value);
                     web3Require.logger.debug(result);
                     web3Require.stepNext();
                 }
@@ -348,6 +355,11 @@ const Transaction = {
                 if(result)
                 {
                     self.OTAAddress = result.OTAsadress;
+                    web3Require.web3_ipc.wan.getOTABalance(self.OTAAddress,function (err,result) {
+                        if (!err) {
+                            self.amount = result;
+                        }
+                    });
                     web3Require.logger.debug(result);
                     web3Require.stepNext();
                 }
