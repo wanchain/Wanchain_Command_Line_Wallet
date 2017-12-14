@@ -88,6 +88,7 @@ const web3Require ={
     initFunction:[],
     transCollection : null,
     OTAsCollection : null,
+    tokenCollection : null,
     runUseDb: false,
 //    curAccount : '',
     schemaIndex : 0,
@@ -137,6 +138,10 @@ const web3Require ={
     initOTAsCollection()
     {
         this.OTAsCollection = Db.getCollection('OTAsCollection');
+    },
+    initTokenCollection()
+    {
+        this.tokenCollection = Db.getCollection('tokenCollection');
     },
     run(func)
     {

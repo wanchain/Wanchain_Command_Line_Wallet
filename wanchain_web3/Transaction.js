@@ -6,12 +6,14 @@ let wanUtil = require('wanchain-util');
 var keythereum = require("keythereum");
 const Db = require('./collection.js').walletDB;
 const scanDb = require('./collection.js').scanOTADB;
+const wanToken = require('../wanchain_web3/wanToken.js')
 const Transaction = {
     curAddress: null,
     toAddress: null,
     curTransaction: null,
     toWAddress: null,
     OTAAddress: null,
+    tokenAddress: null,
     amount: null,
     gasPrice: null,
     gasLimit: null,
@@ -118,6 +120,16 @@ const Transaction = {
                 console.log('from: ' + self.OTAAddress);
                 console.log('to: ' + self.curAddress);
                 console.log('value: 0x00 ');
+            }
+            else if(self.tokenAddress)
+            {
+                console.log('token: ' + self.tokenAddress);
+                console.log('from: ' + self.curAddress);
+                if(self.toAddress)
+                {
+                    console.log('to: ' + self.toAddress);
+                }
+                console.log('value: ' + self.amount);
             }
             else
             {
@@ -284,6 +296,20 @@ const Transaction = {
         });
 
     },
+    sendToToken(result)
+    {
+        let self = this;
+        web3Require.logger.debug(self.curAddress);
+        web3Require.logger.debug(self.tokenAddress);
+        web3Require.logger.debug(self.toAddress);
+        wanToken.sendToken(web3Require.web3_ipc,self.tokenAddress,self.curAddress,self.toAddress,function (err,result) {
+            if(!err){
+                console.log('Transaction hash: ' + result);
+                insertTransaction(result,self.curAddress,self.toAddress,self.amount,'token');
+            }
+            web3Require.exit(err);
+        })
+    },
     addSelectList(){
         let self = this;
         var Temp = web3Require;
@@ -371,6 +397,77 @@ const Transaction = {
         }
 
     },
+    //token
+    getTokenBalance()
+    {
+        return web3Require.tokenCollection.find({'address': this.curAddress});
+    },
+    addTokenSelection()
+    {
+        let self = this;
+        var Temp = web3Require;
+        var schema = web3Require.schemaAll.tokenSchema('Select an token balance by inputting No. (1, 2, 3..):',
+            'You inputted the wrong number.',function (schema) {
+                var data = self.getTokenBalance();
+                if(data)
+                {
+                    data.forEach(function (item, index) {
+                        var value = getCollectionItem(item);
+                        value.value = web3Require.web3_ipc.fromWei(value.value);
+                        schema.optionalArray.push(value);
+                    });
+                }
+            });
+//        schema.optionalArray = web3Require.accountArray;
+        web3Require.addSchema(schema, function (result) {
+            if(result)
+            {
+                if(Array.isArray(result))
+                {
+                    self.tokenAddress = result[0];
+                }
+                else
+                {
+                    self.tokenAddress = result.tokenAddress;
+                }
+                web3Require.stepNext();
+            }
+            else
+            {
+                web3Require.exit('You have no token balance.');
+            }
+        });
+    },
+    addTokenAddress()
+    {
+        let self = this;
+        var Temp = web3Require;
+        web3Require.addSchema(web3Require.schemaAll.tokenAddress('Input the token address:',
+            'The token address is invalid or nonexistent.'), function (result) {
+            if(result)
+            {
+                self.tokenAddress = result.tokenAddress;
+                wanToken.getTokenBalance(web3Require.web3_ipc,self.tokenAddress,self.curAddress,function (err,result) {
+                    if (!err) {
+                        if(result>0)
+                        {
+                            console.log('add new token balance : ' + self.tokenAddress + '; value : ' + result);
+                            insertTokenBalance(self.curAddress,self.tokenAddress,result);
+                        }
+                        else
+                        {
+                            console.log('this token balance have no coin!');
+                        }
+                    }
+                    web3Require.runschemaStep();
+                });
+            }
+            else
+            {
+                web3Require.exit('this token balance have no coin!');
+            }
+        });
+    },
     consoleTransactionInfo(transHash,callback)
     {
         web3Require.web3_ipc.eth.getTransactionReceipt(transHash,function (err,result) {
@@ -438,6 +535,26 @@ function insertOTAs(OTAHash,address,value,timeStamp,otaFrom,status)
         });
     } else {
         console.log(transhash + 'is already existed!');
+    }
+};
+function insertTokenBalance(address,tokenAddress,value)
+{
+    var data = {'address': address,'tokenAddress' : tokenAddress };
+    var found = web3Require.tokenCollection.findOne(data);
+    if(found == null) {
+        data.value = value;
+        var result = web3Require.tokenCollection.maxRecord('_id');
+        if(result)
+        {
+            data._id = result.max + 1;
+        }
+        else
+        {
+            data._id = 0;
+        }
+        web3Require.tokenCollection.insert(data);
+    } else {
+        found.value = value;
     }
 };
 function getNowFormatDate() {

@@ -132,12 +132,28 @@ exports.AccountNameSchema = function (desc,message) {
 exports.AccountSchema = function (desc,message,preLoad) {
     let Schema = {
         preLoad: preLoad,
+        optionalArray:[],
         properties:{}
     };
     Schema.properties.AccountNo = modifyDesc(SchemaAll.properties.intValue,desc,message);
     return Schema;
 };
-
+exports.tokenSchema = function (desc,message,preLoad) {
+    let Schema = {
+        preLoad: preLoad,
+        optionalArray:[],
+        properties:{}
+    };
+    Schema.properties.tokenNo = modifyDesc(SchemaAll.properties.intValue,desc,message);
+    return Schema;
+};
+exports.tokenAddress = function (desc,message) {
+    let Schema = {
+        properties:{}
+    };
+    Schema.properties.tokenAddress = modifyDesc(SchemaAll.properties.address,desc,message);
+    return Schema;
+};
 exports.feeSchema = function (desc,message) {
     let Schema = {
         type: 'fee',
@@ -202,6 +218,7 @@ exports.YesNoSchema = function (key,desc,message) {
 exports.TransListSchema = function (desc,message,preLoad) {
     let Schema = {
         preLoad: preLoad,
+        optionalArray:[],
         properties:{}
     };
     Schema.properties.TransNo = modifyDesc(SchemaAll.properties.intValue,desc,message);
@@ -218,6 +235,7 @@ exports.OTASNameSchema = function (desc,message) {
 exports.OTAsListSchema = function (desc,message,preLoad) {
     let Schema = {
         preLoad: preLoad,
+        optionalArray:[],
         properties:{}
     };
     Schema.properties.OTAsNo = modifyDesc(SchemaAll.properties.intValue,desc,message);
