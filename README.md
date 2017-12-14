@@ -46,7 +46,7 @@ input a parameter value 'Q' or 'q' to exit;
 
 - sendPrivacy.js: send with privacy
 
-    command parameters: --AccountNo  --waddress --amount --FeeSel  --gasLimit --gasPrice --submit --password
+    command parameters: --AccountNo  --waddress --PrivacyAmount --FeeSel  --gasLimit --gasPrice --submit --password
 
 - transactionList.js: Print transaction list and transaction details
 

@@ -5,7 +5,7 @@ transaction.addCurAccount();
 transaction.addOTAsSelectList();
 transaction.addFee();
 transaction.addSend(function(result) {
-    transaction.sendTo(result);
+    transaction.sendRefundOTA(result);
 });
 transaction.run(function () {
     web3Require.initTransCollection();

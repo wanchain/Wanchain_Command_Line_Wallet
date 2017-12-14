@@ -122,6 +122,13 @@ exports.keyPasswordSchema = {
         repeatPass: SchemaAll.properties.repeatPass
     }
 };
+exports.AccountNameSchema = function (desc,message) {
+    let Schema = {
+        properties:{}
+    };
+    Schema.properties.curaddress = modifyDesc(SchemaAll.properties.address,desc,message);
+    return Schema;
+};
 exports.AccountSchema = function (desc,message,preLoad) {
     let Schema = {
         preLoad: preLoad,
@@ -200,6 +207,14 @@ exports.TransListSchema = function (desc,message,preLoad) {
     Schema.properties.TransNo = modifyDesc(SchemaAll.properties.intValue,desc,message);
     return Schema;
 };
+exports.OTASNameSchema = function (desc,message) {
+    let Schema = {
+        properties:{}
+    };
+    Schema.properties.OTAsadress = modifyDesc(SchemaAll.properties.waddress,desc,message);
+    return Schema;
+};
+
 exports.OTAsListSchema = function (desc,message,preLoad) {
     let Schema = {
         preLoad: preLoad,

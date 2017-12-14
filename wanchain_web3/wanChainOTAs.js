@@ -81,6 +81,7 @@ exports.checkOta = function(cb,currentScanAddress, blockFrom) {
        let changed = cb(ota);
        if (changed) {
            var Item = getCollectionItem(ota);
+           Item.state = '0';
            var found = OTAsCollection.findOne({'_id': Item._id});
            console.log(Item._id);
            if(!found)
