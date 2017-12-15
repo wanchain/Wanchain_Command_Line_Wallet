@@ -300,9 +300,16 @@ const Transaction = {
     {
         let self = this;
         web3Require.logger.debug(self.curAddress);
-        web3Require.logger.debug(self.tokenAddress);
         web3Require.logger.debug(self.toAddress);
-        wanToken.sendToken(web3Require.web3_ipc,self.tokenAddress,self.curAddress,self.toAddress,function (err,result) {
+        web3Require.logger.debug(self.tokenAddress);
+        web3Require.web3_ipc.personal.sendTransaction({
+            from: self.curAddress,
+            to: self.toAddress,
+            value: 0x00,
+            gasPrice: self.gasPrice,
+            gas: self.gasLimit,
+            data : wanToken.getTokenData(web3Require.web3_ipc,self.tokenAddress,self.toAddress,self.amount)
+        },result.password,function (err,result) {
             if(!err){
                 console.log('Transaction hash: ' + result);
                 insertTransaction(result,self.curAddress,self.toAddress,self.amount,'token');
@@ -398,9 +405,29 @@ const Transaction = {
 
     },
     //token
-    getTokenBalance()
+    getTokenBalance(bUpdate)
     {
-        return web3Require.tokenCollection.find({'address': this.curAddress});
+        let self = this;
+        var Data = web3Require.tokenCollection.find({'address': this.curAddress});
+        if(bUpdate)
+        {
+            if(Data) {
+                Data.forEach(function (item, index) {
+                    wanToken.getTokenBalance(web3Require.web3_ipc, item.tokenAddress, self.curAddress, function (err, result) {
+                        if (!err) {
+                            if (result > 0) {
+                                item.value = result;
+                                web3Require.tokenCollection.update(item);
+                            }
+                            else {
+                                web3Require.tokenCollection.remove(item);
+                            }
+                        }
+                    });
+                });
+            }
+        }
+        return Data;
     },
     addTokenSelection()
     {
@@ -544,9 +571,9 @@ function insertTokenBalance(address,tokenAddress,value)
     if(found == null) {
         data.value = value;
         var result = web3Require.tokenCollection.maxRecord('_id');
-        if(result)
+        if(result && result.value)
         {
-            data._id = result.max + 1;
+            data._id = result.value + 1;
         }
         else
         {

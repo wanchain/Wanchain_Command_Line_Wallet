@@ -12,7 +12,7 @@ transaction.addCurAccountFunc(function (result) {
     {
         transaction.curAddress = result.curaddress;
     }
-    var Data =  transaction.getTokenBalance();
+    var Data =  transaction.getTokenBalance(true);
     if(Data)
     {
         Data.forEach(function (item, index) {

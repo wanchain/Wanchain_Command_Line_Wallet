@@ -11,4 +11,5 @@ transaction.addSend(function(result) {
 });
 transaction.run(function(){
     web3Require.initTokenCollection();
+    web3Require.initTransCollection();
 });
