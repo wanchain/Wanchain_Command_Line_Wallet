@@ -272,7 +272,7 @@ const Transaction = {
                         }, self.password, function (err, result) {
                             if (!err) {
                                 console.log('Transaction hash: ' + result);
-                                insertTransaction(result,self.OTAAddress,self.curAddress,'0x00','OTA');
+                                insertTransaction(result,self.curAddress,self.OTAAddress,'0x00','OTA');
                                 var found = web3Require.OTAsCollection.findOne({'_id': self.OTAAddress});
                                 if(found){
                                     found.state = 1;
