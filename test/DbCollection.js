@@ -20,7 +20,7 @@ Db.init().then(function () {
             break;
         case 'OTAList':
             let wAddress = web3Require.getWAddress(optimist.argv.address);
-            var data = OTAsCollection.find({'from': wAddress});
+            var data = OTAsCollection.find({'address': wAddress});
             if(data)
             {
                 data.forEach(function (item, index) {
