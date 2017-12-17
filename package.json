@@ -1,6 +1,6 @@
 {
   "name": "wanchain_Command_Line_Wallet",
-//  "version": "0.1.5",
+  "version": "0.1.5",
   "description": "wanchain Command line wallet",
   "dependencies": {
     "bluebird": "^3.5.1",
@@ -18,7 +18,7 @@
     "underscore": "^1.8.3",
     "underscore-deep-extend": "^1.1.5",
     "uuid": "^3.1.0",
-    "wanchain-util": "^1.0.1",
+    "wanchain-util": "^1.0.2",
     "web3": "^0.20.2"
   },
   "keywords": [
