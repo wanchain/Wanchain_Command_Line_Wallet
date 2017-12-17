@@ -5,7 +5,7 @@ function Qmsg(desc) {
 function CheckProcessExit(value) {
     if(value == 'Q' || value == 'q')
     {
-        console.log('You have quit command!');
+        console.log('Exiting...');
         process.exit();
     }
     return true;
@@ -15,7 +15,7 @@ var SchemaAll = {
         password: {
             pattern: '[^\u4e00-\u9fa5]+',
             message: "Password invalid or too short!",
-            description: Qmsg("Input password: "),
+            description: Qmsg("Enter password: "),
             hidden: true,
             replace: '*',
             required: true,
@@ -28,7 +28,7 @@ var SchemaAll = {
         repeatPass:{
             pattern: '[^\u4e00-\u9fa5]+',
             message: "Password invalid",
-            description: Qmsg("repeat password: "),
+            description: Qmsg("Reenter password: "),
             hidden: true,
             replace: '*',
             conform : CheckProcessExit,
@@ -71,7 +71,7 @@ var SchemaAll = {
         },
         gasLimit:{
             pattern: /^[1-9]\d*$/,
-            message: "Gas limit invalid!",
+            message: "Invalid Gas limit",
             description: Qmsg("Input gas limit: "),
             conform : CheckProcessExit,
             required: true
@@ -79,11 +79,11 @@ var SchemaAll = {
         gasPrice:{
             pattern: /^[1-9]\d*$/,
             message: "Price invalid!",
-            description: Qmsg("Input gas price (Price limit is between 1Gwin-60Gwin): "),
+            description: Qmsg("Input gas price (Price limit is between 18Gwin-60Gwin): "),
             required: true,
             conform : function (value) {
                 CheckProcessExit(value);
-                return value>=1 && value<=60;
+                return value>=18 && value<=60;
             }
         },
     }
@@ -122,15 +122,38 @@ exports.keyPasswordSchema = {
         repeatPass: SchemaAll.properties.repeatPass
     }
 };
+exports.AccountNameSchema = function (desc,message) {
+    let Schema = {
+        properties:{}
+    };
+    Schema.properties.curaddress = modifyDesc(SchemaAll.properties.address,desc,message);
+    return Schema;
+};
 exports.AccountSchema = function (desc,message,preLoad) {
     let Schema = {
         preLoad: preLoad,
+        optionalArray:[],
         properties:{}
     };
     Schema.properties.AccountNo = modifyDesc(SchemaAll.properties.intValue,desc,message);
     return Schema;
 };
-
+exports.tokenSchema = function (desc,message,preLoad) {
+    let Schema = {
+        preLoad: preLoad,
+        optionalArray:[],
+        properties:{}
+    };
+    Schema.properties.tokenNo = modifyDesc(SchemaAll.properties.intValue,desc,message);
+    return Schema;
+};
+exports.tokenAddress = function (desc,message) {
+    let Schema = {
+        properties:{}
+    };
+    Schema.properties.tokenAddress = modifyDesc(SchemaAll.properties.address,desc,message);
+    return Schema;
+};
 exports.feeSchema = function (desc,message) {
     let Schema = {
         type: 'fee',
@@ -157,8 +180,8 @@ exports.sendSchema = function () {
     let Schema = {
         properties:{}
     };
-    Schema.properties.toaddress = modifyDesc(SchemaAll.properties.address,'Input recipient address:','The address inputted is invalid. ');
-    Schema.properties.amount = modifyDesc(SchemaAll.properties.floatValue, 'Input amount you want to send: ','The amount inputted is invalid');
+    Schema.properties.toaddress = modifyDesc(SchemaAll.properties.address,'Enter Recipient\'s address:','The address entered is invalid. ');
+    Schema.properties.amount = modifyDesc(SchemaAll.properties.intValue, 'Enter transfer amount: ','The amount entered is invalid');
     return Schema;
 };
 exports.sendPrivacySchema = function () {
@@ -166,8 +189,8 @@ exports.sendPrivacySchema = function () {
         properties:{}
     };
     Schema.properties.waddress = modifyDesc(SchemaAll.properties.waddress,'Input recipient p-address which is longer one for privacy transaction:',
-        'The address inputted is invalid. ');
-//    Schema.properties.floatValue = modifyDesc(SchemaAll.properties.floatValue,'Input amount you want to send: ','The amount inputted is invalid');
+        'The address entered is invalid. ');
+//    Schema.properties.floatValue = modifyDesc(SchemaAll.properties.floatValue,'Input amount you want to send: ','The amount entered is invalid');
     return Schema;
 };
 exports.sendPrivacyAmount = function () {
@@ -195,14 +218,24 @@ exports.YesNoSchema = function (key,desc,message) {
 exports.TransListSchema = function (desc,message,preLoad) {
     let Schema = {
         preLoad: preLoad,
+        optionalArray:[],
         properties:{}
     };
     Schema.properties.TransNo = modifyDesc(SchemaAll.properties.intValue,desc,message);
     return Schema;
 };
+exports.OTASNameSchema = function (desc,message) {
+    let Schema = {
+        properties:{}
+    };
+    Schema.properties.OTAsadress = modifyDesc(SchemaAll.properties.waddress,desc,message);
+    return Schema;
+};
+
 exports.OTAsListSchema = function (desc,message,preLoad) {
     let Schema = {
         preLoad: preLoad,
+        optionalArray:[],
         properties:{}
     };
     Schema.properties.OTAsNo = modifyDesc(SchemaAll.properties.intValue,desc,message);

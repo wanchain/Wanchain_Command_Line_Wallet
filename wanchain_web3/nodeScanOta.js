@@ -80,7 +80,7 @@ class nodeScanOta  {
                                 }
                                 let inputPara = tx.input.slice(10);
                                 let paras = parseContractMethodPara(inputPara, wanUtil.coinSCAbi, 'buyCoinNote');
-                                wanchainDB.insertOtas( paras.OtaAddr, tx.value, 0, block.timeStamp, tx.from, scanBlockIndex);
+                                wanchainDB.insertOtas( paras.OtaAddr, tx.value, 0, block.timeStamp, tx.from, scanBlockIndex,tx.hash);
                                 console.log("new ota found:", paras.OtaAddr, scanBlockIndex);
                             }
                         });

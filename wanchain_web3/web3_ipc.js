@@ -6,7 +6,7 @@ var net = require('net');
 const prompt = require('prompt');
 var colors = require("colors/safe");
 var optimist = require('optimist')
-        .string(['password', 'repeatPass', 'toaddress' ,'waddress']);
+        .string(['password', 'repeatPass', 'toaddress' ,'waddress', 'tokenAddress']);
 var schema = require('../Schema/SchemaAll');
 let wanUtil = require('wanchain-util');
 const Db = require('./collection.js').walletDB;
@@ -40,10 +40,14 @@ if(config.logfile)
     log4jsOptions.categories.default.appenders.push('ruleFile');
 }
 logDebug.configure(log4jsOptions);
-
+let web3_ipc_exit = false;
 process.on('exit', function () {
     //handle your on exit code
-    web3Require.exit('waiting for exiting process ...');
+    if(!web3_ipc_exit)
+    {
+        web3Require.exit('process exit');
+        web3_ipc_exit = true;
+    }
 });
 function initDbStack(dbArray,index,thenFunc,catchFunc)
 {
@@ -88,6 +92,7 @@ const web3Require ={
     initFunction:[],
     transCollection : null,
     OTAsCollection : null,
+    tokenCollection : null,
     runUseDb: false,
 //    curAccount : '',
     schemaIndex : 0,
@@ -138,6 +143,10 @@ const web3Require ={
     {
         this.OTAsCollection = Db.getCollection('OTAsCollection');
     },
+    initTokenCollection()
+    {
+        this.tokenCollection = Db.getCollection('tokenCollection');
+    },
     run(func)
     {
         try {
@@ -173,9 +182,12 @@ const web3Require ={
         {
             if(schema.optionalArray.length>0)
             {
-                schema.optionalArray.forEach(function (item, index) {
-                    console.log(index+1 + '.    ' + JSON.stringify(item));
-                });
+                if(!config.noLogAccount)
+                {
+                    schema.optionalArray.forEach(function (item, index) {
+                        console.log(index+1 + '.    ' + JSON.stringify(item));
+                    });
+                }
             }
             else
             {
@@ -198,7 +210,7 @@ const web3Require ={
                     for (var key in result) {
                         var val = result[key];
                         if (val > schema.optionalArray.length) {
-                            console.log("Input index cannot greater than " + schema.optionalArray.length + "! Please repeat!");
+                            console.log("Input index cannot greater than " + schema.optionalArray.length + ". Please retry.");
                             temp.runschemaStep();
                         }
                         else if (callback) {
@@ -275,6 +287,7 @@ const web3Require ={
     },
     exit(err)
     {
+        web3_ipc_exit = true;
         if(err)
         {
             console.log(err);
@@ -344,8 +357,8 @@ const web3Require ={
     addfeeSchema(callback)
     {
         var temp = this;
-        this.addSchema(this.schemaAll.feeSchema('Select transaction fee by inputting No.:',
-            'You inputted the wrong number.'), function (result) {
+        this.addSchema(this.schemaAll.feeSchema('Input the transaction fee:',
+            'Invalid input.'), function (result) {
             callback(result);
         });
         this.addSchema(this.schemaAll.feeInputSchema(),function (result) {

@@ -3,14 +3,17 @@ var config = require('../config');
 const secp256k1 = require('secp256k1');
 const web3Require = global.web3Require = require('./web3_ipc');
 let wanUtil = require('wanchain-util');
+var keythereum = require("keythereum");
 const Db = require('./collection.js').walletDB;
 const scanDb = require('./collection.js').scanOTADB;
+const wanToken = require('../wanchain_web3/wanToken.js')
 const Transaction = {
     curAddress: null,
     toAddress: null,
     curTransaction: null,
     toWAddress: null,
     OTAAddress: null,
+    tokenAddress: null,
     amount: null,
     gasPrice: null,
     gasLimit: null,
@@ -24,24 +27,47 @@ const Transaction = {
     },
     addCurAccountFunc(func)
     {
-        var schema = web3Require.schemaAll.AccountSchema('Select an account by inputting No. (1, 2, 3..):',
-            'You inputted the wrong number.',function (schema) {
-                if(web3Require.accountArray.length>0) {
-                    schema.optionalArray = web3Require.accountArray;
-                }
-            });
+        if(config.listAccount)
+        {
+            var schema = web3Require.schemaAll.AccountSchema('Enter the index of the Source address(1, 2, 3..):',
+                'You entered the wrong number.',function (schema) {
+                    if(web3Require.accountArray.length>0) {
+                        schema.optionalArray = web3Require.accountArray;
+                    }
+                });
 //        schema.optionalArray = web3Require.accountArray;
-        web3Require.addSchema(schema, func);
+            web3Require.addSchema(schema, func);
+        }
+        else
+        {
+            var schema = web3Require.schemaAll.AccountNameSchema('Input account address:',
+                'You inputted the wrong address.');
+//        schema.optionalArray = web3Require.accountArray;
+            web3Require.addSchema(schema, func);
+        }
+
     },
     addCurAccount(){
         let self = this;
         this.addCurAccountFunc(function (result) {
             if(result)
             {
-                Transaction.curAddress = result[0];
+                if(Array.isArray(result))
+                {
+                    self.curAddress = result[0];
+                }
+                else
+                {
+                    self.curAddress = result.curaddress;
+                }
                 console.log('address: ' + self.curAddress);
                 console.log('waddress: ' + web3Require.getWAddress(self.curAddress));
-                web3Require.stepNext();
+                web3Require.web3_ipc.eth.getBalance(self.curAddress,function (err,result) {
+                    if (!err) {
+                        console.log('balance: ' + web3Require.web3_ipc.fromWei(result.toString()));
+                    }
+                    web3Require.stepNext();
+                });
             }
             else
             {
@@ -89,17 +115,37 @@ const Transaction = {
                 self.gasPrice = result.gasPrice*1000000000;
                 self.gasLimit = result.gasLimit;
             }
-            console.log('from: ' + self.curAddress);
-            if(self.toAddress)
+            if(self.OTAAddress)
             {
-                console.log('to: ' + self.toAddress);
+                console.log('from: ' + self.OTAAddress);
+                console.log('to: ' + self.curAddress);
+                console.log('value: 0x00 ');
             }
-            else if(self.toWAddress)
+            else if(self.tokenAddress)
             {
-                console.log('to: ' + self.toWAddress);
+                console.log('token: ' + self.tokenAddress);
+                console.log('from: ' + self.curAddress);
+                if(self.toAddress)
+                {
+                    console.log('to: ' + self.toAddress);
+                }
+                console.log('value: ' + self.amount);
             }
-            console.log('value: ' + web3Require.web3_ipc.toWei(self.amount));
-            console.log('gasPrice: ' + self.gasPrice);
+            else
+            {
+                console.log('from: ' + self.curAddress);
+                if(self.toAddress)
+                {
+                    console.log('to: ' + self.toAddress);
+                }
+                else if(self.toWAddress)
+                {
+                    console.log('to: ' + self.toWAddress);
+                }
+                console.log('value: ' + self.amount);
+            }
+
+            console.log('gasPrice: ' + self.gasPrice/1000000000);
             console.log('gas: ' + self.gasLimit);
             web3Require.stepNext();
         });
@@ -170,10 +216,10 @@ const Transaction = {
         let CoinContractAddr = wanUtil.contractCoinAddress;
         let CoinContract = web3Require.web3_ipc.eth.contract(wanUtil.coinSCAbi);
         self.password = result.password;
-        web3Require.web3_ipc.wan.getOTAMixSet([self.OTAAddress, config.OTAMixNumber],function (err,otaSet) {
+        web3Require.web3_ipc.wan.getOTAMixSet(self.OTAAddress, config.OTAMixNumber ,function (err,otaSet) {
             if(!err)
             {
-                let keystore = web3Require.getKeystoreJSON();
+                let keystore = web3Require.getKeystoreJSON(self.curAddress);
                 let keyBObj = {version:keystore.version, crypto:keystore.crypto2};
                 let keyAObj = {version:keystore.version, crypto:keystore.crypto};
                 let privKeyA;
@@ -188,7 +234,7 @@ const Transaction = {
 
                 //let otaSetr = await ethereumNode.send('eth_getOTAMixSet', [otaDestAddress, number]);
                 //let otaSet = otaSetr.result;
-                web3Require.logger.debug("otaSetr:",otaSetr);
+                web3Require.logger.debug("otaSetr:",otaSet);
                 let otaSetBuf = [];
                 for(let i=0; i<otaSet.length; i++){
                     let rpkc = new Buffer(otaSet[i].slice(2,68),'hex');
@@ -200,8 +246,9 @@ const Transaction = {
                 let otaPub = wanUtil.recoverPubkeyFromWaddress(self.OTAAddress);
                 let otaPubK = otaPub.A;
 
-                let M = new Buffer(self.curAddress,'hex');
+                let M = new Buffer(self.curAddress.slice(2),'hex');
                 let ringArgs = wanUtil.getRingSign(M, otaSk,otaPubK,otaSetBuf);
+                wanUtil.verifyRinSign(ringArgs);
                 let KIWQ = generatePubkeyIWQforRing(ringArgs.PubKeys,ringArgs.I, ringArgs.w, ringArgs.q);
                 web3Require.logger.debug("KIWQ:", KIWQ);
 
@@ -214,17 +261,23 @@ const Transaction = {
                         let serial = result;
                         web3Require.logger.debug("serial:", serial);
                         web3Require.web3_ipc.personal.sendTransaction({
+                            from: self.curAddress,
                             Txtype: '0x00',
                             nonce: serial,
                             gasPrice: self.gasPrice,
-                            gasLimit: self.gasLimit,
+                            gas: self.gasLimit,
                             to: CoinContractAddr,//contract address
                             value: '0x00',
                             data: all
                         }, self.password, function (err, result) {
                             if (!err) {
                                 console.log('Transaction hash: ' + result);
-                                insertTransaction(result,self.OTAAddress,self.curAddress,'0x00','OTA');
+                                insertTransaction(result,self.curAddress,self.OTAAddress,'0x00','OTA');
+                                var found = web3Require.OTAsCollection.findOne({'_id': self.OTAAddress});
+                                if(found){
+                                    found.state = 1;
+                                    web3Require.OTAsCollection.update(found);
+                                }
                             }
                             web3Require.exit(err);
                         });
@@ -242,6 +295,27 @@ const Transaction = {
 
         });
 
+    },
+    sendToToken(result)
+    {
+        let self = this;
+        web3Require.logger.debug(self.curAddress);
+        web3Require.logger.debug(self.toAddress);
+        web3Require.logger.debug(self.tokenAddress);
+        web3Require.web3_ipc.personal.sendTransaction({
+            from: self.curAddress,
+            to: self.toAddress,
+            value: 0x00,
+            gasPrice: self.gasPrice,
+            gas: self.gasLimit,
+            data : wanToken.getTokenData(web3Require.web3_ipc,self.tokenAddress,self.toAddress,self.amount)
+        },result.password,function (err,result) {
+            if(!err){
+                console.log('Transaction hash: ' + result);
+                insertTransaction(result,self.curAddress,self.toAddress,self.amount,'token');
+            }
+            web3Require.exit(err);
+        })
     },
     addSelectList(){
         let self = this;
@@ -262,7 +336,7 @@ const Transaction = {
                 Temp.curTransaction = result[0];
                 web3Require.logger.debug(result);
                 self.consoleTransactionInfo(Temp.curTransaction.transHash,function(){
-                    Temp.runschemaStep()
+                    Temp.exit();
                 });
             }
             else
@@ -274,48 +348,193 @@ const Transaction = {
     addOTAsSelectList(){
         let self = this;
         var Temp = web3Require;
-        web3Require.addSchema(web3Require.schemaAll.OTAsListSchema('Input the OTAs No. :',
-            'The Number is invalid or nonexistent.',function (schema) {
-                schema.optionalArray = [];
-                let wAddress = web3Require.getWAddress(self.curAddress);
-                if(wAddress)
-                {
-                    var data = Temp.OTAsCollection.find({'address': wAddress});
-                    if(data)
+        if(config.listAccount)
+        {
+            web3Require.addSchema(web3Require.schemaAll.OTAsListSchema('Input the OTAs No. :',
+                'The Number is invalid or nonexistent.',function (schema) {
+                    schema.optionalArray = [];
+                    let wAddress = web3Require.getWAddress(self.curAddress);
+                    if(wAddress)
                     {
-                        data.forEach(function (item, index) {
-                            var value = getCollectionItem(item);
-                            value.value = web3Require.web3_ipc.fromWei(value.value);
-                            schema.optionalArray.push(value);
-                        });
-                    }
+                        var data = Temp.OTAsCollection.find({'address': wAddress,'state': '0'});
+                        if(data)
+                        {
+                            data.forEach(function (item, index) {
+                                var value = getCollectionItem(item);
+                                value.value = web3Require.web3_ipc.fromWei(value.value);
+                                schema.optionalArray.push(value);
+                            });
+                        }
 
+                    }
+                }), function (result) {
+                if(result)
+                {
+                    self.OTAAddress = result[0]._id;
+                    self.amount = web3Require.web3_ipc.toWei(result[0].value);
+                    web3Require.logger.debug(result);
+                    web3Require.stepNext();
                 }
-            }), function (result) {
+                else
+                {
+                    web3Require.exit('This account have no OTA!');
+                }
+            });
+        }
+        else
+        {
+            web3Require.addSchema(web3Require.schemaAll.OTASNameSchema('Input the OTA:',
+                'The OTA is invalid or nonexistent.'), function (result) {
+                if(result)
+                {
+                    self.OTAAddress = result.OTAsadress;
+                    web3Require.web3_ipc.wan.getOTABalance(self.OTAAddress,function (err,result) {
+                        if (!err) {
+                            self.amount = result;
+                        }
+                    });
+                    web3Require.logger.debug(result);
+                    web3Require.stepNext();
+                }
+                else
+                {
+                    web3Require.exit('This account have no OTA!');
+                }
+            });
+        }
+
+    },
+    //token
+    getTokenBalance(bUpdate)
+    {
+        let self = this;
+        var Data = web3Require.tokenCollection.find({'address': this.curAddress});
+        if(bUpdate)
+        {
+            if(Data) {
+                Data.forEach(function (item, index) {
+                    wanToken.getTokenBalance(web3Require.web3_ipc, item.tokenAddress, self.curAddress, function (err, result) {
+                        if (!err) {
+                            if (result > 0) {
+                                item.value = result;
+                                web3Require.tokenCollection.update(item);
+                            }
+                            else {
+                                web3Require.tokenCollection.remove(item);
+                            }
+                        }
+                    });
+                });
+            }
+        }
+        return Data;
+    },
+    addTokenSelection()
+    {
+        let self = this;
+        var Temp = web3Require;
+        var schema = web3Require.schemaAll.tokenSchema('Select an token balance by inputting No. (1, 2, 3..):',
+            'You inputted the wrong number.',function (schema) {
+                var data = self.getTokenBalance();
+                if(data)
+                {
+                    data.forEach(function (item, index) {
+                        var value = getCollectionItem(item);
+                        value.value = web3Require.web3_ipc.fromWei(value.value);
+                        schema.optionalArray.push(value);
+                    });
+                }
+            });
+//        schema.optionalArray = web3Require.accountArray;
+        web3Require.addSchema(schema, function (result) {
             if(result)
             {
-                self.OTAAddress = result[0];
-                web3Require.logger.debug(result);
+                if(Array.isArray(result))
+                {
+                    self.tokenAddress = result[0];
+                }
+                else
+                {
+                    self.tokenAddress = result.tokenAddress;
+                }
                 web3Require.stepNext();
             }
             else
             {
-                web3Require.exit('This account have no OTA!');
+                web3Require.exit('You have no token balance.');
+            }
+        });
+    },
+    addTokenAddress()
+    {
+        let self = this;
+        var Temp = web3Require;
+        web3Require.addSchema(web3Require.schemaAll.tokenAddress('Input the token address:',
+            'The token address is invalid or nonexistent.'), function (result) {
+            if(result)
+            {
+                self.tokenAddress = result.tokenAddress;
+                wanToken.getTokenBalance(web3Require.web3_ipc,self.tokenAddress,self.curAddress,function (err,result) {
+                    if (!err) {
+                        if(result>0)
+                        {
+                            console.log('add new token balance : ' + self.tokenAddress + '; value : ' + result);
+                            insertTokenBalance(self.curAddress,self.tokenAddress,result);
+                        }
+                        else
+                        {
+                            console.log('this token balance have no coin!');
+                        }
+                    }
+                    web3Require.runschemaStep();
+                });
+            }
+            else
+            {
+                web3Require.exit('this token balance have no coin!');
             }
         });
     },
     consoleTransactionInfo(transHash,callback)
     {
         web3Require.web3_ipc.eth.getTransactionReceipt(transHash,function (err,result) {
-           if(!err)
-           {
-               console.log(result);
-           }
-           else
-           {
-               console.log(err);
-           }
-            callback();
+            if(!err)
+            {
+                if(result)
+                {
+                    console.log(result);
+                    callback();
+                }
+                else
+                {
+                    if(web3Require.web3_ipc.wan.pendingTransactions)
+                    {
+                        web3Require.web3_ipc.wan.pendingTransactions(transHash,function (err,result) {
+                            if(!err)
+                            {
+                                console.log(result);
+                            }
+                            else
+                            {
+                                console.log(err);
+                            }
+                            callback();
+                        });
+
+                    }
+                    else
+                    {
+                        console.log(result);
+                        callback();
+                    }
+                }
+            }
+            else
+            {
+                console.log(err);
+                callback();
+            }
+
         });
     },
 
@@ -371,6 +590,26 @@ function insertOTAs(OTAHash,address,value,timeStamp,otaFrom,status)
         });
     } else {
         console.log(transhash + 'is already existed!');
+    }
+};
+function insertTokenBalance(address,tokenAddress,value)
+{
+    var data = {'address': address,'tokenAddress' : tokenAddress };
+    var found = web3Require.tokenCollection.findOne(data);
+    if(found == null) {
+        data.value = value;
+        var result = web3Require.tokenCollection.maxRecord('_id');
+        if(result && result.value)
+        {
+            data._id = result.value + 1;
+        }
+        else
+        {
+            data._id = 0;
+        }
+        web3Require.tokenCollection.insert(data);
+    } else {
+        found.value = value;
     }
 };
 function getNowFormatDate() {
