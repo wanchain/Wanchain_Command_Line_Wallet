@@ -498,15 +498,43 @@ const Transaction = {
     consoleTransactionInfo(transHash,callback)
     {
         web3Require.web3_ipc.eth.getTransactionReceipt(transHash,function (err,result) {
-           if(!err)
-           {
-               console.log(result);
-           }
-           else
-           {
-               console.log(err);
-           }
-            callback();
+            if(!err)
+            {
+                if(result)
+                {
+                    console.log(result);
+                    callback();
+                }
+                else
+                {
+                    if(web3Require.web3_ipc.wan.pendingTransactions)
+                    {
+                        web3Require.web3_ipc.wan.pendingTransactions(transHash,function (err,result) {
+                            if(!err)
+                            {
+                                console.log(result);
+                            }
+                            else
+                            {
+                                console.log(err);
+                            }
+                            callback();
+                        });
+
+                    }
+                    else
+                    {
+                        console.log(result);
+                        callback();
+                    }
+                }
+            }
+            else
+            {
+                console.log(err);
+                callback();
+            }
+
         });
     },
 
