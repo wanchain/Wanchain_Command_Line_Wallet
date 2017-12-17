@@ -24,10 +24,10 @@ exports.setScanedIndex = function (scaned) {
         console.log('setScanedByWaddr:', waddr, 'update');
     }
 }
-exports.insertOtas = function( ota, value, state,timeStamp,from,blockNumber) {
+exports.insertOtas = function( ota, value, state,timeStamp,from,blockNumber,txHash) {
     let OTAsCollection = scanDb.getCollection('OTAsScan');
     try {
-        OTAsCollection.insert({ '_id':ota, 'value':value, 'state':state, 'timeStamp':timeStamp,'otaFrom':from, 'blockNumber':blockNumber});
+        OTAsCollection.insert({ '_id':ota, 'value':value, 'state':state, 'timeStamp':timeStamp,'otaFrom':from, 'blockNumber':blockNumber,'txHash': txHash});
     }catch(err){
         console.log("insertOtabyWaddr:", err);
     }
