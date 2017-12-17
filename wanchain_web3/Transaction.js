@@ -30,7 +30,7 @@ const Transaction = {
         if(config.listAccount)
         {
             var schema = web3Require.schemaAll.AccountSchema('Enter the index of the Source address(1, 2, 3..):',
-                'You inputted the wrong number.',function (schema) {
+                'You entered the wrong number.',function (schema) {
                     if(web3Require.accountArray.length>0) {
                         schema.optionalArray = web3Require.accountArray;
                     }

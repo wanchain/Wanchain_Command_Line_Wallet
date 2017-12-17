@@ -210,7 +210,7 @@ const web3Require ={
                     for (var key in result) {
                         var val = result[key];
                         if (val > schema.optionalArray.length) {
-                            console.log("Input index cannot greater than " + schema.optionalArray.length + "! Please repeat!");
+                            console.log("Input index cannot greater than " + schema.optionalArray.length + ". Please retry.");
                             temp.runschemaStep();
                         }
                         else if (callback) {
@@ -357,8 +357,8 @@ const web3Require ={
     addfeeSchema(callback)
     {
         var temp = this;
-        this.addSchema(this.schemaAll.feeSchema('Select transaction fee by inputting No.:',
-            'You inputted the wrong number.'), function (result) {
+        this.addSchema(this.schemaAll.feeSchema('Input the transaction fee:',
+            'Invalid input.'), function (result) {
             callback(result);
         });
         this.addSchema(this.schemaAll.feeInputSchema(),function (result) {
