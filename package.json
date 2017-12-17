@@ -1,7 +1,7 @@
 {
-  "name": "wanchain-util-test",
-  "version": "0.1.0",
-  "description": "wanchain util package test",
+  "name": "wanchain_Command_Line_Wallet",
+//  "version": "0.1.5",
+  "description": "wanchain Command line wallet",
   "dependencies": {
     "bluebird": "^3.5.1",
     "bn.js": "^4.11.8",
