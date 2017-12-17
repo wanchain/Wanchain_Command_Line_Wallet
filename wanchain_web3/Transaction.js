@@ -211,7 +211,7 @@ const Transaction = {
                 web3Require.web3_ipc.eth.getTransactionCount(self.curAddress,'latest',function (err,result) {
                     if(!err)
                     {
-                        let serial = '0x'+result;
+                        let serial = result;
                         web3Require.logger.debug("serial:", serial);
                         web3Require.web3_ipc.personal.sendTransaction({
                             Txtype: '0x00',
