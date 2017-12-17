@@ -29,7 +29,7 @@ const Transaction = {
     {
         if(config.listAccount)
         {
-            var schema = web3Require.schemaAll.AccountSchema('Select an account by inputting No. (1, 2, 3..):',
+            var schema = web3Require.schemaAll.AccountSchema('Enter the index of the Source address(1, 2, 3..):',
                 'You inputted the wrong number.',function (schema) {
                     if(web3Require.accountArray.length>0) {
                         schema.optionalArray = web3Require.accountArray;
@@ -336,7 +336,7 @@ const Transaction = {
                 Temp.curTransaction = result[0];
                 web3Require.logger.debug(result);
                 self.consoleTransactionInfo(Temp.curTransaction.transHash,function(){
-                    Temp.runschemaStep()
+                    Temp.exit();
                 });
             }
             else

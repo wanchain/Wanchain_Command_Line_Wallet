@@ -5,7 +5,7 @@ function Qmsg(desc) {
 function CheckProcessExit(value) {
     if(value == 'Q' || value == 'q')
     {
-        console.log('You have quit command!');
+        console.log('You have quit the command!');
         process.exit();
     }
     return true;

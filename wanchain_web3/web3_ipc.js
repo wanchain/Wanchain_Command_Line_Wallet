@@ -40,10 +40,14 @@ if(config.logfile)
     log4jsOptions.categories.default.appenders.push('ruleFile');
 }
 logDebug.configure(log4jsOptions);
-
+let web3_ipc_exit = false;
 process.on('exit', function () {
     //handle your on exit code
-    web3Require.exit('waiting for exiting process ...');
+    if(!web3_ipc_exit)
+    {
+        web3Require.exit('process exit');
+        web3_ipc_exit = true;
+    }
 });
 function initDbStack(dbArray,index,thenFunc,catchFunc)
 {
@@ -283,6 +287,7 @@ const web3Require ={
     },
     exit(err)
     {
+        web3_ipc_exit = true;
         if(err)
         {
             console.log(err);
