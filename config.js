@@ -1,5 +1,5 @@
 const config = {};
-var wanchainNet = 'testnet';
+var wanchainNet = '';
 if(wanchainNet.length)
 {
     if(process.platform === 'win32')
