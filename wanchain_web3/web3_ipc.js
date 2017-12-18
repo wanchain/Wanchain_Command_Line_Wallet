@@ -101,6 +101,8 @@ const web3Require ={
     //prompt functions
     init()
     {
+        this.logger.debug('rpcIpcPath:' + config.rpcIpcPath);
+        this.logger.debug('keyStorePath:' + config.keyStorePath);
         this.initFunction.forEach(function (func) {
             func();
         });

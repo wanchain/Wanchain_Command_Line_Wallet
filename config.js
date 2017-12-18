@@ -1,30 +1,42 @@
 const config = {};
+var wanchainNet = 'testnet';
+if(wanchainNet.length)
+{
+    if(process.platform === 'win32')
+    {
+        wanchainNet = wanchainNet + '\\';
+    }
+    else
+    {
+        wanchainNet = wanchainNet + '/';
+    }
+}
 config.version = '0.1.6';
 // web3 parameter
 config.host = '// http://localhost'; // http://localhost
 config.rpcIpcPath = process.env.HOME;
 if (process.platform === 'darwin') {
-    config.rpcIpcPath += '/Library/Wanchain/gwan.ipc';
+    config.rpcIpcPath += '/Library/Wanchain/'+wanchainNet+'gwan.ipc';
 } else if (process.platform === 'freebsd' ||
     process.platform === 'linux' ||
     process.platform === 'sunos') {
-    config.rpcIpcPath += '/.wanchain/gwan.ipc';
+    config.rpcIpcPath += '/.wanchain/'+wanchainNet+'gwan.ipc';
 } else if (process.platform === 'win32') {
-    config.rpcIpcPath = '\\\\.\\pipe\\gwan.ipc';
+    config.rpcIpcPath = '\\\\.\\pipe\\'+wanchainNet+'gwan.ipc';
 }
 config.keyStorePath = process.env.HOME;
 if (process.platform === 'darwin') {
-    config.keyStorePath += '/Library/wanchain/keystore/';
+    config.keyStorePath += '/Library/wanchain/'+wanchainNet+'keystore/';
 }
 
 if (process.platform === 'freebsd' ||
     process.platform === 'linux' ||
     process.platform === 'sunos') {
-    config.keyStorePath += '/.wanchain/keystore/';
+    config.keyStorePath += '/.wanchain/'+wanchainNet+'keystore/';
 }
 
 if (process.platform === 'win32') {
-    config.keyStorePath = process.env.APPDATA + '\\wanchain\\keystore\\';
+    config.keyStorePath = process.env.APPDATA + '\\wanchain\\'+wanchainNet+'keystore\\';
 }
 // config.host = 'http://192.168.1.77'; // http://localhost
 config.port = 8545;
