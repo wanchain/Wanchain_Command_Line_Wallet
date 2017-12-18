@@ -1,5 +1,5 @@
 const config = {};
-config.version = '0.1.5';
+config.version = '0.1.6';
 // web3 parameter
 config.host = '// http://localhost'; // http://localhost
 config.rpcIpcPath = process.env.HOME;
