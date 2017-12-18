@@ -237,39 +237,27 @@ const Transaction = {
                 let CoinContractInstance = CoinContract.at(CoinContractAddr);
 
                 let all = CoinContractInstance.refundCoin.getData(KIWQ,self.amount);
-                web3Require.web3_ipc.eth.getTransactionCount(self.curAddress,'latest',function (err,result) {
-                    if(!err)
-                    {
-                        let serial = result;
-                        web3Require.logger.debug("serial:", serial);
-                        web3Require.web3_ipc.personal.sendTransaction({
-                            from: self.curAddress,
-                            Txtype: '0x00',
-                            nonce: serial,
-                            gasPrice: self.gasPrice,
-                            gas: self.gasLimit,
-                            to: CoinContractAddr,//contract address
-                            value: '0x00',
-                            data: all
-                        }, self.password, function (err, result) {
-                            if (!err) {
-                                console.log('Transaction hash: ' + result);
-                                insertTransaction(result,self.curAddress,self.OTAAddress,'0x00','OTA');
-                                var found = web3Require.OTAsCollection.findOne({'_id': self.OTAAddress});
-                                if(found){
-                                    found.state = 1;
-                                    web3Require.OTAsCollection.update(found);
-                                }
-                            }
-                            web3Require.exit(err);
-                        });
+                web3Require.web3_ipc.personal.sendTransaction({
+                    from: self.curAddress,
+                    Txtype: '0x00',
+                    //nonce: serial,
+                    gasPrice: self.gasPrice,
+                    gas: self.gasLimit,
+                    to: CoinContractAddr,//contract address
+                    value: '0x00',
+                    data: all
+                }, self.password, function (err, result) {
+                    if (!err) {
+                        console.log('Transaction hash: ' + result);
+                        insertTransaction(result,self.curAddress,self.OTAAddress,'0x00','OTA');
+                        var found = web3Require.OTAsCollection.findOne({'_id': self.OTAAddress});
+                        if(found){
+                            found.state = 1;
+                            web3Require.OTAsCollection.update(found);
+                        }
                     }
-                    else{
-                        web3Require.exit(err);
-                    }
-                })
-
-
+                    web3Require.exit(err);
+                });
             }
             else {
                 web3Require.exit(err);
