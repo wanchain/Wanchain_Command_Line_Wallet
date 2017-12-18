@@ -27,24 +27,13 @@ const Transaction = {
     },
     addCurAccountFunc(func)
     {
-        if(config.listAccount)
-        {
-            var schema = web3Require.schemaAll.AccountSchema('Enter the index of the Source address(1, 2, 3..):',
-                'You entered the wrong number.',function (schema) {
-                    if(web3Require.accountArray.length>0) {
-                        schema.optionalArray = web3Require.accountArray;
-                    }
-                });
-//        schema.optionalArray = web3Require.accountArray;
-            web3Require.addSchema(schema, func);
-        }
-        else
-        {
-            var schema = web3Require.schemaAll.AccountNameSchema('Input account address:',
-                'You inputted the wrong address.');
-//        schema.optionalArray = web3Require.accountArray;
-            web3Require.addSchema(schema, func);
-        }
+        var schema = web3Require.schemaAll.AccountSchema('Enter the index of the Source address(1, 2, 3..):',
+            'You entered the wrong number.',function (schema) {
+                if(web3Require.accountArray.length>0) {
+                    schema.optionalArray = web3Require.accountArray;
+                }
+            });
+        web3Require.addSchema(schema, func);
 
     },
     addCurAccount(){
@@ -52,14 +41,7 @@ const Transaction = {
         this.addCurAccountFunc(function (result) {
             if(result)
             {
-                if(Array.isArray(result))
-                {
-                    self.curAddress = result[0];
-                }
-                else
-                {
-                    self.curAddress = result.curaddress;
-                }
+                self.curAddress = result;
                 console.log('address: ' + self.curAddress);
                 console.log('waddress: ' + web3Require.getWAddress(self.curAddress));
                 web3Require.web3_ipc.eth.getBalance(self.curAddress,function (err,result) {
@@ -97,7 +79,7 @@ const Transaction = {
         let self = this;
         web3Require.addSchema(web3Require.schemaAll.sendPrivacyAmount(),function (result) {
             web3Require.logger.debug(result);
-            self.amount = result[0];
+            self.amount = result;
             web3Require.stepNext();
         });
     },
@@ -258,7 +240,7 @@ const Transaction = {
                 web3Require.web3_ipc.eth.getTransactionCount(self.curAddress,'latest',function (err,result) {
                     if(!err)
                     {
-                        let serial = '0x'+result;
+                        let serial = result;
                         web3Require.logger.debug("serial:", serial);
                         web3Require.web3_ipc.personal.sendTransaction({
                             from: self.curAddress,
@@ -302,13 +284,14 @@ const Transaction = {
         web3Require.logger.debug(self.curAddress);
         web3Require.logger.debug(self.toAddress);
         web3Require.logger.debug(self.tokenAddress);
+        var data1 = wanToken.getTokenData(web3Require.web3_ipc,self.tokenAddress,self.toAddress,web3Require.web3_ipc.toWei(self.amount));
         web3Require.web3_ipc.personal.sendTransaction({
             from: self.curAddress,
-            to: self.toAddress,
+            to: self.tokenAddress,
             value: 0x00,
             gasPrice: self.gasPrice,
             gas: self.gasLimit,
-            data : wanToken.getTokenData(web3Require.web3_ipc,self.tokenAddress,self.toAddress,self.amount)
+            data : data1
         },result.password,function (err,result) {
             if(!err){
                 console.log('Transaction hash: ' + result);
@@ -333,9 +316,9 @@ const Transaction = {
             }), function (result) {
             if(result)
             {
-                Temp.curTransaction = result[0];
+                Temp.curTransaction = result;
                 web3Require.logger.debug(result);
-                self.consoleTransactionInfo(Temp.curTransaction.transHash,function(){
+                self.consoleTransactionInfo(Temp.curTransaction,function(){
                     Temp.exit();
                 });
             }
@@ -348,60 +331,40 @@ const Transaction = {
     addOTAsSelectList(){
         let self = this;
         var Temp = web3Require;
-        if(config.listAccount)
-        {
-            web3Require.addSchema(web3Require.schemaAll.OTAsListSchema('Input the OTAs No. :',
-                'The Number is invalid or nonexistent.',function (schema) {
-                    schema.optionalArray = [];
-                    let wAddress = web3Require.getWAddress(self.curAddress);
-                    if(wAddress)
+        web3Require.addSchema(web3Require.schemaAll.OTAsListSchema('Input the OTAs No. :',
+            'The Number is invalid or nonexistent.',function (schema) {
+                schema.optionalArray = [];
+                let wAddress = web3Require.getWAddress(self.curAddress);
+                if(wAddress)
+                {
+                    var data = Temp.OTAsCollection.find({'address': wAddress,'state': '0'});
+                    if(data)
                     {
-                        var data = Temp.OTAsCollection.find({'address': wAddress,'state': '0'});
-                        if(data)
-                        {
-                            data.forEach(function (item, index) {
-                                var value = getCollectionItem(item);
-                                value.value = web3Require.web3_ipc.fromWei(value.value);
-                                schema.optionalArray.push(value);
-                            });
-                        }
-
+                        data.forEach(function (item, index) {
+                            var value = getCollectionItem(item);
+                            value.value = web3Require.web3_ipc.fromWei(value.value);
+                            schema.optionalArray.push(value);
+                        });
                     }
-                }), function (result) {
-                if(result)
-                {
-                    self.OTAAddress = result[0]._id;
-                    self.amount = web3Require.web3_ipc.toWei(result[0].value);
-                    web3Require.logger.debug(result);
-                    web3Require.stepNext();
+
                 }
-                else
+            }), function (result) {
+            if(result)
+            {
+                self.OTAAddress = result;
+                var data = Temp.OTAsCollection.findOne({'_id': self.OTAAddress});
+                if(data)
                 {
-                    web3Require.exit('This account have no OTA!');
+                    self.amount = data.value;
+                    web3Require.logger.debug(data);
                 }
-            });
-        }
-        else
-        {
-            web3Require.addSchema(web3Require.schemaAll.OTASNameSchema('Input the OTA:',
-                'The OTA is invalid or nonexistent.'), function (result) {
-                if(result)
-                {
-                    self.OTAAddress = result.OTAsadress;
-                    web3Require.web3_ipc.wan.getOTABalance(self.OTAAddress,function (err,result) {
-                        if (!err) {
-                            self.amount = result;
-                        }
-                    });
-                    web3Require.logger.debug(result);
-                    web3Require.stepNext();
-                }
-                else
-                {
-                    web3Require.exit('This account have no OTA!');
-                }
-            });
-        }
+                web3Require.stepNext();
+            }
+            else
+            {
+                web3Require.exit('This account have no OTA!');
+            }
+        });
 
     },
     //token
@@ -449,14 +412,7 @@ const Transaction = {
         web3Require.addSchema(schema, function (result) {
             if(result)
             {
-                if(Array.isArray(result))
-                {
-                    self.tokenAddress = result[0];
-                }
-                else
-                {
-                    self.tokenAddress = result.tokenAddress;
-                }
+                self.tokenAddress = result;
                 web3Require.stepNext();
             }
             else
@@ -478,7 +434,7 @@ const Transaction = {
                     if (!err) {
                         if(result>0)
                         {
-                            console.log('add new token balance : ' + self.tokenAddress + '; value : ' + result);
+                            console.log('add new token balance : ' + self.tokenAddress + '; value : ' + web3Require.web3_ipc.fromWei(result));
                             insertTokenBalance(self.curAddress,self.tokenAddress,result);
                         }
                         else
@@ -605,7 +561,7 @@ function insertTokenBalance(address,tokenAddress,value)
         }
         else
         {
-            data._id = 0;
+            data._id = 1;
         }
         web3Require.tokenCollection.insert(data);
     } else {

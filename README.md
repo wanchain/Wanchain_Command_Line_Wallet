@@ -42,37 +42,37 @@ input a parameter value 'Q' or 'q' to exit;
 
 - send.js: send a transaction
 
-    command parameters: --AccountNo  --toaddress --amount --FeeSel  --gasLimit --gasPrice --submit --password
+    command parameters: --address  --toaddress --amount --FeeSel  --gasLimit --gasPrice --submit --password
 
 - sendPrivacy.js: send with privacy
 
-    command parameters: --AccountNo  --waddress --PrivacyAmount --FeeSel  --gasLimit --gasPrice --submit --password
+    command parameters: --address  --waddress --PrivacyAmount --FeeSel  --gasLimit --gasPrice --submit --password
 
 - transactionList.js: Print transaction list and transaction details
 
-    command parameters: --AccountNo --TransNo
+    command parameters: --address --transHash
 
 - fetchMyOTA.js: fetch account OTA.
 
-    command parameters: --AccountNo --password
+    command parameters: --address --password
 
     please run node ..\backend\syncOta.js in new terminal first.
 
 - refundOTAs.js: refund OTA
 
-    command parameters: --AccountNo  --OTAsNo --FeeSel  --gasLimit --gasPrice --submit --password
+    command parameters: --address  --OTAaddress --FeeSel  --gasLimit --gasPrice --submit --password
 
 - ordinaryBalance.js: fetch ordinaray balance info.
 
-    command parameters: --AccountNo
+    command parameters: --address
 
 - watchToken.js: fetch watch Token balance info.
 
-    command parameters: --AccountNo --tokenAddress
+    command parameters: --address --tokenAddress
 
 - tokensend.js: send a token transaction
 
-    command parameters: --AccountNo  --tokenNo --toaddress --amount --FeeSel  --gasLimit --gasPrice --submit --password
+    command parameters: --address  --tokenAddress --toaddress --amount --FeeSel  --gasLimit --gasPrice --submit --password
 
 
 - version.js: print Wanchain_Command_Line_Wallet version

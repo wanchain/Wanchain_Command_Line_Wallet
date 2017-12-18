@@ -6,7 +6,7 @@ var net = require('net');
 const prompt = require('prompt');
 var colors = require("colors/safe");
 var optimist = require('optimist')
-        .string(['password', 'repeatPass', 'toaddress' ,'waddress', 'tokenAddress']);
+        .string(['password', 'repeatPass','address', 'toaddress' ,'waddress','OTAaddress', 'tokenAddress','transHash']);
 var schema = require('../Schema/SchemaAll');
 let wanUtil = require('wanchain-util');
 const Db = require('./collection.js').walletDB;
@@ -129,7 +129,7 @@ const web3Require ={
         if(this.dbArray.length>0)
         {
             return closeDbStack(this.dbArray,0,thenFunc,function (err) {
-                temp.exit(e);
+                this.exit(err);
             });
         }
 
@@ -171,18 +171,19 @@ const web3Require ={
         this.init();
         func();
     },
-    promptGet(schema, callback)
+    promptGet(schema, callback,notListOption)
     {
         var temp = this;
         if(schema.preLoad)
         {
             schema.preLoad(schema);
         }
+
         if(schema.optionalArray)
         {
             if(schema.optionalArray.length>0)
             {
-                if(!config.noLogAccount)
+                if(!notListOption && config.listOption)
                 {
                     schema.optionalArray.forEach(function (item, index) {
                         console.log(index+1 + '.    ' + JSON.stringify(item));
@@ -206,7 +207,24 @@ const web3Require ={
             if(!err)
             {
                 temp.logger.debug(result);
-                if(schema.optionalArray && schema.optionalArray.length>0) {
+                if(schema.type == 'optional')
+                {
+                    var value = schema.checkResult(result);
+                    if(!value)
+                    {
+                        let prop1;
+                        for (var key in schema.properties) {
+                            prop1 = schema.properties[key];
+                            break;
+                        }
+                        console.log(prop1.message);
+                        temp.promptGet(schema,callback,true);
+                        return;
+                    }
+                    temp.logger.debug(result);
+                    callback(value);
+                }
+                else if(schema.optionalArray && schema.optionalArray.length>0) {
                     for (var key in result) {
                         var val = result[key];
                         if (val > schema.optionalArray.length) {

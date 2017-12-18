@@ -3,15 +3,7 @@ const web3Require = global.web3Require = require('../wanchain_web3/web3_ipc');
 transaction.useWalletDb();
 transaction.addCurAccountFunc(function (result) {
     web3Require.logger.debug(result);
-    var curAddress;
-    if(Array.isArray(result))
-    {
-        transaction.curAddress = result[0];
-    }
-    else
-    {
-        transaction.curAddress = result.curaddress;
-    }
+    transaction.curAddress = result;
     var Data =  transaction.getTokenBalance(true);
     if(Data)
     {
