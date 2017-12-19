@@ -46,7 +46,7 @@ process.on('exit', function () {
     if(!web3_ipc_exit)
     {
         web3Require.exit('process exit');
-        web3_ipc_exit = true;
+//        web3_ipc_exit = true;
     }
 });
 function initDbStack(dbArray,index,thenFunc,catchFunc)
@@ -128,10 +128,11 @@ const web3Require ={
 
     closeDatabase(thenFunc)
     {
+        var temp = this;
         if(this.dbArray.length>0)
         {
             return closeDbStack(this.dbArray,0,thenFunc,function (err) {
-                this.exit(err);
+                temp.exit(err);
             });
         }
 
@@ -307,21 +308,25 @@ const web3Require ={
     },
     exit(err)
     {
-        web3_ipc_exit = true;
         if(err)
         {
             console.log(err);
         }
-        this.logger.debug('process.exit');
-        if(this.dbArray.length)
+        if(!web3_ipc_exit)
         {
-            this.closeDatabase(function () {
-                      process.exit();
+            web3_ipc_exit = true;
+
+            this.logger.debug('process.exit');
+            if(this.dbArray.length)
+            {
+                this.closeDatabase(function () {
+                    process.exit();
                 });
-        }
-        else
-        {
-            process.exit();
+            }
+            else
+            {
+                process.exit();
+            }
         }
     },
 
