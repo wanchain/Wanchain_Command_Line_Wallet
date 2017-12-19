@@ -18,6 +18,11 @@ dowload Wanchain_Command_Line_Wallet from https://github.com/wanchain/Wanchain_C
 
     $ git clone https://github.com/wanchain/Wanchain_Command_Line_Wallet.git
     $ cd Wanchain_Command_Line_Wallet npm install
+    
+## Select wanchain network
+
+- Running geth.exe with network parameter.
+- Modify var wanchainNet in config.js. 
 
 ## run  Wanchain Command Line Wallet
 
