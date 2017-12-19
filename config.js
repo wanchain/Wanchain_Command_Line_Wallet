@@ -11,7 +11,7 @@ if(wanchainNet.length)
         wanchainNet = wanchainNet + '/';
     }
 }
-config.version = '0.1.6';
+config.version = '0.1.7';
 // web3 parameter
 config.host = '// http://localhost'; // http://localhost
 config.rpcIpcPath = process.env.HOME;
