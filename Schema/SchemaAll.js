@@ -258,7 +258,7 @@ exports.sendSchema = function () {
         properties:{}
     };
     Schema.properties.toaddress = modifyDesc(SchemaAll.properties.address,'Enter Recipient\'s address:','The address entered is invalid. ');
-    Schema.properties.amount = modifyDesc(SchemaAll.properties.intValue, 'Enter transfer amount: ','The amount entered is invalid');
+    Schema.properties.amount = modifyDesc(SchemaAll.properties.floatValue, 'Enter transfer amount: ','The amount entered is invalid');
     return Schema;
 };
 exports.sendPrivacySchema = function () {
