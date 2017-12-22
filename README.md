@@ -22,7 +22,7 @@
 - Run `geth.exe` with network parameter
 - Modify `wanchainNet` value in config.js
 
-### run Wanchain Command Line Wallet
+#### run Wanchain Command Line Wallet
 
     $ cd src
 
