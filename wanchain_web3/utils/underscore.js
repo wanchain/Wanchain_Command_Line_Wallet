@@ -1,5 +1,5 @@
 const _ = module.exports = require('underscore');
-const uuid = require('uuid');
+const uuidv4 = require('uuid/v4');
 const underscoreDeepExtend = require('underscore-deep-extend');
 
 _.mixin({
@@ -32,7 +32,7 @@ _.mixin({
     },
     deepExtend: underscoreDeepExtend(_),
     uuid() {
-        return uuid.v4();
+        return uuidv4();
     },
 });
 
