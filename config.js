@@ -1,5 +1,5 @@
 const config = {};
-var wanchainNet = '';
+var wanchainNet = 'internal';
 if(wanchainNet.length)
 {
     if(process.platform === 'win32')
@@ -22,7 +22,7 @@ if (process.platform === 'darwin') {
     process.platform === 'sunos') {
     config.rpcIpcPath += '/.wanchain/'+wanchainNet+'gwan.ipc';
 } else if (process.platform === 'win32') {
-    config.rpcIpcPath = '\\\\.\\pipe\\'+wanchainNet+'gwan.ipc';
+    config.rpcIpcPath = '\\\\.\\pipe\\gwan.ipc';
 }
 config.keyStorePath = process.env.HOME;
 if (process.platform === 'darwin') {
@@ -41,6 +41,7 @@ if (process.platform === 'win32') {
 // config.host = 'http://192.168.1.77'; // http://localhost
 config.port = 8545;
 config.OTAMixNumber = 8;
+config.StampMixNumber = 3;
 // Instance Address
 config.contractInstanceAddress = '0x0000000000000000000000000000000000000064';
 config.contractStampAddress = '0x00000000000000000000000000000000000000c8';
@@ -55,7 +56,7 @@ config.from_address = '0x2d0e7c0813a51d3bd1d08246af2a8a7a57d8922e';
 config.to_waddress = '0x0340721B2B6C7970A443B215951C7BAa4c41c35E2b591EA51016Eae523f5E123760354b82CccbEdC5c84F16D63414d44F595d85FD9e46C617E29e3AE2e82C5F7bDA9';
 config.transferValue = 1000000000000000000;
 
-//config.loglevel = 'debug';
+config.loglevel = 'debug';
 config.listOption = true;
 //config.noLogAccount = true;
 // console color

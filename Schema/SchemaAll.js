@@ -1,5 +1,6 @@
 var colors = require("colors/safe");
 var validate = require('revalidator').validate;
+let wanUtil = require('wanchain-util');
 function Qmsg(desc) {
     return colors.magenta(desc+'[Q\\q to exit]:');
 };
@@ -118,7 +119,14 @@ var SchemaAll = {
             pattern: /^(0x)?[0-9a-fA-F]{40}$/,
             message: 'Address invalid!',
             description: Qmsg("Input address: "),
-            conform : CheckProcessExit,
+            conform : function(value) {
+                CheckProcessExit(value);
+                if(/^0x[0-9a-f]{40}$/.test(value))
+                    return true;
+                if(/^0x[0-9A-F]{40}$/.test(value))
+                    return true;
+                return wanUtil.toChecksumAddress(value) == value;
+            },
             required: true
         },
         txHash: {
@@ -166,11 +174,11 @@ var SchemaAll = {
         gasPrice:{
             pattern: /^[1-9]\d*$/,
             message: "Price invalid!",
-            description: Qmsg("Input gas price (Price limit is between 18Gwin-60Gwin): "),
+            description: Qmsg("Input gas price (Price limit is between 1800Gwin-6000Gwin): "),
             required: true,
             conform : function (value) {
                 CheckProcessExit(value);
-                return value>=18 && value<=60;
+                return value>=1800 && value<=6000;
             }
         },
     }
@@ -224,11 +232,33 @@ exports.tokenSchema = function (desc,message,preLoad) {
     }
     return Schema;
 };
+exports.contractSchema = function (desc,message,preLoad) {
+    let Schema = new OptionalSchema(preLoad);
+    Schema.setPorperty('contractAddress',desc,message);
+    Schema.addOptionResult(SchemaAll.properties.address);
+    Schema.getOptionResult = function (item) {
+        return item.conAddress;
+    }
+    return Schema;
+};
+exports.contractBalanceSchema = function (desc,message,preLoad) {
+    let Schema = new OptionalSchema(preLoad);
+    Schema.setPorperty('contractBalance',desc,message);
+//    Schema.addOptionResult(SchemaAll.properties.txHash);
+    return Schema;
+};
 exports.tokenAddress = function (desc,message) {
     let Schema = {
         properties:{}
     };
     Schema.properties.tokenAddress = modifyDesc(SchemaAll.properties.address,desc,message);
+    return Schema;
+};
+exports.OTAAddress = function (desc,message) {
+    let Schema = {
+        properties:{}
+    };
+    Schema.properties.OTAAddress = modifyDesc(SchemaAll.properties.waddress,desc,message);
     return Schema;
 };
 exports.feeSchema = function (desc,message) {
@@ -261,6 +291,13 @@ exports.sendSchema = function () {
     Schema.properties.amount = modifyDesc(SchemaAll.properties.floatValue, 'Enter transfer amount: ','The amount entered is invalid');
     return Schema;
 };
+exports.sendAmountSchema = function () {
+    let Schema = {
+        properties:{}
+    };
+    Schema.properties.amount = modifyDesc(SchemaAll.properties.floatValue, 'Enter transfer amount: ','The amount entered is invalid');
+    return Schema;
+};
 exports.sendPrivacySchema = function () {
     let Schema = {
         properties:{}
@@ -276,6 +313,23 @@ exports.sendPrivacyAmount = function () {
         'The number is invalid. ');
     Schema.addOptionResult(SchemaAll.properties.intValue);
     Schema.optionalArray = [10,20,50,100,200,500,1000,5000,50000];
+    return Schema;
+};
+exports.stampBalanceSchema = function (preLoad) {
+    let Schema = new OptionalSchema(preLoad);
+    Schema.setPorperty('stampBalance','Input stamp index you want to buy:',
+        'The number is invalid. ');
+    Schema.addOptionResult(SchemaAll.properties.intValue);
+    return Schema;
+};
+exports.stampSelSchema = function (preLoad) {
+    let Schema = new OptionalSchema(preLoad);
+    Schema.setPorperty('stampOTA','Input stamp OTA you want to use:',
+        'The number is invalid. ');
+    Schema.addOptionResult(SchemaAll.properties.waddress);
+    Schema.getOptionResult = function (item) {
+        return item.waddress;
+    }
     return Schema;
 };
 exports.YesNoSchema = function (key,desc,message) {
@@ -313,7 +367,7 @@ exports.OTAsListSchema = function (desc,message,preLoad) {
     Schema.setPorperty('OTAaddress',desc,message);
     Schema.addOptionResult(SchemaAll.properties.waddress);
     Schema.getOptionResult = function (item) {
-        return item._id;
+        return item.waddress;
     }
     return Schema;
 };

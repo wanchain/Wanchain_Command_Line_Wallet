@@ -1,3 +1,4 @@
+let keyStore = require('./keyStore.js');
 var optimist = require('optimist')
     .string(['password', 'repeatPass', 'address' ,'waddress', 'tokenAddress']);
 const Db = require('../wanchain_web3/collection.js').walletDB;
@@ -19,7 +20,7 @@ Db.init().then(function () {
             }
             break;
         case 'OTAList':
-            let wAddress = web3Require.getWAddress(optimist.argv.address);
+            let wAddress = keyStore.getWAddress(optimist.argv.address);
             var data = OTAsCollection.find({'address': wAddress});
             if(data)
             {

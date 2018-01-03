@@ -17,11 +17,11 @@ exports.setScanedIndex = function (scaned) {
             _id: waddr,
             index: scaned,
         });
-        console.log('setScanedByWaddr:', waddr, 'insert');
+//        console.log('setScanedByWaddr:', waddr, 'insert');
     } else {
         found.index = scaned;
         ScanBlockIndex.update(found);
-        console.log('setScanedByWaddr:', waddr, 'update');
+//        console.log('setScanedByWaddr:', waddr, 'update');
     }
 }
 exports.insertOtas = function( ota, value, state,timeStamp,from,blockNumber,txHash) {

@@ -82,3 +82,16 @@ input a parameter value 'Q' or 'q' to exit;
 
 - version.js: print Wanchain_Command_Line_Wallet version
 - keystorePath.js: print Wanchain keystore path
+
+
+new Scan Block Command is backend/wanChainBlockScan.js
+new Token privacy comand:
+tokenBuyStamp.js           buy Stamp
+tokenSendPrivacy.js        send privacy token transaction
+fetchTokenOTA.js           fetch Token OTAs someone send to me
+TokenTransactionList.js    list Token privacy Transactions send from me 
+watchTokenOTA.js           fetch My OTA Balance from Token address and OTA address
+
+some test Command in test directory is helpful to test:
+initPrivacyAsset.js        give you a OTA Balance with 5000 wan
+deployContract.js          deploy a new contract
