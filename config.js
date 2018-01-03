@@ -1,5 +1,5 @@
 const config = {};
-var wanchainNet = 'internal';
+var wanchainNet = 'testnet';
 if(wanchainNet.length)
 {
     if(process.platform === 'win32')
@@ -11,7 +11,7 @@ if(wanchainNet.length)
         wanchainNet = wanchainNet + '/';
     }
 }
-config.version = '0.1.7';
+config.version = '0.1.8';
 // web3 parameter
 config.host = '// http://localhost'; // http://localhost
 config.rpcIpcPath = process.env.HOME;
@@ -56,7 +56,7 @@ config.from_address = '0x2d0e7c0813a51d3bd1d08246af2a8a7a57d8922e';
 config.to_waddress = '0x0340721B2B6C7970A443B215951C7BAa4c41c35E2b591EA51016Eae523f5E123760354b82CccbEdC5c84F16D63414d44F595d85FD9e46C617E29e3AE2e82C5F7bDA9';
 config.transferValue = 1000000000000000000;
 
-config.loglevel = 'debug';
+//config.loglevel = 'debug';
 config.listOption = true;
 //config.noLogAccount = true;
 // console color
