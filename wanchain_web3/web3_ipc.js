@@ -6,7 +6,7 @@ const prompt = require('prompt');
 var colors = require("colors/safe");
 var optimist = require('optimist')
         .string(['password', 'repeatPass','address', 'toaddress' ,'waddress','OTAaddress', 'tokenAddress','transHash','contractAddress',
-            'OTAAddress']);
+            'OTAAddress','stampOTA']);
 var schema = require('../Schema/SchemaAll');
 let wanUtil = require('wanchain-util');
 let collection = require('./collection.js');

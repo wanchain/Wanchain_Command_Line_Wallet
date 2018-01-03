@@ -1,96 +1,77 @@
 # Wanchain_Command_Line_Wallet
-Wanchain Command Line Wallet
 
 ## How to use Wanchain Command Line Wallet
 
-## run in windows x64
-- download https://github.com/wanchain/go-wanchain/releases/ for win_geth.zip the lastest version
-- unzip and run geth.exe
-- download https://github.com/wanchain/go-wanchain/releases/ for wanchainclient_cli_win64.zip the lastest version
-- unzip and run wanchain_client.cmd
+### run in windows x64
+- download latest version of `win_geth.zip` from https://github.com/wanchain/go-wanchain/releases/
+- unzip and run `geth.exe`
+- download latest version of `wanchainclient_cli_win64.zip` from https://github.com/wanchain/go-wanchain/releases/
+- unzip and run `wanchain_client.cmd`
 
-## run in linux and mac
-- Environment nodejs v8+
-- download https://github.com/wanchain/go-wanchain/releases/ for linux_geth.tar.gz the lastest version
-- unzip and run geth.exe
+### run in linux or mac
+- Supported Env: `node v8+`
+- download lateset version of `linux_geth.tar.gz` from https://github.com/wanchain/go-wanchain/releases/
+- unzip and run `geth.exe`
 
-dowload Wanchain_Command_Line_Wallet from https://github.com/wanchain/Wanchain_Command_Line_Wallet
-
+### Install node packages
     $ git clone https://github.com/wanchain/Wanchain_Command_Line_Wallet.git
-    $ cd Wanchain_Command_Line_Wallet npm install
+    $ cd Wanchain_Command_Line_Wallet 
+    $ npm install
     
-## Select wanchain network
+### Select Wanchain network
+- Run `geth.exe` with network parameter
+- Modify `wanchainNet` value in config.js
 
-- Running geth.exe with network parameter.
-- Modify var wanchainNet in config.js. 
-
-## run  Wanchain Command Line Wallet
+#### run Wanchain Command Line Wallet
 
     $ cd src
 
-#### If you want fetch OTAs, please run node ..\backend\syncOta.js to Scan OTAs in new terminal first.
-
+#### If you want fetch OTAs, please run the following command based on your OS env to Scan OTAs in new terminal first.
+#### run in windows x64
     $ node ..\backend\syncOta.js
+#### run in linux or mac
+    $ node ../backend/syncOta.js
 
 
-run *.js file as node *.js in command line. For example
+### Executing commands
+#### Run each `*.js` file as `node *.js or node <filename> without .js` in command line. 
+#### For example,
 
     $ node createKeystore.js
+    or
+    $ node createKeystore
 
-you can input command parameters as default parameters
-input a parameter value 'Q' or 'q' to exit;
+Supports command line input parameters and default input parameter 'Q' or 'q' to exit the process. 
 
-## command details
-- createKeystore.js: create new account
+### List of supported commands
 
-    command parameters: --password  --repeatPass
-
-- send.js: send a transaction
-
-    command parameters: --address  --toaddress --amount --FeeSel  --gasLimit --gasPrice --submit --password
-
-- sendPrivacy.js: send with privacy
-
-    command parameters: --address  --waddress --PrivacyAmount --FeeSel  --gasLimit --gasPrice --submit --password
-
-- transactionList.js: Print transaction list and transaction details
-
-    command parameters: --address --transHash
-
-- fetchMyOTA.js: fetch account OTA.
-
-    command parameters: --address --password
-
-    please run node ..\backend\syncOta.js in new terminal first.
-
-- refundOTAs.js: refund OTA
-
-    command parameters: --address  --OTAaddress --FeeSel  --gasLimit --gasPrice --submit --password
-
-- ordinaryBalance.js: fetch ordinaray balance info.
-
-    command parameters: --address
-
-- watchToken.js: fetch watch Token balance info.
-
-    command parameters: --address --tokenAddress
-
-- tokensend.js: send a token transaction
-
-    command parameters: --address  --tokenAddress --toaddress --amount --FeeSel  --gasLimit --gasPrice --submit --password
+| File          | Purpose       |   Parameters  |  Command  |
+| ------------- | ------------- |-------------|---------|
+| createKeystore.js | create new account | `--password  --repeatPass` | ```node createKeystore.js --password  --repeatPass```|
+| send.js | send a transaction | `--address  --toaddress --amount --FeeSel  --gasLimit --gasPrice --submit --password` | ```node send.js --address  --toaddress --amount --FeeSel  --gasLimit --gasPrice --submit --password```|
+| sendPrivacy.js | send with privacy | `--address  --waddress --PrivacyAmount --FeeSel  --gasLimit --gasPrice --submit --password` | ```node sendPrivacy.js --address  --waddress --PrivacyAmount --FeeSel  --gasLimit --gasPrice --submit --password```|
+| transactionList.js | Print transaction list and its details | `--address --transHash` | ```node transactionList.js --address --transHash```|
+| fetchMyOTA.js ** | fetch account OTA | `--address --password` | ```$ node fetchMyOTA.js --address --password```|
+| refundOTAs.js | refund OTA | `--address  --OTAaddress --FeeSel  --gasLimit --gasPrice --submit --password` | ```node refundOTAs.js --address  --OTAaddress --FeeSel  --gasLimit --gasPrice --submit --password```|
+| ordinaryBalance.js | fetch ordinaray balance info | `--address` | ```node ordinaryBalance.js --address```|
+| watchToken.js | fetch watch Token balance info | `--address --tokenAddress` | ```node watchToken.js --address --tokenAddress```|
+| tokensend.js | send a token transaction | `--address  --tokenAddress --toaddress --amount --FeeSel  --gasLimit --gasPrice --submit --password` | ```node tokensend.js --address  --tokenAddress --toaddress --amount --FeeSel  --gasLimit --gasPrice --submit --password```|
+| version.js | print Wanchain_Command_Line_Wallet version |  | ```node version.js```|
+| keystorePath.js | print Wanchain keystore path |  | ```node keystorePath.js```|
+| tokenBuyStamp.js | buy Stamp used in token privacy transaction| `--address  --stampBalance --FeeSel  --gasLimit --gasPrice --submit --password` | ```node tokenBuyStamp.js --address  --stampBalance --FeeSel  --gasLimit --gasPrice --submit --password```|
+| tokenSendPrivacy.js | send a token privacy transaction| `--address  --contractBalance --waddress  --amount --stampOTA --submit --password` | ```node tokenSendPrivacy.js --address  --contractBalance --waddress  --amount --stampOTA --submit --password```|
+| fetchTokenOTA.js | fetch token privacy OTAs| `--address  --password` | ```node fetchTokenOTA.js --address  --password```|
+| TokenTransactionList.js | list Token privacy Transactions send from me| `--address` | ```node TokenTransactionList.js --address```|
+| watchTokenOTA.js | fetch My OTA Balance from Token address and OTA address| `--address  --tokenAddress --OTAAddress` | ```node watchTokenOTA.js --address  --tokenAddress --OTAAddress```|
 
 
-- version.js: print Wanchain_Command_Line_Wallet version
-- keystorePath.js: print Wanchain keystore path
+
 
 
 new Scan Block Command is backend/wanChainBlockScan.js
-new Token privacy comand:
-tokenBuyStamp.js           buy Stamp
-tokenSendPrivacy.js        send privacy token transaction
-fetchTokenOTA.js           fetch Token OTAs someone send to me
-TokenTransactionList.js    list Token privacy Transactions send from me 
-watchTokenOTA.js           fetch My OTA Balance from Token address and OTA address
+
+** run `cd backend && node wanChainBlockScan.js` in new terminal first
+
 
 some test Command in test directory is helpful to test:
 initPrivacyAsset.js        give you a OTA Balance with 5000 wan
