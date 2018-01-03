@@ -58,9 +58,21 @@ Supports command line input parameters and default input parameter 'Q' or 'q' to
 | tokensend.js | send a token transaction | `--address  --tokenAddress --toaddress --amount --FeeSel  --gasLimit --gasPrice --submit --password` | ```node tokensend.js --address  --tokenAddress --toaddress --amount --FeeSel  --gasLimit --gasPrice --submit --password```|
 | version.js | print Wanchain_Command_Line_Wallet version |  | ```node version.js```|
 | keystorePath.js | print Wanchain keystore path |  | ```node keystorePath.js```|
+| tokenBuyStamp.js | buy Stamp used in token privacy transaction| `--address  --stampBalance --FeeSel  --gasLimit --gasPrice --submit --password` | ```node tokenBuyStamp.js --address  --stampBalance --FeeSel  --gasLimit --gasPrice --submit --password```|
+| tokenSendPrivacy.js | send a token privacy transaction| `--address  --contractBalance --waddress  --amount --stampOTA --submit --password` | ```node tokenSendPrivacy.js --address  --contractBalance --waddress  --amount --stampOTA --submit --password```|
+| fetchTokenOTA.js | fetch token privacy OTAs| `--address  --password` | ```node fetchTokenOTA.js --address  --password```|
+| TokenTransactionList.js | list Token privacy Transactions send from me| `--address` | ```node TokenTransactionList.js --address```|
+| watchTokenOTA.js | fetch My OTA Balance from Token address and OTA address| `--address  --tokenAddress --OTAAddress` | ```node watchTokenOTA.js --address  --tokenAddress --OTAAddress```|
 
 
 
 
-** run `node ../backend/syncOta.js` in new terminal first
 
+new Scan Block Command is backend/wanChainBlockScan.js
+
+** run `cd backend && node wanChainBlockScan.js` in new terminal first
+
+
+some test Command in test directory is helpful to test:
+initPrivacyAsset.js        give you a OTA Balance with 5000 wan
+deployContract.js          deploy a new contract

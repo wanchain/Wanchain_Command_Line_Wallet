@@ -1,6 +1,8 @@
 let transaction = require('../wanchain_web3/Transaction');
 const web3Require = global.web3Require = require('../wanchain_web3/web3_ipc');
-transaction.useWalletDb();
+let collection = require('../wanchain_web3/collection.js');
+let DBArray = [{db:collection.walletDB,collection: ['transCollection']}];
+web3Require.useDb(DBArray);
 transaction.addCurAccountFunc(function (result) {
     web3Require.logger.debug(result);
     var curAddress = result;
@@ -13,7 +15,5 @@ transaction.addCurAccountFunc(function (result) {
         web3Require.exit(err);
     });
 });
-transaction.run(function(){
-    web3Require.initTransCollection();
-});
+transaction.run();
 

@@ -1,16 +1,17 @@
 var config = require('../config');
 const Web3 = require("web3");
-const fs = require('fs');
 //const web3Admin = require('web3Admin.js');
 var net = require('net');
 const prompt = require('prompt');
 var colors = require("colors/safe");
 var optimist = require('optimist')
-        .string(['password', 'repeatPass','address', 'toaddress' ,'waddress','OTAaddress', 'tokenAddress','transHash']);
+        .string(['password', 'repeatPass','address', 'toaddress' ,'waddress','OTAaddress', 'tokenAddress','transHash','contractAddress',
+            'OTAAddress','stampOTA']);
 var schema = require('../Schema/SchemaAll');
 let wanUtil = require('wanchain-util');
-const Db = require('./collection.js').walletDB;
-const scanDb = require('./collection.js').scanOTADB;
+let collection = require('./collection.js');
+const Db = collection.walletDB;
+const scanDb = collection.scanOTADB;
 
 const logDebug = require('log4js');
 let log4jsOptions = {
@@ -51,15 +52,24 @@ process.on('exit', function () {
 });
 function initDbStack(dbArray,index,thenFunc,catchFunc)
 {
+    let Item = dbArray[index];
     if(index<dbArray.length-1)
-        dbArray[index].init().then(function () {
+        Item.db.init().then(function () {
+            if(Item.db.InitCollection && Item.collection)
+            {
+                Item.db.InitCollection(Item.collection);
+            }
             initDbStack(dbArray,index+1,thenFunc,catchFunc);
         }).catch((err) => {
             catchFunc(err);
         });
     else
     {
-        dbArray[index].init().then(function () {
+        Item.db.init().then(function () {
+            if(Item.db.InitCollection && Item.collection)
+            {
+                Item.db.InitCollection(Item.collection);
+            }
             thenFunc();
         }).catch((err) => {
             catchFunc(err);
@@ -69,45 +79,45 @@ function initDbStack(dbArray,index,thenFunc,catchFunc)
 function closeDbStack(dbArray,index,thenFunc,catchFunc)
 {
     if(index<dbArray.length-1)
-        dbArray[index].close().then(function () {
+        dbArray[index].db.close().then(function () {
             return closeDbStack(dbArray,index+1,thenFunc,catchFunc);
         }).catch((err) => {
             catchFunc(err);
         });
     else
     {
-        dbArray[index].close().then(function () {
+        dbArray[index].db.close().then(function () {
             thenFunc();
         }).catch((err) => {
             catchFunc(err);
         });
     }
 };
-const web3Require ={
+let web3Require ={
     schemaAll : schema,
     web3_ipc : new Web3(new Web3.providers.IpcProvider( config.rpcIpcPath, net.Socket())),
     dbArray : [],
     schemaArray: [],
     accountArray: [],
     initFunction:[],
-    transCollection : null,
-    OTAsCollection : null,
-    tokenCollection : null,
-    runUseDb: false,
 //    curAccount : '',
     schemaIndex : 0,
     logger: logDebug.getLogger('wanchain'),
 
     //prompt functions
+    useDb(dbAry)
+    {
+        this.dbArray = dbAry;
+    },
     init()
     {
+        this.web3_ipc.wan = new wanUtil.web3Wan(this.web3_ipc);
         this.logger.debug('rpcIpcPath:' + config.rpcIpcPath);
         this.logger.debug('keyStorePath:' + config.keyStorePath);
         this.initFunction.forEach(function (func) {
             func();
         });
         prompt.override = optimist.argv;
-        this.web3_ipc.wan = new wanUtil.web3Wan(this.web3_ipc);
         prompt.start();
         prompt.message = colors.blue("wanWallet");
         prompt.delimiter = colors.green(">>");
@@ -120,7 +130,7 @@ const web3Require ={
         if(temp.dbArray.length>0)
         {
             initDbStack(temp.dbArray,0,thenFunc,function (err) {
-                temp.exit(e);
+                temp.exit(err);
             });
         }
 
@@ -137,18 +147,36 @@ const web3Require ={
         }
 
     },
-
-    initTransCollection()
+    initContractCollection()
     {
-        this.transCollection = Db.getCollection('transaction','transHash');
+        this.contractCollection = Db.getCollection('contractCollection','consAddress');
     },
-    initOTAsCollection()
+    fetchLocalContract()
     {
-        this.OTAsCollection = Db.getCollection('OTAsCollection');
-    },
-    initTokenCollection()
-    {
-        this.tokenCollection = Db.getCollection('tokenCollection');
+        let self = this;
+        var data = collection.WalletDBCollections.find({'Type': 'contract'});
+        if(data && data.length)
+        {
+            data.forEach(function (item,index){
+                self.web3_ipc.eth.getTransactionReceipt(item.transHash,function (err,result) {
+                    if(!err)
+                    {
+                        if(result.blockNumber && result.status == '0x1' &&
+                            result.contractAddress && result.contractAddress.length>0){
+                            insertConstract(result.contractAddress);
+                        }
+                    }
+                    if(index == data.length-1)
+                    {
+                        self.exit('done');
+                    }
+                });
+            });
+        }
+        else
+        {
+            self.exit('done');
+        }
     },
     run(func)
     {
@@ -393,57 +421,18 @@ const web3Require ={
 
 
     //sync functions
-    getWAddress(address)
-    {
-        let keyStore = this.getKeystoreJSON(address);
-        if(keyStore) {
-            return keyStore.waddress;
-        }
-        return null;
-    },
 
-    getKeystoreJSON(address)
-    {
-        let fileName = this.getKeystoreFile(address);
-        if(fileName)
-        {
-            let keystoreStr = fs.readFileSync(fileName, "utf8");
-            return JSON.parse(keystoreStr);
-        }
-        return null;
-    },
-    getKeystoreFile(address)
-    {
-        if(address.substr(0,2) == '0x' || address.substr(0,2) == '0X')
-            address = address.substr(2);
-        let keyStorePath = this.getKeystorePath();
-        let files = fs.readdirSync(keyStorePath);
-        for(var i in files) {
-            var item = files[i];
-            if(item.indexOf(address)>=0)
-            {
-                return keyStorePath + item;
-            }
-        }
-    },
-    getKeystorePath()
-    {
-        return config.keyStorePath;
-        /*
-        let curPath = config.rpcIpcPath;
-        let nPos = curPath.lastIndexOf('/');
-        if(nPos<0)
-        {
-            nPos = curPath.lastIndexOf('\\');
-        }
-        if(nPos>= 0)
-        {
-            curPath = curPath.substr(0,nPos+1);
-        }
-        curPath += 'keystore/';
-        return curPath;
-        */
-    },
 
+};
+function insertConstract(consAddress)
+{
+    var found = web3Require.contractCollection.findOne({'conAddress': consAddress});
+    if(found == null) {
+        web3Require.contractCollection.insert({
+            conAddress: consAddress
+        });
+    } else {
+        console.log(transhash + 'is already existed!');
+    }
 };
 module.exports = web3Require;

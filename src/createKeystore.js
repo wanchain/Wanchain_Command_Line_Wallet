@@ -1,5 +1,4 @@
-
-var config = require('../config');
+let keyStore = require('../wanchain_web3/keyStore.js');
 
 const web3Require = global.web3Require = require('../wanchain_web3/web3_ipc');
 // Start the prompt
@@ -20,7 +19,7 @@ web3Require.addSchema(web3Require.schemaAll.keyPasswordSchema, function (result)
             if(!err)
             {
                 console.log('address: ' + result);
-                console.log('waddress: ' + web3Require.getWAddress(result));
+                console.log('waddress: ' + keyStore.getWAddress(result));
             }
             web3Require.exit(err);
         })

@@ -1,14 +1,12 @@
-
-var config = require('../config');
-const secp256k1 = require('secp256k1');
+let collection = require('../wanchain_web3/collection.js');
 const web3Require = global.web3Require = require('./web3_ipc');
-let wanUtil = require('wanchain-util');
-var keythereum = require("keythereum");
-const Db = require('./collection.js').walletDB;
-const scanDb = require('./collection.js').scanOTADB;
 const wanToken = require('../wanchain_web3/wanToken.js')
+const privacyTransInfo = require('./privacyTransInfo.js');
+let functionStack = require('./functionStack.js');
+let keyStore = require('./keyStore.js');
 const Transaction = {
     curAddress: null,
+    curWaddress: null,
     toAddress: null,
     curTransaction: null,
     toWAddress: null,
@@ -17,13 +15,104 @@ const Transaction = {
     amount: null,
     gasPrice: null,
     gasLimit: null,
+    transaction:{
+        Txtype: '0x01',
+        from: null,
+        to : null,
+        value : null,
+        gasPrice: null,
+        gas: null,
+        data:'',
+    },
+    privacyToken:{
+        defStampBalances: null,
+        stampValue: null,
+        address : null,
+        waddress: null,
+        stampWAddress : null,
+        toWAddress: null,
+    },
+    transPassword: null,
+    funcResult: null,
+    //function properties
+    transInfo: function (result,self) {
+        if(result.FeeSel)
+        {
+            self.gasLimit = 300000;
+            self.gasPrice = self.GWinToWin(2000);
+        }
+        else
+        {
+            self.gasPrice = self.GWinToWin(result.gasPrice);
+            self.gasLimit = result.gasLimit;
+        }
+        if(self.OTAAddress)
+        {
+            console.log('from: ' + self.OTAAddress);
+            console.log('to: ' + self.curAddress);
+            console.log('value: 0x00 ');
+        }
+        else if(self.tokenAddress)
+        {
+            console.log('token: ' + self.tokenAddress);
+            console.log('from: ' + self.curAddress);
+            if(self.toAddress)
+            {
+                console.log('to: ' + self.toAddress);
+            }
+            console.log('value: ' + self.amount);
+        }
+        else
+        {
+            console.log('from: ' + self.curAddress);
+            if(self.toAddress)
+            {
+                console.log('to: ' + self.toAddress);
+            }
+            else if(self.toWAddress)
+            {
+                console.log('to: ' + self.toWAddress);
+            }
+            console.log('value: ' + self.amount);
+        }
+
+        console.log('gasPrice: ' + self.toGWin(self.gasPrice));
+        console.log('gas: ' + self.gasLimit);
+    },
+    send: new functionStack(),
+    sendTransaction(self)
+    {
+        self.funcResult = null;
+        web3Require.logger.debug(self.transaction);
+
+        web3Require.web3_ipc.personal.sendTransaction(self.transaction,self.transPassword,function (err,result) {
+            if(!err){
+                console.log('Transaction hash: ' + result);
+                self.funcResult = result;
+                self.send.stepNext();
+            }
+            else
+            {
+                web3Require.exit(err);
+            }
+        })
+
+    },
+    toGWin(value)
+    {
+        return value/1000000000;
+    },
+    GWinToWin(GValue)
+    {
+        return GValue * 1000000000;
+    },
     useWalletDb()
     {
-        web3Require.dbArray.push(Db);
+        web3Require.useWalletDb();
     },
     useScanOTADb()
     {
-        web3Require.dbArray.push(scanDb);
+        web3Require.useScanOTADb();
     },
     addCurAccountFunc(func)
     {
@@ -43,7 +132,8 @@ const Transaction = {
             {
                 self.curAddress = result;
                 console.log('address: ' + self.curAddress);
-                console.log('waddress: ' + web3Require.getWAddress(self.curAddress));
+                self.curWaddress = keyStore.getWAddress(self.curAddress);
+                console.log('waddress: ' + self.curWaddress);
                 web3Require.web3_ipc.eth.getBalance(self.curAddress,function (err,result) {
                     if (!err) {
                         console.log('balance: ' + web3Require.web3_ipc.fromWei(result.toString()));
@@ -75,6 +165,15 @@ const Transaction = {
             web3Require.stepNext();
         });
     },
+    addTransAmount()
+    {
+        let self = this;
+        web3Require.addSchema(web3Require.schemaAll.sendAmountSchema(),function (result) {
+            web3Require.logger.debug(result);
+            self.amount = result.amount;
+            web3Require.stepNext();
+        });
+    },
     addToPrivacyAmount(){
         let self = this;
         web3Require.addSchema(web3Require.schemaAll.sendPrivacyAmount(),function (result) {
@@ -83,57 +182,71 @@ const Transaction = {
             web3Require.stepNext();
         });
     },
+    initStampBalance()
+    {
+        let self = this;
+        web3Require.web3_ipc.wan.getSupportStampOTABalances(function (err,result) {
+            if(!err)
+            {
+                self.privacyToken.defStampBalances = [];
+                result.forEach(function (item) {
+                    self.privacyToken.defStampBalances.push(self.toGWin(item));
+                })
+            }
+        });
+    },
+    addStampBalance(){
+        let self = this;
+        web3Require.addSchema(web3Require.schemaAll.stampBalanceSchema(function (schema) {
+            schema.optionalArray = self.privacyToken.defStampBalances;
+            }
+
+        ),function (result) {
+            web3Require.logger.debug(result);
+            self.privacyToken.stampValue = self.GWinToWin(result);
+            web3Require.stepNext();
+        });
+    },
     addFee(){
         let self = this;
         web3Require.addfeeSchema(function (result) {
             web3Require.logger.debug(result);
-            if(result.FeeSel)
-            {
-                 self.gasLimit = 300000;
-                self.gasPrice = 20000000000;
-            }
-            else
-            {
-                self.gasPrice = result.gasPrice*1000000000;
-                self.gasLimit = result.gasLimit;
-            }
-            if(self.OTAAddress)
-            {
-                console.log('from: ' + self.OTAAddress);
-                console.log('to: ' + self.curAddress);
-                console.log('value: 0x00 ');
-            }
-            else if(self.tokenAddress)
-            {
-                console.log('token: ' + self.tokenAddress);
-                console.log('from: ' + self.curAddress);
-                if(self.toAddress)
-                {
-                    console.log('to: ' + self.toAddress);
-                }
-                console.log('value: ' + self.amount);
-            }
-            else
-            {
-                console.log('from: ' + self.curAddress);
-                if(self.toAddress)
-                {
-                    console.log('to: ' + self.toAddress);
-                }
-                else if(self.toWAddress)
-                {
-                    console.log('to: ' + self.toWAddress);
-                }
-                console.log('value: ' + self.amount);
-            }
-
-            console.log('gasPrice: ' + self.gasPrice/1000000000);
-            console.log('gas: ' + self.gasLimit);
+            self.transInfo(result,self);
             web3Require.stepNext();
         });
     },
-    addSend(callback)
+    addStampFee()
     {
+        let self = this;
+        let temp = web3Require;
+        web3Require.addSchema(web3Require.schemaAll.stampSelSchema(function (schema) {
+            schema.optionalArray = [];
+            var data = collection.tokenOTADBCollections.tokenStampCollection.find({'address': self.curAddress,'status': 0});
+            if(data)
+            {
+                data.forEach(function (item, index) {
+                    var stamp = getCollectionItem(item);
+                    stamp.value = self.toGWin(stamp.value);
+                    schema.optionalArray.push(stamp);
+                });
+            }
+        }),function (result) {
+            if(result)
+            {
+                web3Require.logger.debug(result);
+                self.privacyToken.stampWAddress = result;
+                web3Require.stepNext();
+            }
+            else
+            {
+                web3Require.exit('Please buy stamp first!');
+            }
+
+        });
+    },
+    addSend()
+    {
+        let self = this;
         web3Require.addSchema(web3Require.schemaAll.YesNoSchema('submit','Do you confirm to send transaction? [Y]es or [N]o : '),function (result) {
             web3Require.logger.debug(result);
             if(result.submit == 'Y' || result.submit == 'y')
@@ -146,147 +259,276 @@ const Transaction = {
             }
         });
         web3Require.addSchema(web3Require.schemaAll.PasswordSchema,function (result) {
-            callback(result);
+            self.sendTransactionResult(result);
             //temp.web3_ipc.personal.unlock
         });
     },
-    sendTo(result)
+    sendTransactionResult(result)
     {
-        let self = this;
-        web3Require.logger.debug(self.curAddress);
-        web3Require.logger.debug(self.toAddress);
-        web3Require.web3_ipc.personal.sendTransaction({
-            from: self.curAddress,
-            to: self.toAddress,
-            value: web3Require.web3_ipc.toWei(self.amount),
-            gasPrice: self.gasPrice,
-            gas: self.gasLimit
-        },result.password,function (err,result) {
-            if(!err){
-                console.log('Transaction hash: ' + result);
-                insertTransaction(result,self.curAddress,self.toAddress,self.amount,'');
-            }
-            web3Require.exit(err);
-        })
+        this.transPassword = result.password;
+        this.send.run();
     },
-    sendToPrivacy(result)
+    sendOrdinarySendStack()
     {
-        let self = this;
-        let CoinContractAddr = wanUtil.contractCoinAddress;
-        let otaAddr = wanUtil.generateOTAWaddress(self.toWAddress);
-        let CoinContract = web3Require.web3_ipc.eth.contract(wanUtil.coinSCAbi);
-        let CoinContractInstance = CoinContract.at(CoinContractAddr);
-        var txBuyData = CoinContractInstance.buyCoinNote.getData(otaAddr, web3Require.web3_ipc.toWei(self.amount));
-        web3Require.web3_ipc.personal.sendTransaction({
-            from: self.curAddress,
-            to: CoinContractAddr,
-            value: web3Require.web3_ipc.toWei(self.amount),
-            gasPrice: self.gasPrice,
-            gas: self.gasLimit,
-            data: txBuyData
-        }, result.password, function (err, result) {
-            if (!err) {
-                console.log('Transaction hash: ' + result);
-                insertTransaction(result,self.curAddress,self.toWAddress,self.amount,'p');
-            }
-            web3Require.exit(err);
-        })
-    },
-    sendRefundOTA(result)
-    {
-        let self = this;
-        let CoinContractAddr = wanUtil.contractCoinAddress;
-        let CoinContract = web3Require.web3_ipc.eth.contract(wanUtil.coinSCAbi);
-        self.password = result.password;
-        web3Require.web3_ipc.wan.getOTAMixSet(self.OTAAddress, config.OTAMixNumber ,function (err,otaSet) {
-            if(!err)
+        this.send.addFunction(function(self){
+            self.transaction.from = self.curAddress;
+            self.transaction.to = self.toAddress;
+            self.transaction.value = web3Require.web3_ipc.toWei(self.amount);
+            self.transaction.gasPrice = self.gasPrice;
+            self.transaction.gas = self.gasLimit;
+        },this);
+        this.send.addFunction(function(self){
+            self.sendTransaction(self);
+        },this,true);
+        this.send.addFunction(function (self) {
+            if(self.funcResult)
             {
-                let keystore = web3Require.getKeystoreJSON(self.curAddress);
-                let keyBObj = {version:keystore.version, crypto:keystore.crypto2};
-                let keyAObj = {version:keystore.version, crypto:keystore.crypto};
-                let privKeyA;
-                let privKeyB;
-                try {
-                    privKeyA = keythereum.recover(self.password, keyAObj);
-                    privKeyB = keythereum.recover(self.password, keyBObj);
-                }catch(error){
-                    console.log('wan_refundCoin', 'wrong password');
-                    web3Require.exit();
-                }
-
-                //let otaSetr = await ethereumNode.send('eth_getOTAMixSet', [otaDestAddress, number]);
-                //let otaSet = otaSetr.result;
-                web3Require.logger.debug("otaSetr:",otaSet);
-                let otaSetBuf = [];
-                for(let i=0; i<otaSet.length; i++){
-                    let rpkc = new Buffer(otaSet[i].slice(2,68),'hex');
-                    let rpcu = secp256k1.publicKeyConvert(rpkc, false);
-                    otaSetBuf.push(rpcu);
-                }
-                web3Require.logger.debug('fetch  ota set: ', otaSet);
-                let otaSk = wanUtil.computeWaddrPrivateKey(self.OTAAddress, privKeyA,privKeyB);
-                let otaPub = wanUtil.recoverPubkeyFromWaddress(self.OTAAddress);
-                let otaPubK = otaPub.A;
-
-                let M = new Buffer(self.curAddress.slice(2),'hex');
-                let ringArgs = wanUtil.getRingSign(M, otaSk,otaPubK,otaSetBuf);
-                wanUtil.verifyRinSign(ringArgs);
-                let KIWQ = generatePubkeyIWQforRing(ringArgs.PubKeys,ringArgs.I, ringArgs.w, ringArgs.q);
-                web3Require.logger.debug("KIWQ:", KIWQ);
-
-                let CoinContractInstance = CoinContract.at(CoinContractAddr);
-
-                let all = CoinContractInstance.refundCoin.getData(KIWQ,self.amount);
-                web3Require.web3_ipc.personal.sendTransaction({
-                    from: self.curAddress,
-                    Txtype: '0x00',
-                    //nonce: serial,
-                    gasPrice: self.gasPrice,
-                    gas: self.gasLimit,
-                    to: CoinContractAddr,//contract address
-                    value: '0x00',
-                    data: all
-                }, self.password, function (err, result) {
-                    if (!err) {
-                        console.log('Transaction hash: ' + result);
-                        insertTransaction(result,self.curAddress,self.OTAAddress,'0x00','OTA');
-                        var found = web3Require.OTAsCollection.findOne({'_id': self.OTAAddress});
-                        if(found){
-                            found.state = 1;
-                            web3Require.OTAsCollection.update(found);
-                        }
-                    }
-                    web3Require.exit(err);
-                });
+                insertTransaction(self.funcResult,self.curAddress,self.toAddress,self.amount,'');
             }
-            else {
-                web3Require.exit(err);
-            }
-
-        });
-
+            web3Require.exit(null);
+        },this);
     },
-    sendToToken(result)
+    sendPrivacySendStack()
     {
-        let self = this;
-        web3Require.logger.debug(self.curAddress);
-        web3Require.logger.debug(self.toAddress);
-        web3Require.logger.debug(self.tokenAddress);
-        var data1 = wanToken.getTokenData(web3Require.web3_ipc,self.tokenAddress,self.toAddress,web3Require.web3_ipc.toWei(self.amount));
-        web3Require.web3_ipc.personal.sendTransaction({
-            from: self.curAddress,
-            to: self.tokenAddress,
-            value: 0x00,
-            gasPrice: self.gasPrice,
-            gas: self.gasLimit,
-            data : data1
-        },result.password,function (err,result) {
-            if(!err){
-                console.log('Transaction hash: ' + result);
-                insertTransaction(result,self.curAddress,self.toAddress,self.amount,'token');
+        this.send.addFunction(function(self){
+            self.transaction.from = self.curAddress;
+            self.transaction.to = privacyTransInfo.toCoinContractAddr;
+            self.transaction.value = web3Require.web3_ipc.toWei(self.amount);
+            self.transaction.gasPrice = self.gasPrice;
+            self.transaction.gas = self.gasLimit;
+            self.transaction.data = privacyTransInfo.sendPrivacyData(web3Require.web3_ipc,self.toWAddress,self.amount);
+        },this);
+        this.send.addFunction(function(self){
+            self.sendTransaction(self);
+        },this,true);
+        this.send.addFunction(function (self) {
+            if(self.funcResult)
+            {
+                insertTransaction(self.funcResult,self.curAddress,self.toWAddress,self.amount,'p');
             }
-            web3Require.exit(err);
-        })
+            web3Require.exit(null);
+        },this);
+    },
+    sendRefundOTAStack()
+    {
+        this.send.addFunction(function(self){
+            self.transaction.from = self.curAddress;
+            self.transaction.to = privacyTransInfo.toCoinContractAddr;
+            self.transaction.value = '0x00';
+            self.transaction.gasPrice = self.gasPrice;
+            self.transaction.gas = self.gasLimit;
+        },this);
+        this.send.addFunction(function(self){
+            //refund amount is wei. Remember don't web3.toWei
+            privacyTransInfo.refundPrivacyData(web3Require.web3_ipc,self.curAddress,self.transPassword,self.OTAAddress,
+                self.amount,function(err,result){
+                    if(!err)
+                    {
+                        self.transaction.data = result;
+                        self.send.stepNext();
+                    }
+                    else
+                    {
+                        web3Require.exit(err);
+                    }
+                });
+        },this,true);
+        this.send.addFunction(function(self){
+            self.funcResult = null;
+            web3Require.logger.debug(self.transaction);
+
+            web3Require.web3_ipc.personal.sendTransaction(self.transaction,self.transPassword,function (err,result) {
+                if(!err){
+                    console.log('Transaction hash: ' + result);
+                    self.funcResult = result;
+                    self.send.stepNext();
+                }
+                else
+                {
+                    if(err.message == 'OTA is reused')
+                    {
+                        self.funcResult = "warning: " + err.message;
+                        console.log(self.funcResult);
+                        self.send.stepNext();
+                    }
+                    else
+                    {
+                        web3Require.exit(err);
+                    }
+                }
+            })
+        },this,true);
+        this.send.addFunction(function (self) {
+            if(self.funcResult)
+            {
+                if(self.funcResult.slice(0,7) != 'warning')
+                {
+                    insertTransaction(self.funcResult,self.curAddress,self.OTAAddress,'0x00','OTA');
+                    var found = collection.WalletDBCollections.OTAsCollection.findOne({'waddress': self.OTAAddress});
+                    if(found){
+                        found.transHash = self.funcResult;
+                        collection.WalletDBCollections.OTAsCollection.update(found);
+                    }
+                }
+                else
+                {
+                    var found = collection.WalletDBCollections.OTAsCollection.findOne({'waddress': self.OTAAddress});
+                    if(found){
+                        found.state = 1;
+                        collection.WalletDBCollections.OTAsCollection.update(found);
+                    }
+                }
+            }
+            web3Require.exit(null);
+        },this);
+    },
+
+    sendTokenStack()
+    {
+        this.send.addFunction(function(self){
+            self.transaction.from = self.curAddress;
+            self.transaction.to = self.tokenAddress;
+            self.transaction.value = '0x00';
+            self.transaction.gasPrice = self.gasPrice;
+            self.transaction.gas = self.gasLimit;
+            self.transaction.data = wanToken.getTokenData(web3Require.web3_ipc,self.tokenAddress,self.toAddress,web3Require.web3_ipc.toWei(self.amount));
+        },this);
+        this.send.addFunction(function(self){
+            self.sendTransaction(self);
+        },this,true);
+        this.send.addFunction(function (self) {
+            if(self.funcResult)
+            {
+                insertTransaction(self.funcResult,self.curAddress,self.toAddress,self.amount,'token');
+            }
+            web3Require.exit(null);
+        },this);
+    },
+
+    sendDeployContractStack()
+    {
+        this.send.addFunction(function(self){
+            self.transaction.from = self.curAddress;
+            self.transaction.value = '0x00';
+            self.transaction.gasPrice = self.gasPrice;
+            self.transaction.gas = self.gasLimit;
+            self.transaction.data = wanToken.deployContractData(web3Require.web3_ipc,"../sol/StandardToken.sol");
+        },this);
+        this.send.addFunction(function(self){
+            self.sendTransaction(self);
+        },this,true);
+        this.send.addFunction(function (self) {
+            if(self.funcResult)
+            {
+                insertTransaction(self.funcResult,self.curAddress,self.toAddress,self.amount,'contract');
+            }
+            web3Require.exit(null);
+        },this);
+    },
+    initPrivacyAssetStack()
+    {
+        this.send.addFunction(function(self){
+            self.amount = web3Require.web3_ipc.toWei(5000);
+            self.transaction.from = self.curAddress;
+            self.transaction.to = self.tokenAddress;
+            self.transaction.value = '0x00';
+            self.transaction.gasPrice = self.gasPrice;
+            self.transaction.gas = self.gasLimit;
+            var value = wanToken.initPrivacyAssetData(web3Require.web3_ipc,self.curAddress,self.curWaddress,self.tokenAddress,self.amount);
+            self.transaction.data = value[2];
+            self.privacyToken.address = value[0];
+            self.privacyToken.waddress = value[1];
+        },this);
+        this.send.addFunction(function(self){
+            self.sendTransaction(self);
+        },this,true);
+        this.send.addFunction(function (self) {
+            if(self.funcResult)
+            {
+                insertTransaction(self.funcResult,self.curAddress,self.toAddress,self.amount,'initPrivacy');
+                collection.tokenOTADBCollections.insertTokenCollection(collection.tokenOTADBCollections.tokenOTABalance,
+                    {   owner:self.curAddress,
+                        waddress:self.privacyToken.waddress,
+                        tokenAddress:self.tokenAddress,
+                        value:web3Require.web3_ipc.fromWei(self.amount)});
+            }
+            web3Require.exit(null);
+        },this);
+    },
+    tokenBuyStampStack()
+    {
+        this.send.addFunction(function(self){
+            self.transaction.from = self.curAddress;
+            self.transaction.to = wanToken.stampContractAddr;
+            self.transaction.value = self.privacyToken.stampValue;
+            self.transaction.gasPrice = self.gasPrice;
+            self.transaction.gas = self.gasLimit;
+            var value = wanToken.getStampData(web3Require.web3_ipc,self.curAddress,self.curWaddress,self.privacyToken.stampValue);
+            self.transaction.data = value[1];
+            self.privacyToken.stampWAddress = value[0];
+        },this);
+        this.send.addFunction(function(self){
+            self.sendTransaction(self);
+        },this,true);
+        this.send.addFunction(function (self) {
+            if(self.funcResult)
+            {
+                insertTransaction(self.funcResult,self.curAddress,self.toAddress,self.amount,'stamp');
+                insertPrivacyStamps(self.curAddress,self.privacyToken.stampWAddress,self.privacyToken.stampValue);
+            }
+            web3Require.exit(null);
+        },this);
+    },
+    sendTokenPrivacyContractStack()
+    {
+        this.send.addFunction(function(self){
+            self.transaction.to = self.tokenAddress;
+            self.transaction.value = '0x0';
+            self.transaction.gasPrice = '0x' + (self.GWinToWin(2000)).toString(16);
+        },this);
+        this.send.addFunction(function(self){
+            wanToken.getTokenPrivacyData(web3Require.web3_ipc,self.curAddress,self.transPassword,self.privacyToken.stampWAddress,
+                self.privacyToken.waddress,self.tokenAddress,self.toWAddress,web3Require.web3_ipc.toWei(self.amount),function(err,result){
+                    if(!err)
+                    {
+                        self.transaction.from = result[0];
+                        self.transaction.data = result[2];
+                        self.privacyToken.toWAddress = result[1];
+                        self.send.stepNext();
+                    }
+                    else
+                    {
+                        web3Require.exit(err);
+                    }
+                });
+        },this,true);
+        this.send.addFunction(function(self){
+            self.funcResult = null;
+            let privateKey = keyStore.getOTAPrivateKey(self.curAddress,self.transPassword,self.privacyToken.waddress);
+            web3Require.logger.debug(self.transaction);
+            let pass = '0x'+privateKey.toString('hex');
+            web3Require.web3_ipc.wan.sendPrivacyCxtTransaction(self.transaction,pass,function (err,result) {
+                if(!err){
+                    console.log('Transaction hash: ' + result);
+                    self.funcResult = result;
+                    self.send.stepNext();
+                }
+                else
+                {
+                    web3Require.exit(err);
+                }
+            })
+        },this,true);
+        this.send.addFunction(function (self) {
+            if(self.funcResult)
+            {
+                insertTransaction(self.funcResult,self.curAddress,self.toWAddress,self.amount,'Privacy');
+                updatePrivacyStamps(self.privacyToken.stampWAddress,1);
+                insertPrivacyTransaction(self.funcResult,self.curAddress,self.tokenAddress,self.privacyToken.waddress,
+                    self.privacyToken.stampWAddress,self.privacyToken.toWAddress);
+            }
+            web3Require.exit(null);
+        },this);
     },
     addSelectList(){
         let self = this;
@@ -294,7 +536,7 @@ const Transaction = {
         web3Require.addSchema(web3Require.schemaAll.TransListSchema('Input the transaction No. :',
             'The Number is invalid or nonexistent.',function (schema) {
                 schema.optionalArray = [];
-                var data = Temp.transCollection.find({'from': self.curAddress});
+                var data = collection.WalletDBCollections.transCollection.find({'from': self.curAddress});
                 if(data)
                 {
                     data.forEach(function (item, index) {
@@ -322,10 +564,10 @@ const Transaction = {
         web3Require.addSchema(web3Require.schemaAll.OTAsListSchema('Input the OTAs No. :',
             'The Number is invalid or nonexistent.',function (schema) {
                 schema.optionalArray = [];
-                let wAddress = web3Require.getWAddress(self.curAddress);
+                let wAddress = keyStore.getWAddress(self.curAddress);
                 if(wAddress)
                 {
-                    var data = Temp.OTAsCollection.find({'address': wAddress,'state': '0'});
+                    var data = collection.WalletDBCollections.OTAsCollection.find({'toaddress': wAddress,'state': '0'});
                     if(data)
                     {
                         data.forEach(function (item, index) {
@@ -340,7 +582,7 @@ const Transaction = {
             if(result)
             {
                 self.OTAAddress = result;
-                var data = Temp.OTAsCollection.findOne({'_id': self.OTAAddress});
+                var data = collection.WalletDBCollections.OTAsCollection.findOne({'waddress': self.OTAAddress});
                 if(data)
                 {
                     self.amount = data.value;
@@ -359,7 +601,7 @@ const Transaction = {
     getTokenBalance(bUpdate)
     {
         let self = this;
-        var Data = web3Require.tokenCollection.find({'address': this.curAddress});
+        var Data = collection.WalletDBCollections.tokenCollection.find({'address': this.curAddress});
         if(bUpdate)
         {
             if(Data) {
@@ -368,10 +610,10 @@ const Transaction = {
                         if (!err) {
                             if (result > 0) {
                                 item.value = result;
-                                web3Require.tokenCollection.update(item);
+                                collection.WalletDBCollections.tokenCollection.update(item);
                             }
                             else {
-                                web3Require.tokenCollection.remove(item);
+                                collection.WalletDBCollections.tokenCollection.remove(item);
                             }
                         }
                     });
@@ -409,34 +651,140 @@ const Transaction = {
             }
         });
     },
-    addTokenAddress()
+    addTokenAddressFunc(func)
     {
         let self = this;
         var Temp = web3Require;
         web3Require.addSchema(web3Require.schemaAll.tokenAddress('Input the token address:',
             'The token address is invalid or nonexistent.'), function (result) {
+            if (result) {
+                self.tokenAddress = result.tokenAddress;
+                func(result);
+            }
+        });
+    },
+    getTokenAddress()
+    {
+        this.addTokenAddressFunc(function (result) {
+            web3Require.stepNext();
+        })
+    },
+    addContractList()
+    {
+        let self = this;
+        var Temp = web3Require;
+        var schema = web3Require.schemaAll.contractSchema('Select an contract address by inputting No. (1, 2, 3..):',
+            'You inputted the wrong number.',function (schema) {
+                var data = Temp.contractCollection.find();
+                if(data)
+                {
+                    data.forEach(function (item, index) {
+                        var value = getCollectionItem(item);
+                        schema.optionalArray.push(value);
+                    });
+                }
+            });
+//        schema.optionalArray = web3Require.accountArray;
+        web3Require.addSchema(schema, function (result) {
+            if(result)
+            {
+                self.tokenAddress = result;
+                web3Require.stepNext();
+            }
+            else
+            {
+                web3Require.exit('You have no token balance.');
+            }
+        });
+    },
+    addContractBalanceList(callback)
+    {
+        let self = this;
+        var Temp = web3Require;
+        var schema = web3Require.schemaAll.contractBalanceSchema('Select an contract balance by inputting No. (1, 2, 3..):',
+            'You inputted the wrong number.',function (schema) {
+                schema.optionalArray = [];
+                var find = collection.tokenOTADBCollections.tokenOTABalance.find({'owner':self.curAddress});
+                if(find && find.length)
+                {
+                    for(var i=0;i<find.length;++i)
+                    {
+                        var item = collection.getCollectionItem(find[i]);
+                        schema.optionalArray.push(item);
+                    }
+                }
+            });
+//        schema.optionalArray = web3Require.accountArray;
+        web3Require.addSchema(schema, function (result) {
             if(result)
             {
                 self.tokenAddress = result.tokenAddress;
-                wanToken.getTokenBalance(web3Require.web3_ipc,self.tokenAddress,self.curAddress,function (err,result) {
-                    if (!err) {
-                        if(result>0)
-                        {
-                            console.log('add new token balance : ' + self.tokenAddress + '; value : ' + web3Require.web3_ipc.fromWei(result));
-                            insertTokenBalance(self.curAddress,self.tokenAddress,result);
+                self.privacyToken.waddress = result.waddress;
+                callback(self);
+            }
+            else
+            {
+                web3Require.exit('You have no token balance.');
+            }
+        });
+    },
+    addTokenAddress(bPrivacyToken)
+    {
+        let self = this;
+        web3Require.addSchema(web3Require.schemaAll.tokenAddress('Input the token address:',
+            'The token address is invalid or nonexistent.'), function (result) {
+            if(result) {
+                self.tokenAddress = result.tokenAddress;
+                if (!bPrivacyToken)
+                {
+                    wanToken.getTokenBalance(web3Require.web3_ipc,self.tokenAddress,self.curAddress,function (err,result) {
+                        if (!err) {
+                            if(result>0)
+                            {
+                                console.log('add new token balance : ' + self.tokenAddress + '; value : ' + web3Require.web3_ipc.fromWei(result));
+                                insertTokenBalance(self.curAddress,self.tokenAddress,result);
+                            }
+                            else
+                            {
+                                console.log('this token balance have no coin!');
+                            }
                         }
-                        else
-                        {
-                            console.log('this token balance have no coin!');
-                        }
-                    }
-                    web3Require.runschemaStep();
-                });
+                        web3Require.runschemaStep();
+                    });
+                }
+                else
+                {
+                    web3Require.stepNext();
+                }
             }
             else
             {
                 web3Require.exit('this token balance have no coin!');
             }
+        });
+    },
+    addTokenOTAaddress()
+    {
+        let self = this;
+        web3Require.addSchema(web3Require.schemaAll.OTAAddress('Input the token OTA waddress:',
+        'The token OTA waddress is invalid or nonexistent.'), function (result) {
+            self.privacyToken.waddress = result.OTAAddress;
+            wanToken.getTokenPrivacyBalance(web3Require.web3_ipc,self.tokenAddress,self.privacyToken.waddress,function (err,result) {
+                if (!err) {
+                    let value = parseFloat(web3Require.web3_ipc.fromWei(result));
+                    if(value > 0)
+                    {
+                        console.log('add new token balance : ' + self.tokenAddress + '; value : ' + value);
+                        collection.tokenOTADBCollections.insertTokenCollection(collection.tokenOTADBCollections.tokenOTABalance,
+                            {owner:self.curAddress,waddress:self.privacyToken.waddress,tokenAddress:self.tokenAddress,value:value});
+                    }
+                    else
+                    {
+                        console.log('this token balance have no coin!');
+                    }
+                }
+                web3Require.exit();
+            });
         });
     },
     consoleTransactionInfo(transHash,callback)
@@ -506,9 +854,9 @@ function getCollectionItem(item) {
 };
 function insertTransaction(transhash,from,to,value,p)
 {
-    var found = web3Require.transCollection.findOne({'transHash': transhash});
+    var found = collection.WalletDBCollections.transCollection.findOne({'transHash': transhash});
     if(found == null) {
-        web3Require.transCollection.insert({
+        collection.WalletDBCollections.transCollection.insert({
             transHash: transhash,
             from: from,
             to:to,
@@ -520,17 +868,55 @@ function insertTransaction(transhash,from,to,value,p)
         web3Require.logger.debug(transhash + 'is already existed!');
     }
 };
-function insertOTAs(OTAHash,address,value,timeStamp,otaFrom,status)
+function insertPrivacyOTAs(transhash,curAddress,contractAddr,tokenAddr,tokenWaddr)
 {
-    var found = web3Require.OTAsCollection.findOne({'OTAHash': OTAHash});
+    var found = web3Require.PrivacyOTACollection.findOne({'transHash': transhash});
     if(found == null) {
-        web3Require.OTAsCollection.insert({
-            OTAHash: OTAHash,
-            address: address,
-            value:value,
-            timeStamp:timeStamp,
-            otaFrom:otaFrom,
-            status:status
+        web3Require.PrivacyOTACollection.insert({
+            transhash: transhash,
+            address: curAddress,
+            contractAddr: contractAddr,
+            tokenAddr:tokenAddr,
+            tokenWaddr:tokenWaddr,
+        });
+    } else {
+        console.log(transhash + 'is already existed!');
+    }
+};
+function insertPrivacyStamps(curAddress,stampWAddress,stampValue)
+{
+    var found = collection.tokenOTADBCollections.tokenStampCollection.findOne({'waddress': stampWAddress});
+    if(found == null) {
+        collection.tokenOTADBCollections.tokenStampCollection.insert({
+            waddress: stampWAddress,
+            address: curAddress,
+            value: stampValue,
+            status:0,
+        });
+    } else {
+        console.log(transhash + 'is already existed!');
+    }
+};
+function updatePrivacyStamps(stampWAddress,status)
+{
+    var found = collection.tokenOTADBCollections.tokenStampCollection.findOne({'waddress': stampWAddress});
+    if(found !== null) {
+        found.status = status;
+        collection.tokenOTADBCollections.tokenStampCollection.update(found);
+    }
+
+}
+function insertPrivacyTransaction(transhash,curAddress,contractAddr,curTokenAddr,curStampAddr,toTokenWaddr)
+{
+    var found = collection.tokenOTADBCollections.tokenPrivacyTransCollection.findOne({'transHash': transhash});
+    if(found == null) {
+        collection.tokenOTADBCollections.tokenPrivacyTransCollection.insert({
+            transhash: transhash,
+            address: curAddress,
+            contract: contractAddr,
+            from:curTokenAddr,
+            stamp:curStampAddr,
+            to:toTokenWaddr
         });
     } else {
         console.log(transhash + 'is already existed!');
@@ -539,10 +925,10 @@ function insertOTAs(OTAHash,address,value,timeStamp,otaFrom,status)
 function insertTokenBalance(address,tokenAddress,value)
 {
     var data = {'address': address,'tokenAddress' : tokenAddress };
-    var found = web3Require.tokenCollection.findOne(data);
+    var found = collection.WalletDBCollections.tokenCollection.findOne(data);
     if(found == null) {
         data.value = value;
-        var result = web3Require.tokenCollection.maxRecord('_id');
+        var result = collection.WalletDBCollections.tokenCollection.maxRecord('_id');
         if(result && result.value)
         {
             data._id = result.value + 1;
@@ -551,7 +937,7 @@ function insertTokenBalance(address,tokenAddress,value)
         {
             data._id = 1;
         }
-        web3Require.tokenCollection.insert(data);
+        collection.WalletDBCollections.tokenCollection.insert(data);
     } else {
         found.value = value;
     }
@@ -573,28 +959,7 @@ function getNowFormatDate() {
         + seperator2 + date.getSeconds();
     return currentdate;
 };
-function generatePubkeyIWQforRing(Pubs, I, w, q){
-    let length = Pubs.length;
-    let sPubs  = [];
-    for(let i=0; i<length; i++){
-        sPubs.push(Pubs[i].toString('hex'));
-    }
-    let ssPubs = sPubs.join('&');
-    let ssI = I.toString('hex');
-    let sw  = [];
-    for(let i=0; i<length; i++){
-        sw.push('0x'+w[i].toString('hex').replace(/(^0*)/g,""));
-    }
-    let ssw = sw.join('&');
-    let sq  = [];
-    for(let i=0; i<length; i++){
-        sq.push('0x'+q[i].toString('hex').replace(/(^0*)/g,""));
-    }
-    let ssq = sq.join('&');
 
-    let KWQ = [ssPubs,ssI,ssw,ssq].join('+');
-    return KWQ;
-};
 module.exports = Transaction;
 
 
