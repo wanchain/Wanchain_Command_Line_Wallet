@@ -22,16 +22,18 @@
 - Run `geth.exe` with network parameter
 - Modify `wanchainNet` value in config.js
 
-#### run Wanchain Command Line Wallet
+
+### If you want fetch OTAs, please run the following command based on your OS env to Scan OTAs in new terminal first.
+#### run in windows x64
+    $ cd backend 
+    $ node wanChainBlockScan.js
+#### run in linux or mac
+    $ cd backend 
+    $ node wanChainBlockScan.js
+
+### run Wanchain Command Line Wallet in src dir
 
     $ cd src
-
-#### If you want fetch OTAs, please run the following command based on your OS env to Scan OTAs in new terminal first.
-#### run in windows x64
-    $ node ..\backend\syncOta.js
-#### run in linux or mac
-    $ node ../backend/syncOta.js
-
 
 ### Executing commands
 #### Run each `*.js` file as `node *.js or node <filename> without .js` in command line. 

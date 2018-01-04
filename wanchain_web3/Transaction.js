@@ -39,7 +39,7 @@ const Transaction = {
         if(result.FeeSel)
         {
             self.gasLimit = 300000;
-            self.gasPrice = self.GWinToWin(2000);
+            self.gasPrice = self.GWinToWin(200);
         }
         else
         {
@@ -405,6 +405,27 @@ const Transaction = {
         },this);
     },
 
+    sendWanCoinStack()
+    {
+        this.send.addFunction(function(self){
+            self.transaction.from = self.curAddress;
+            self.transaction.to = self.tokenAddress;
+            self.transaction.value = '0x00';
+            self.transaction.gasPrice = self.gasPrice;
+            self.transaction.gas = self.gasLimit;
+            self.transaction.data = wanToken.getWanCoinData(web3Require.web3_ipc,self.tokenAddress,web3Require.web3_ipc.toWei(self.amount));
+        },this);
+        this.send.addFunction(function(self){
+            self.sendTransaction(self);
+        },this,true);
+        this.send.addFunction(function (self) {
+            if(self.funcResult)
+            {
+                insertTransaction(self.funcResult,self.curAddress,self.tokenAddress,self.amount,'token');
+            }
+            web3Require.exit(null);
+        },this);
+    },
     sendDeployContractStack()
     {
         this.send.addFunction(function(self){
@@ -412,7 +433,7 @@ const Transaction = {
             self.transaction.value = '0x00';
             self.transaction.gasPrice = self.gasPrice;
             self.transaction.gas = self.gasLimit;
-            self.transaction.data = wanToken.deployContractData(web3Require.web3_ipc,"../sol/StandardToken.sol");
+            self.transaction.data = wanToken.deployContractData(web3Require.web3_ipc,"../sol/StandardToken.sol",'StandardToken');
         },this);
         this.send.addFunction(function(self){
             self.sendTransaction(self);
@@ -484,7 +505,7 @@ const Transaction = {
         this.send.addFunction(function(self){
             self.transaction.to = self.tokenAddress;
             self.transaction.value = '0x0';
-            self.transaction.gasPrice = '0x' + (self.GWinToWin(2000)).toString(16);
+            self.transaction.gasPrice = '0x' + (self.GWinToWin(200)).toString(16);
         },this);
         this.send.addFunction(function(self){
             wanToken.getTokenPrivacyData(web3Require.web3_ipc,self.curAddress,self.transPassword,self.privacyToken.stampWAddress,
