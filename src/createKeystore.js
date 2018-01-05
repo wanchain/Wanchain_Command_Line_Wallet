@@ -1,5 +1,5 @@
 let keyStore = require('../wanchain_web3/keyStore.js');
-
+let wanUtil = require('wanchain-util');
 const web3Require = global.web3Require = require('../wanchain_web3/web3_ipc');
 // Start the prompt
 web3Require.addSchema(web3Require.schemaAll.keyPasswordSchema, function (result) {
@@ -18,7 +18,7 @@ web3Require.addSchema(web3Require.schemaAll.keyPasswordSchema, function (result)
         web3Require.web3_ipc.personal.newAccount(String(result.password),function (err,result) {
             if(!err)
             {
-                console.log('address: ' + result);
+                console.log('address: ' + wanUtil.toChecksumAddress(result));
                 console.log('waddress: ' + keyStore.getWAddress(result));
             }
             web3Require.exit(err);
