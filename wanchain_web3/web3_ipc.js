@@ -338,7 +338,10 @@ let web3Require ={
     {
         if(err)
         {
-            console.log(err);
+            if(err.message && (config.loglevel && config.loglevel == 'debug'))
+                console.log(err.message);
+            else
+                console.log(err);
         }
         if(!web3_ipc_exit)
         {
@@ -368,7 +371,7 @@ let web3Require ={
                 temp.accountArray = [];
                 for(var i = 0;i<results.length;i++)
                 {
-                    temp.accountArray.push(temp.web3_ipc.toChecksumAddress(results[i]));
+                    temp.accountArray.push(wanUtil.toChecksumAddress(results[i]));
 
                 }
                 callback();
