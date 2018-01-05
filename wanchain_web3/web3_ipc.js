@@ -338,7 +338,7 @@ let web3Require ={
     {
         if(err)
         {
-            if(err.message && (config.loglevel && config.loglevel == 'debug'))
+            if(err.message && (!config.loglevel || config.loglevel !== 'debug'))
                 console.log(err.message);
             else
                 console.log(err);
