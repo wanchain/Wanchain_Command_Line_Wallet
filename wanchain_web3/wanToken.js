@@ -25,13 +25,27 @@ exports.getTokenData = function (web3,TokenAddress,toAddress,amount) {
     let TokenInstance = standardtokenContract.at(TokenAddress);
     return TokenInstance.transfer.getData(toAddress,amount);
 }
-exports.deployContractData = function (web3,keyFile) {
+exports.getWanCoinData = function (web3,TokenAddress,amount) {
+    let content = fs.readFileSync('../sol/fetchWanCoin.sol', 'utf8');
+    let compiled = solc.compile(content, 1);
+    let Contract = web3.eth.contract(JSON.parse(compiled.contracts[':fetchWanCoin'].interface));
+    let TokenInstance = Contract.at(TokenAddress);
+    return TokenInstance.sendWanCoin.getData(amount);
+}
+exports.deployContractData = function (web3,keyFile,contract) {
     let content = fs.readFileSync(keyFile, 'utf8');
     let compiled = solc.compile(content, 1);
     let name;
-    for (var key in compiled.contracts) {
-        name = key;
+    if(!contract)
+    {
+        for (var key in compiled.contracts) {
+            name = key;
 //        break;
+        }
+    }
+    else
+    {
+        name = ':' + contract;
     }
     let Contract = web3.eth.contract(JSON.parse(compiled.contracts[name].interface));
     var constructorInputs = [];

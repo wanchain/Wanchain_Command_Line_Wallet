@@ -307,12 +307,12 @@ exports.sendPrivacySchema = function () {
 //    Schema.properties.floatValue = modifyDesc(SchemaAll.properties.floatValue,'Input amount you want to send: ','The amount entered is invalid');
     return Schema;
 };
-exports.sendPrivacyAmount = function () {
-    let Schema = new OptionalSchema(null);
+exports.sendPrivacyAmount = function (preLoad) {
+    let Schema = new OptionalSchema(preLoad);
     Schema.setPorperty('PrivacyAmount','Input amount index you want to send by selecting value face:',
         'The number is invalid. ');
     Schema.addOptionResult(SchemaAll.properties.intValue);
-    Schema.optionalArray = [10,20,50,100,200,500,1000,5000,50000];
+//    Schema.optionalArray = [10,20,50,100,200,500,1000,5000,50000];
     return Schema;
 };
 exports.stampBalanceSchema = function (preLoad) {

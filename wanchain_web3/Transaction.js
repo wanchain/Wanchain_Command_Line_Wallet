@@ -11,6 +11,7 @@ const Transaction = {
     curTransaction: null,
     toWAddress: null,
     OTAAddress: null,
+    OTABalances: null,
     tokenAddress: null,
     amount: null,
     gasPrice: null,
@@ -176,10 +177,25 @@ const Transaction = {
     },
     addToPrivacyAmount(){
         let self = this;
-        web3Require.addSchema(web3Require.schemaAll.sendPrivacyAmount(),function (result) {
+        web3Require.addSchema(web3Require.schemaAll.sendPrivacyAmount(function (schema) {
+            schema.optionalArray = self.OTABalances;
+        }),function (result) {
             web3Require.logger.debug(result);
             self.amount = result;
             web3Require.stepNext();
+        });
+    },
+    initOTABalances()
+    {
+        let self = this;
+        web3Require.web3_ipc.wan.getSupportWanCoinOTABalances(function (err,result) {
+            if(!err)
+            {
+                self.OTABalances = [];
+                result.forEach(function (item) {
+                    self.OTABalances.push(parseFloat(web3Require.web3_ipc.fromWei(item)));
+                })
+            }
         });
     },
     initStampBalance()
