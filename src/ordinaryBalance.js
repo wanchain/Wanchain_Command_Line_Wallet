@@ -4,16 +4,23 @@ let collection = require('../wanchain_web3/collection.js');
 let DBArray = [{db:collection.walletDB,collection: ['transCollection']}];
 web3Require.useDb(DBArray);
 transaction.addCurAccountFunc(function (result) {
-    web3Require.logger.debug(result);
-    var curAddress = result;
-    web3Require.web3_ipc.eth.getBalance(curAddress,function (err,result) {
-        if(!err)
-        {
-            console.log('balance : ' + web3Require.web3_ipc.fromWei(result.toString()));
-        }
-        //web3Require.runschemaStep();
-        web3Require.exit(err);
-    });
+    if(result)
+    {
+        web3Require.logger.debug(result);
+        var curAddress = result;
+        web3Require.web3_ipc.eth.getBalance(curAddress,function (err,result) {
+            if(!err)
+            {
+                console.log('balance : ' + web3Require.web3_ipc.fromWei(result.toString()));
+            }
+            //web3Require.runschemaStep();
+            web3Require.exit(err);
+        });
+    }
+    else
+    {
+        web3Require.exit('No account created. You could create new one or import one from a keystore file.');
+    }
 });
 transaction.run();
 

@@ -4,17 +4,24 @@ let collection = require('../wanchain_web3/collection.js');
 let DBArray = [{db:collection.walletDB,collection: ['tokenCollection']}];
 web3Require.useDb(DBArray);
 transaction.addCurAccountFunc(function (result) {
-    web3Require.logger.debug(result);
-    transaction.curAddress = result;
-    var Data =  transaction.getTokenBalance(true);
-    if(Data)
+    if(result)
     {
-        Data.forEach(function (item, index) {
-            var value = {'tokenAddress' : item.tokenAddress,'value' : web3Require.web3_ipc.fromWei(item.value)};
-            console.log(value);
-        });
+        web3Require.logger.debug(result);
+        transaction.curAddress = result;
+        var Data =  transaction.getTokenBalance(true);
+        if(Data)
+        {
+            Data.forEach(function (item, index) {
+                var value = {'tokenAddress' : item.tokenAddress,'value' : web3Require.web3_ipc.fromWei(item.value)};
+                console.log(value);
+            });
+        }
+        web3Require.stepNext();
     }
-    web3Require.stepNext();
+    else
+    {
+        web3Require.exit('No account created. You could create new one or import one from a keystore file.');
+    }
 });
 transaction.addTokenAddress();
 transaction.run();

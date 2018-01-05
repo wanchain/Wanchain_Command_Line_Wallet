@@ -9,4 +9,7 @@ transaction.addToPrivacyAmount();
 transaction.addFee();
 transaction.addSend();
 transaction.sendPrivacySendStack();
-transaction.run();
+transaction.run(function () {
+    transaction.initOTABalances();
+
+});

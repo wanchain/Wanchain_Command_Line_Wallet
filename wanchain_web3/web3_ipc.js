@@ -365,7 +365,12 @@ let web3Require ={
         this.web3_ipc.eth.getAccounts(function (err,results) {
             if(!err)
             {
-                temp.accountArray = results;
+                temp.accountArray = [];
+                for(var i = 0;i<results.length;i++)
+                {
+                    temp.accountArray.push(temp.web3_ipc.toChecksumAddress(results[i]));
+
+                }
                 callback();
             }
             else
