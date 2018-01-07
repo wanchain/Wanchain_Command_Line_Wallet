@@ -2,6 +2,7 @@ let collection = require('../wanchain_web3/collection.js');
 const web3Require = global.web3Require = require('./web3_ipc');
 const wanToken = require('../wanchain_web3/wanToken.js')
 const privacyTransInfo = require('./privacyTransInfo.js');
+let wanUtil = require('wanchain-util');
 let functionStack = require('./functionStack.js');
 let keyStore = require('./keyStore.js');
 const Transaction = {
@@ -123,7 +124,17 @@ const Transaction = {
                     schema.optionalArray = web3Require.accountArray;
                 }
             });
-        web3Require.addSchema(schema, func);
+        web3Require.addSchema(schema, function(result){
+                if(result)
+                {
+                    func(wanUtil.toChecksumAddress(result));
+                }
+                else
+                {
+                    func(result);
+                }
+            }
+        );
 
     },
     addCurAccount(){
@@ -449,7 +460,7 @@ const Transaction = {
             self.transaction.value = '0x00';
             self.transaction.gasPrice = self.gasPrice;
             self.transaction.gas = self.gasLimit;
-            self.transaction.data = wanToken.deployContractData(web3Require.web3_ipc,"../sol/StandardToken.sol",'StandardToken');
+            self.transaction.data = wanToken.deployContractData(web3Require.web3_ipc,"../sol/WttpToken.sol",'WttpToken');
         },this);
         this.send.addFunction(function(self){
             self.sendTransaction(self);
@@ -679,7 +690,7 @@ const Transaction = {
         web3Require.addSchema(schema, function (result) {
             if(result)
             {
-                self.tokenAddress = result;
+                self.tokenAddress = wanUtil.toChecksumAddress(result);
                 web3Require.stepNext();
             }
             else
@@ -695,7 +706,7 @@ const Transaction = {
         web3Require.addSchema(web3Require.schemaAll.tokenAddress('Input the token address:',
             'The token address is invalid or nonexistent.'), function (result) {
             if (result) {
-                self.tokenAddress = result.tokenAddress;
+                self.tokenAddress = wanUtil.toChecksumAddress(result.tokenAddress);
                 func(result);
             }
         });
@@ -725,7 +736,7 @@ const Transaction = {
         web3Require.addSchema(schema, function (result) {
             if(result)
             {
-                self.tokenAddress = result;
+                self.tokenAddress = wanUtil.toChecksumAddress(result);
                 web3Require.stepNext();
             }
             else
@@ -755,7 +766,7 @@ const Transaction = {
         web3Require.addSchema(schema, function (result) {
             if(result)
             {
-                self.tokenAddress = result.tokenAddress;
+                self.tokenAddress = wanUtil.toChecksumAddress(result.tokenAddress);
                 self.privacyToken.waddress = result.waddress;
                 callback(self);
             }
@@ -771,7 +782,7 @@ const Transaction = {
         web3Require.addSchema(web3Require.schemaAll.tokenAddress('Input the token address:',
             'The token address is invalid or nonexistent.'), function (result) {
             if(result) {
-                self.tokenAddress = result.tokenAddress;
+                self.tokenAddress = wanUtil.toChecksumAddress(result.tokenAddress);
                 if (!bPrivacyToken)
                 {
                     wanToken.getTokenBalance(web3Require.web3_ipc,self.tokenAddress,self.curAddress,function (err,result) {
