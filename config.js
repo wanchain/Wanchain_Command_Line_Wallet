@@ -1,5 +1,6 @@
 const config = {};
-var wanchainNet = 'testnet';
+var wanchainNet = '';
+config.dataName = wanchainNet;
 if(wanchainNet.length)
 {
     if(process.platform === 'win32')
@@ -11,7 +12,7 @@ if(wanchainNet.length)
         wanchainNet = wanchainNet + '/';
     }
 }
-config.version = '0.1.8';
+config.version = '0.1.9';
 // web3 parameter
 config.host = '// http://localhost'; // http://localhost
 config.rpcIpcPath = process.env.HOME;
