@@ -40,7 +40,7 @@ const Transaction = {
     transInfo: function (result,self) {
         if(result.FeeSel)
         {
-            self.gasLimit = 300000;
+            self.gasLimit = 500000;
             self.gasPrice = self.GWinToWin(200);
         }
         else

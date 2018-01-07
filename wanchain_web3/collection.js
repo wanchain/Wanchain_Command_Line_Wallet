@@ -1,6 +1,6 @@
 let newDb = require('../wanchain_web3/newDb.js');
-
-let scanOTADB = new newDb('scanOTA.db');
+var config = require('../config');
+let scanOTADB = new newDb(config.dataName+'scanOTA.db');
 exports.scanOTADB = scanOTADB;
 
 
@@ -40,7 +40,7 @@ let WalletDBCollectionInit = {
     }
 }
 //wallet DB
-let walletDB = new newDb('wanchain.db');
+let walletDB = new newDb(config.dataName+'wanchain.db');
 walletDB.InitCollection = function (CollectionAry) {
     WalletDBCollections.initCollection(CollectionAry);
 }
@@ -74,7 +74,7 @@ let ScanDBCollectionsInit = {
     },
 }
 
-let ScanDB = new newDb('WanchainScanDB.db');
+let ScanDB = new newDb(config.dataName+'WanchainScanDB.db');
 ScanDB.InitCollection = function (CollectionAry) {
     ScanDBCollections.initCollection(CollectionAry);
 }
@@ -137,7 +137,7 @@ let tokenOTADBCollectionInit = {
         return tokenOTADB.getCollection('tokenCollection');
     }
 }
-let tokenOTADB = new newDb('tokenOTADB.db');
+let tokenOTADB = new newDb(config.dataName+'tokenOTADB.db');
 tokenOTADB.InitCollection = function (CollectionAry) {
     tokenOTADBCollections.initCollection(CollectionAry);
 }

@@ -59,7 +59,7 @@ function  getAddressAndKeyFrom(WAddress)
     return "0x"+wanUtil.sha3(token_to_ota_a.slice(1)).slice(-20).toString('hex');
 }
 exports.initPrivacyAssetData = function (web3,curAddress,curWaddress,TokenAddress,amount) {
-    var otaAddrTokenHolder = wanUtil.generateOTAWaddress(curWaddress);
+    var otaAddrTokenHolder = wanUtil.generateOTAWaddress(curWaddress).toLowerCase();
     var addrTokenHolder = getAddressAndKeyFrom(otaAddrTokenHolder);
     var standardtokenContract = web3.eth.contract(constractCodeOTA);
     let TokenInstance = standardtokenContract.at(TokenAddress);
@@ -87,7 +87,7 @@ exports.getStampData = function(web3,curAddress,curWaddress,stampBalance)
     var stampContractAddr = "0x00000000000000000000000000000000000000c8";
     var stampContract = contractDef.at(stampContractAddr);
 
-    var otaAddrStamp = wanUtil.generateOTAWaddress(curWaddress);
+    var otaAddrStamp = wanUtil.generateOTAWaddress(curWaddress).toLowerCase();
     var txBuyData = stampContract.buyStamp.getData(otaAddrStamp, stampBalance);
     return [otaAddrStamp,txBuyData];
 
@@ -102,7 +102,7 @@ exports.getTokenPrivacyData = function (web3,address,password,stampOTA,
             var standardtokenContract = web3.eth.contract(constractCodeOTA);
             let TokenInstance = standardtokenContract.at(TokenAddress);
 
-            var otaAddrAccount2 = wanUtil.generateOTAWaddress(toWaddress);
+            var otaAddrAccount2 = wanUtil.generateOTAWaddress(toWaddress).toLowerCase();
             var addrOTA2 = getAddressAndKeyFrom(otaAddrAccount2);
 
             var cxtInterfaceCallData = TokenInstance.otatransfer.getData(addrOTA2, otaAddrAccount2, value);

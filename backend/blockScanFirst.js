@@ -9,10 +9,10 @@ process.on('message', function(m) {
         var item = m.tx[i];
         if(contractParam.isTokenOTA(item))
         {
+            /*
             let param = contractParam.parseContractTokenOTA(item.input);
             if(param)
             {
-                /*
                 let input = param.CxtCallParams;
                 if(contractParam.isOTATransfer(input))
                 {
@@ -23,8 +23,8 @@ process.on('message', function(m) {
                             item.from,m.time, m.number,item.hash]);
                     }
                 }
-                */
             }
+            */
         }
         else if(contractParam.isPrivacyOTA(item))
         {

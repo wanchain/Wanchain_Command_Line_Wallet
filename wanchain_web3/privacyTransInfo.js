@@ -10,7 +10,7 @@ const privacyInfo = {
         let CoinContractAddr = wanUtil.contractCoinAddress;
         let CoinContract = web3.eth.contract(wanUtil.coinSCAbi);
         let CoinContractInstance = CoinContract.at(CoinContractAddr);
-        let otaAddr = wanUtil.generateOTAWaddress(toWAddress);
+        let otaAddr = wanUtil.generateOTAWaddress(toWAddress).toLowerCase();
         return CoinContractInstance.buyCoinNote.getData(otaAddr, web3.toWei(amount));
     },
     getRingSignData(web3,address,password,OTAAddress,message,mixNumber,callback)
