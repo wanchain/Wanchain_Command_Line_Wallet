@@ -15,40 +15,52 @@ transaction.addCurAccountFunc(function (result) {
         web3Require.web3_ipc.eth.getBalance(transaction.curAddress,function (err,result) {
             if (!err) {
                 console.log('balance: ' + web3Require.web3_ipc.fromWei(result.toString()));
-                var data = collection.WalletDBCollections.OTAsCollection.find({'toaddress': transaction.curWaddress, 'state': '0'});
-                if (data && data.length) {
-                    let curLoop = new ASyncLoopStack(3, 2);
-                    curLoop.Array = data;
-                    curLoop.EachFunc = function (param, item, index) {
-                        if (item.transHash && item.transHash.length) {
-                            web3Require.web3_ipc.eth.getTransactionReceipt(item.transHash, function (err, result) {
-                                if (!err) {
-                                    if (result && result.blockNumber > 0) {
-                                        if (result.status == "0x1") {
-                                            item.state = 1;
+                web3Require.web3_ipc.eth.getBlockNumber((err,number)=>{
+                    if(!err)
+                    {
+                        var data = collection.WalletDBCollections.OTAsCollection.where(function (obj) {
+                            return obj.toaddress ==transaction.curWaddress && obj.transHash && obj.transHash.length &&  parseInt(obj.state) <10;
+                        });
+                        if (data && data.length) {
+                            let curLoop = new ASyncLoopStack(3, 2);
+                            curLoop.Array = data;
+                            curLoop.EachFunc = function (param, item, index) {
+                                if (item.transHash && item.transHash.length) {
+                                    web3Require.web3_ipc.eth.getTransactionReceipt(item.transHash, function (err, result) {
+                                        if (!err) {
+                                            if (result && result.blockNumber > 0) {
+                                                if (result.status == "0x1") {
+                                                    item.state = (number - result.blockNumber).toString();
+                                                }
+                                                else {
+                                                    item.transhash = '';
+                                                    item.state = '0';
+                                                }
+                                            }
+                                            else
+                                            {
+                                                item.state = '0';
+                                            }
+                                            collection.WalletDBCollections.OTAsCollection.update(item);
                                         }
-                                        else {
-                                            item.transhash = '';
-                                        }
-                                        collection.WalletDBCollections.OTAsCollection.update(item);
-                                    }
+                                        curLoop.stepNext();
+                                    });
                                 }
-                                curLoop.stepNext();
-                            });
+                                else
+                                {
+                                    curLoop.stepNext();
+                                }
+                            };
+                            curLoop.EndFunc = function () {
+                                web3Require.stepNext();
+                            }
+                            curLoop.run();
                         }
-                        else
-                        {
-                            curLoop.stepNext();
+                        else {
+                            web3Require.stepNext();
                         }
-                    };
-                    curLoop.EndFunc = function () {
-                        web3Require.stepNext();
                     }
-                    curLoop.run();
-                }
-                else {
-                    web3Require.exit('This account have no OTA balance!');
-                }
+                });
 
             }
             else {

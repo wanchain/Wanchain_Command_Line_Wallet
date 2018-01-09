@@ -42,6 +42,10 @@ module.exports = class ASyncLoopStack
             this.waitInfo(this.WaitS);
             this.callFunc();
         }
+        else
+        {
+            this.EndFunc(this.param,null,0);
+        }
     }
     callFunc() {
         while(this.iter - this.sucess<this.RNum && this.isInRange(this.iter))

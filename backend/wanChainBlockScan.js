@@ -180,6 +180,7 @@ function globalScan() {
         else {
             web3.eth.getBlockNumber((err, n) => {
                 if (!err) {
+                    n -= 5;
                     console.log('getBlockNumber' + n);
                     blockNumber = n;
                     LastScan.End = blockNumber;
@@ -207,6 +208,7 @@ web3Require.initDatabase(function () {
 
     web3.eth.getBlockNumber((err, n)=> {
         if (!err) {
+            n -= 5;
             console.log('getBlockNumber' + n);
             blockNumber = n;
             let lastKey = parseInt(n/10000);

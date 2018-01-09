@@ -394,6 +394,7 @@ const Transaction = {
                     var found = collection.WalletDBCollections.OTAsCollection.findOne({'waddress': self.OTAAddress});
                     if(found){
                         found.transHash = self.funcResult;
+                        found.state = '1';
                         collection.WalletDBCollections.OTAsCollection.update(found);
                     }
                 }
@@ -401,7 +402,7 @@ const Transaction = {
                 {
                     var found = collection.WalletDBCollections.OTAsCollection.findOne({'waddress': self.OTAAddress});
                     if(found){
-                        found.state = 1;
+                        found.state = '100';
                         collection.WalletDBCollections.OTAsCollection.update(found);
                     }
                 }

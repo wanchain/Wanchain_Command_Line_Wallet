@@ -136,6 +136,8 @@ const contractTransParam = {
                         let keystore = keyStore.getKeystoreJSON(address);
                         if (keystore) {
                             let otaKeys = this.getOTAKeys(keystore, password);
+                            if(!otaKeys)
+                                return funcExit();
                             for (var i = 0; i < result.length; ++i) {
                                 let Ota = result[i];
                                 let param = self.parseTopicData(Ota.data);
@@ -205,6 +207,8 @@ const contractTransParam = {
             console.log('checkOta otaSet length:', otaSet.length);
             if (otaSet.length > 0) {
                 let otaKeys = this.getOTAKeys(keystore, password);
+                if(otaKeys == null)
+                    return;
                 for (var i = 0; i < otaSet.length; ++i) {
                     var Ota = otaSet[i];
                     if(Ota.waddress.length !== 134)
