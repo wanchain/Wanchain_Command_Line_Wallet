@@ -3,3 +3,8 @@ node_modules/
 *.db
 logs/
 LocalDb/wanchain\.db~
+
+
+# python compiled bytecode
+*.pyc
+
