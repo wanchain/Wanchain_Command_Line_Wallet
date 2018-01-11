@@ -122,6 +122,7 @@ const contractTransParam = {
         let self = this;
         web3.eth.getBlockNumber((err, lastBlock) => {
             if (!err) {
+                lastBlock -= 5;
                 var findvalue = OTAsIndexColl.findOne({address:address});
                 let lastIndex = 0;
                 if(findvalue)
