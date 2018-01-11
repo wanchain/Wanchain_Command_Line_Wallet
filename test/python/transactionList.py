@@ -9,7 +9,7 @@ from send import *
 test_name = "transactionList"
 data = None
 
-with open('../../util/test_data.json') as json_file:
+with open('../util/test_data.json') as json_file:
     data = json.load(json_file)
 
 class TransactionList(Send):
@@ -30,8 +30,10 @@ class TransactionList(Send):
         if commonUtil.show_logs:
             child.logfile = sys.stdout
 
-        commonUtil.check_expect(self.get_transaction_hash(), child, test_name, "Transaction hash not found in the result")
-        child.expect(pexpect.EOF)
+        commonUtil.check_expect_condition(self.get_transaction_hash(), child, test_name,"Transaction hash not found in the result")
+
+
+
 
 def main():
     tranasactionList = TransactionList()
@@ -41,3 +43,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    commonUtil.write_results()

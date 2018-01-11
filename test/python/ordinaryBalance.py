@@ -10,7 +10,7 @@ from send import *
 test_name = "ordinaryBalance"
 data = None
 
-with open('../../util/test_data.json') as json_file:
+with open('../util/test_data.json') as json_file:
     data = json.load(json_file)
 
 class OrdinaryBalance(Send):
@@ -31,8 +31,7 @@ class OrdinaryBalance(Send):
         if commonUtil.show_logs:
             child.logfile = sys.stdout
 
-        commonUtil.check_expect(data['ordinaryBalance']['message']+data['send']['amount'], child, test_name, "Balance not found")
-        child.expect(pexpect.EOF)
+        commonUtil.check_expect_condition(data['ordinaryBalance']['message'] + data['send']['amount'], child, test_name,"Balance not found")
 
 def main():
     ordinaryBalance = OrdinaryBalance()
@@ -40,5 +39,8 @@ def main():
     commonUtil.test_successful(test_name)
 
 
+
+
 if __name__ == "__main__":
     main()
+    commonUtil.write_results()
