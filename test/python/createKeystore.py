@@ -1,10 +1,9 @@
+import json
 import sys
 
 import pexpect
 
 import commonUtil
-
-import json
 
 test_name = "createKeystore"
 
@@ -18,7 +17,7 @@ class CreateKeystore(object):
         self.file_name = ''
         self.password = ''
 
-    def get_eth_address(self):
+    def get_address(self):
         return self.address
 
     def get_wan_address(self):
@@ -30,11 +29,11 @@ class CreateKeystore(object):
     def create_wallet(self):
         """ test create wallet operation"""
 
-        with open('../util/text.json') as json_file:
+        with open('../../util/test_data.json') as json_file:
             data = json.load(json_file)
 
         self.password = commonUtil.get_random_string()
-        child = pexpect.spawn('node createKeystore --password ' + self.password+' --repeatPass ' + self.password, cwd='../src/')
+        child = pexpect.spawn('node createKeystore --password ' + self.password+' --repeatPass ' + self.password, cwd='../../src/')
         if commonUtil.show_logs:
             child.logfile = sys.stdout
 
@@ -43,9 +42,11 @@ class CreateKeystore(object):
 
 
         address_start = result.find('0x')
+        waddress_start = result.find(data["createKeystore"]["waddress"], address_start + 42)
         if address_start == -1:
-            commonUtil.exit_test('address value not found', test_name,child)
+            commonUtil.exit_test('address value not found', test_name, child)
         self.address = result[address_start:address_start + 42]
+
 
         waddress_start = result.find(data["createKeystore"]["waddress"], address_start + 42)
         if waddress_start == -1:
