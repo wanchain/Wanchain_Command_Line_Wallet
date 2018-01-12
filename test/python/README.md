@@ -20,6 +20,7 @@ Run following commands execute test cases.
 - python send.py
 - python transactionList.py
 - python ordinaryBalance.py
+- python sendPrivacy.py (Run cd backend && node wanChainBlockScan.js beforehand)
 
 # Run all test cases
 - python testAll.

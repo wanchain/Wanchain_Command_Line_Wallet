@@ -33,6 +33,7 @@ class CreateKeystore(object):
             data = json.load(json_file)
 
         self.password = commonUtil.get_random_string()
+        print self.password
         child = pexpect.spawn('node createKeystore --password ' + self.password+' --repeatPass ' + self.password, cwd='../../src/')
         if commonUtil.show_logs:
             child.logfile = sys.stdout
@@ -51,6 +52,9 @@ class CreateKeystore(object):
         if waddress_start == -1:
             commonUtil.exit_test('wan address title/value not found', test_name,child)
         self.waddress = result[waddress_start+10:waddress_start + 144]
+
+
+
 
 
 

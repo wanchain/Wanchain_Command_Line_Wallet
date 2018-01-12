@@ -1,6 +1,6 @@
 {
     "test_result": {
-        "createKeystore": {
+        "send": {
             "status": "success"
         }
     }, 
