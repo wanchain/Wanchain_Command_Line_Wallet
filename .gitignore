@@ -8,3 +8,5 @@ LocalDb/wanchain\.db~
 # python compiled bytecode
 *.pyc
 
+# test result file
+test/python/result.json

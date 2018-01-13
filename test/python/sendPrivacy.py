@@ -2,7 +2,7 @@ import time
 
 from send import *
 
-test_name = "send"
+test_name = "sendPrivacy"
 data = None
 
 with open('../util/test_data.json') as json_file:
@@ -48,8 +48,8 @@ class SendPrivacy(Send):
         else:
             commonUtil.exit_test('Transaction hash not found', test_name, child)
 
-        # Transaction successful, now wait for 150 seconds for block to get scanned
-        time.sleep(150)
+        # Transaction successful, now wait for block to get scanned
+        time.sleep(int(data['send privacy']['fetch OTA wait time']))
 
         child = pexpect.spawn('node fetchMyOTA --address ' + self.get_address() +
                               ' --password ' + self.get_password(), cwd='../../src/')
@@ -94,10 +94,10 @@ class SendPrivacy(Send):
         else:
             commonUtil.exit_test('Transaction hash not found', test_name, child)
 
-        time.sleep(30)
+        time.sleep(int(data['general']['default sleep time']))
 
         # Confirm the balance
-        child = pexpect.spawn('node ordinaryBalance --address 0x8679c31bC70D732Ef6F6086516E83B857E09E4fD',
+        child = pexpect.spawn('node ordinaryBalance --address ' + self.get_address(),
                               cwd='../../src/');
 
         if commonUtil.show_logs:

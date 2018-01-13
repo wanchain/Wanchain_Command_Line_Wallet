@@ -23,5 +23,8 @@
   },
   "fetchOTA": {
     "ota_message": "find new OTA:"
+  },
+  "send privacy": {
+    "fetch OTA wait time": "180"
   }
 }
