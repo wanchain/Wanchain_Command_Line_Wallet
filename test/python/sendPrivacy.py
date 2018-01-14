@@ -94,7 +94,7 @@ class SendPrivacy(Send):
         else:
             commonUtil.exit_test('Transaction hash not found', test_name, child)
 
-        time.sleep(int(data['general']['default sleep time']))
+        time.sleep(int(data['general']['balance sync sleep time']))
 
         # Confirm the balance
         child = pexpect.spawn('node ordinaryBalance --address ' + self.get_address(),

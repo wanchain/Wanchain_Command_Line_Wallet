@@ -1,9 +1,9 @@
+import io
+import json
+import os
 import random
 import string
 import sys
-import json
-import os
-import io
 
 import pexpect
 
@@ -13,28 +13,26 @@ status_title = 'status'
 error_title = 'error_message'
 
 
-
-
 def get_random_string():
     return ''.join([random.choice(string.ascii_letters + string.digits) for n in xrange(16)])
 
 
 def exit_test(error_message, test_name, process):
     data = {}
-    data[test_name] = {status_title:'failure',error_title:error_message}
+    data[test_name] = {status_title: 'failure', error_title: error_message}
     with open("temp.dat", "a+") as file:
-        file.write(json.dumps(data)+"\n")
+        file.write(json.dumps(data) + "\n")
     write_results()
     process.close()
     sys.exit(-1)
 
 
-
 def test_successful(test_name):
     data = {}
-    data[test_name] = {status_title:'success'}
+    data[test_name] = {status_title: 'success'}
     with open("temp.dat", "a+") as file:
-        file.write(json.dumps(data)+"\n")
+        file.write(json.dumps(data) + "\n")
+
 
 def check_expect_condition(condition, process, test_name, failure_message):
     i = process.expect(['[\s\S]*(' + condition + ')[\s\S]*', pexpect.TIMEOUT, pexpect.EOF],
@@ -43,7 +41,8 @@ def check_expect_condition(condition, process, test_name, failure_message):
         exit_test(
             "Request timed out. (No response for " + default_timeout + " seconds)", test_name, process)
     if i == 2:
-        exit_test(failure_message, process)
+        exit_test(failure_message, test_name, process)
+
 
 def check_expect_eof(process, test_name):
     i = process.expect([pexpect.EOF, pexpect.TIMEOUT], timeout=int(default_timeout))
@@ -52,7 +51,6 @@ def check_expect_eof(process, test_name):
 
 
 def write_results():
-
     with open("temp.dat") as f:
         content = f.readlines()
 
@@ -69,7 +67,6 @@ def write_results():
     result["total_test_number"] = len(values)
     result["test_result"] = values
     print json.dumps(result, indent=4)
-
 
     with io.open('result.json', 'w', encoding='utf-8') as f:
         f.write(json.dumps(result, ensure_ascii=False, indent=4))
