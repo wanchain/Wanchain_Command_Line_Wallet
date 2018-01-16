@@ -29,31 +29,27 @@ class CreateKeystore(object):
     def create_wallet(self):
         """ test create wallet operation"""
 
-        with open('../../util/test_data.json') as json_file:
+        with open('../util/test_data.json') as json_file:
             data = json.load(json_file)
 
         self.password = commonUtil.get_random_string()
-        child = pexpect.spawn('node createKeystore --password ' + self.password+' --repeatPass ' + self.password, cwd='../../src/')
+        child = pexpect.spawn('node createKeystore --password ' + self.password + ' --repeatPass ' + self.password,
+                              cwd='../../src/')
         if commonUtil.show_logs:
             child.logfile = sys.stdout
 
-        child.expect(pexpect.EOF)
+        commonUtil.check_expect_eof(child, test_name)
+
         result = child.before
-
-
         address_start = result.find('0x')
-        waddress_start = result.find(data["createKeystore"]["waddress"], address_start + 42)
         if address_start == -1:
             commonUtil.exit_test('address value not found', test_name, child)
         self.address = result[address_start:address_start + 42]
 
-
         waddress_start = result.find(data["createKeystore"]["waddress"], address_start + 42)
         if waddress_start == -1:
             commonUtil.exit_test('wan address title/value not found', test_name, child)
-        self.waddress = result[waddress_start+10:waddress_start + 144]
-
-
+        self.waddress = result[waddress_start + 10:waddress_start + 144]
 
 
 def main():
@@ -64,3 +60,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    commonUtil.write_results()
