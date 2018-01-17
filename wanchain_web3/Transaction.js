@@ -454,6 +454,28 @@ const Transaction = {
             web3Require.exit(null);
         },this);
     },
+    sendWanCoinRecordStack()
+    {
+        this.send.addFunction(function(self){
+            self.transaction.from = self.curAddress;
+            self.transaction.to = self.tokenAddress;
+            self.transaction.value = '0x00';
+            self.transaction.gasPrice = self.gasPrice;
+            self.transaction.gas = self.gasLimit;
+            self.transaction.data = wanToken.getTokenInterface(web3Require.web3_ipc,'../sol/DistributeWancoinRecord.sol','DistributeWancoinRecord',
+                self.tokenAddress,'setRecord').getData(self.curAddress,self.tokenAddress);
+        },this);
+        this.send.addFunction(function(self){
+            self.sendTransaction(self);
+        },this,true);
+        this.send.addFunction(function (self) {
+            if(self.funcResult)
+            {
+                insertTransaction(self.funcResult,self.curAddress,self.tokenAddress,self.amount,'token');
+            }
+            web3Require.exit(null);
+        },this);
+    },
     sendDeployContractStack()
     {
         this.send.addFunction(function(self){
@@ -798,7 +820,7 @@ const Transaction = {
                                 console.log('this token balance have no coin!');
                             }
                         }
-                        web3Require.runschemaStep();
+                        web3Require.stepNext();
                     });
                 }
                 else
