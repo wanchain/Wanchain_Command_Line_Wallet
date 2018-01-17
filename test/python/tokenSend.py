@@ -23,7 +23,7 @@ class TokenSend(CreateKeystore):
         self.create_wallet()
 
         child = pexpect.spawn('node tokensend --address ' + data['wallet']['address'] +
-                              ' --tokenAddress ' + data['wallet']['token address'] +
+                              ' --tokenAddress 1 '+
                               ' --toaddress ' + self.get_address() +
                               ' --amount ' + data['send']['amount'] +
                               ' --FeeSel ' + data['send']['fee_selection'] +

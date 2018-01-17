@@ -6,7 +6,7 @@
   "wallet": {
     "address": "0xcAb6aD272D18A52ECd8fc1F37398AbA675145990",
     "password": "viral123",
-    "token address": "0xc709a6Ee87464a303581811b5cfd130727a12B3D"
+    "token address": "0x3150894f182dc46555586c88c2d42c70ed4b32c6"
   },
   "createKeystore": {
     "address": "address:",
@@ -14,7 +14,7 @@
   },
   "send": {
     "fee_selection": "1",
-    "amount": "10",
+    "amount": "1",
     "gas_limit": "200",
     "gas_price": "500000",
     "submit": "Y",
