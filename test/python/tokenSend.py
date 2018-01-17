@@ -1,28 +1,29 @@
 from createKeystore import *
 
-test_name = "send"
+test_name = "tokensend"
 data = None
 
 with open('../util/test_data.json') as json_file:
     data = json.load(json_file)
 
 
-class Send(CreateKeystore):
-    """ Class to test send transaction """
+class TokenSend(CreateKeystore):
+    """ Class to test send token transaction """
 
     def __init__(self):
-        super(Send, self).__init__()
+        super(TokenSend, self).__init__()
         self.tx_hash = ''
 
-    def get_transaction_hash(self):
+    def get_token_transaction_hash(self):
         return self.tx_hash
 
-    def send_transaction(self):
-        """ test send transaction"""
+    def send_token_transaction(self):
+        """ test token send transaction"""
 
         self.create_wallet()
 
-        child = pexpect.spawn('node send --address ' + data['wallet']['address'] +
+        child = pexpect.spawn('node tokensend --address ' + data['wallet']['address'] +
+                              ' --tokenAddress ' + data['wallet']['token address'] +
                               ' --toaddress ' + self.get_address() +
                               ' --amount ' + data['send']['amount'] +
                               ' --FeeSel ' + data['send']['fee_selection'] +
@@ -49,8 +50,8 @@ class Send(CreateKeystore):
 
 
 def main():
-    send = Send()
-    send.send_transaction()
+    tokenSend = TokenSend()
+    tokenSend.send_token_transaction()
     commonUtil.test_successful(test_name)
 
 
