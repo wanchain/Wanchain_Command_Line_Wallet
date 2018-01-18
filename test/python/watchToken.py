@@ -18,6 +18,8 @@ class WatchToken(TokenSend):
     def get_token_balance(self):
         """ get transaction list details"""
 
+        print sys._getframe().f_code.co_name + ": start"
+
         self.send_token_transaction()
         time.sleep(float(data['general']['balance sync sleep time']))
         child = pexpect.spawn('node watchToken --address ' + self.get_address() +
@@ -30,11 +32,14 @@ class WatchToken(TokenSend):
                                           test_name,
                                           "Balance not found")
 
+        print sys._getframe().f_code.co_name + ": end"
 
 def main():
     watchToken = WatchToken()
+    print (" --------------- " + test_name + " start -------------")
     watchToken.get_token_balance()
     commonUtil.test_successful(test_name)
+    print (" --------------- " + test_name + " complete -------------")
 
 
 if __name__ == "__main__":

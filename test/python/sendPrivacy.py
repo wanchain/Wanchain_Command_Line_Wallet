@@ -20,8 +20,10 @@ class SendPrivacy(Send):
     def send_privacy_transaction(self):
         """ test send privacy transaction"""
 
+        print sys._getframe().f_code.co_name + ": start"
         # create a wallet with balance
         self.send_transaction()
+
 
         # Start privacy transaction
         child = pexpect.spawn('node sendPrivacy --address ' + data['wallet']['address'] +
@@ -48,7 +50,10 @@ class SendPrivacy(Send):
         else:
             commonUtil.exit_test('Transaction hash not found', test_name, child)
 
+
+
         # Transaction successful, now wait for block to get scanned
+        print "send a privacy transaction"
         time.sleep(int(data['send privacy']['fetch OTA wait time']))
 
         child = pexpect.spawn('node fetchMyOTA --address ' + self.get_address() +
@@ -71,6 +76,7 @@ class SendPrivacy(Send):
             commonUtil.exit_test('OTA not found', test_name, child)
 
         # OTA fetched, now start refund process
+        print "send refundOTA transaction"
         child = pexpect.spawn('node refundOTAs --address ' + self.address +
                               ' --OTAaddress ' + self.ota +
                               ' --FeeSel ' + data['send']['fee_selection'] +
@@ -97,6 +103,7 @@ class SendPrivacy(Send):
         time.sleep(int(data['general']['balance sync sleep time']))
 
         # Confirm the balance
+        print "send ordinaryBalance transaction"
         child = pexpect.spawn('node ordinaryBalance --address ' + self.get_address(),
                               cwd='../../src/');
 
@@ -114,11 +121,14 @@ class SendPrivacy(Send):
         if (float(result[message_start + len(data['ordinaryBalance']['message']):]) <= float(data['send']['amount'])):
             commonUtil.exit_test('Balance not updated', test_name, child)
 
+        print sys._getframe().f_code.co_name + ": end"
 
 def main():
     sendPrivacy = SendPrivacy()
+    print (" --------------- " + test_name + " start -------------")
     sendPrivacy.send_privacy_transaction()
     commonUtil.test_successful(test_name)
+    print (" --------------- " + test_name + " complete -------------")
 
 
 if __name__ == "__main__":

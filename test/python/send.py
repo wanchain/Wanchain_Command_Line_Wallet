@@ -19,8 +19,10 @@ class Send(CreateKeystore):
 
     def send_transaction(self):
         """ test send transaction"""
+        print sys._getframe().f_code.co_name + ": start"
 
         self.create_wallet()
+
 
         child = pexpect.spawn('node send --address ' + data['wallet']['address'] +
                               ' --toaddress ' + self.get_address() +
@@ -46,12 +48,14 @@ class Send(CreateKeystore):
             self.tx_hash = result[tx_start:tx_start + 66]
         else:
             commonUtil.exit_test('Transaction hash not found', test_name, child)
-
+            print sys._getframe().f_code.co_name + ": end"
 
 def main():
     send = Send()
+    print (" --------------- " + test_name + " start -------------")
     send.send_transaction()
     commonUtil.test_successful(test_name)
+    print (" --------------- " + test_name + " complete -------------")
 
 
 if __name__ == "__main__":

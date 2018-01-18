@@ -29,6 +29,7 @@ class CreateKeystore(object):
     def create_wallet(self):
         """ test create wallet operation"""
 
+        print sys._getframe().f_code.co_name + ": start"
         with open('../util/test_data.json') as json_file:
             data = json.load(json_file)
 
@@ -50,12 +51,14 @@ class CreateKeystore(object):
         if waddress_start == -1:
             commonUtil.exit_test('wan address title/value not found', test_name, child)
         self.waddress = result[waddress_start + 10:waddress_start + 144]
-
+        print sys._getframe().f_code.co_name + ": end"
 
 def main():
     createKeystore = CreateKeystore()
+    print (" --------------- " + test_name + " start -------------")
     createKeystore.create_wallet()
     commonUtil.test_successful(test_name)
+    print (" --------------- " + test_name + " complete -------------")
 
 
 if __name__ == "__main__":

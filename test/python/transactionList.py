@@ -18,6 +18,7 @@ class TransactionList(Send, TokenSend):
     def get_transaction_list(self):
         """ get transaction list details"""
 
+        print sys._getframe().f_code.co_name + ": start"
         self.send_transaction()
         child = pexpect.spawn('node transactionList --address ' + data['wallet']['address'] +
                               ' --transHash ' + self.get_transaction_hash(), cwd='../../src/');
@@ -39,11 +40,15 @@ class TransactionList(Send, TokenSend):
                                           test_name,
                                           "Token transaction summary mismatch")
 
+        print sys._getframe().f_code.co_name + ": end"
+
 
 def main():
     tranasactionList = TransactionList()
+    print (" --------------- " + test_name + " start -------------")
     tranasactionList.get_transaction_list()
     commonUtil.test_successful(test_name)
+    print (" --------------- " + test_name + " complete -------------")
 
 
 if __name__ == "__main__":
