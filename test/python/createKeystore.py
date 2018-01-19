@@ -39,24 +39,27 @@ class CreateKeystore(object):
         if commonUtil.show_logs:
             child.logfile = sys.stdout
 
-        commonUtil.check_expect_eof(child, test_name)
+        commonUtil.check_expect_eof(child, test_name, self.get_address())
 
         result = child.before
         address_start = result.find('0x')
         if address_start == -1:
-            commonUtil.exit_test('address value not found', test_name, child)
+            commonUtil.exit_test('address value not found', test_name, child, self.get_address())
         self.address = result[address_start:address_start + 42]
 
         waddress_start = result.find(data["createKeystore"]["waddress"], address_start + 42)
         if waddress_start == -1:
-            commonUtil.exit_test('wan address title/value not found', test_name, child)
+            commonUtil.exit_test('wan address title/value not found', test_name, child, self.get_address())
         self.waddress = result[waddress_start + 10:waddress_start + 144]
+
+
         print sys._getframe().f_code.co_name + ": end"
 
 def main():
     createKeystore = CreateKeystore()
     print (" --------------- " + test_name + " start -------------")
     createKeystore.create_wallet()
+    commonUtil.cleanup(createKeystore.get_address())
     commonUtil.test_successful(test_name)
     print (" --------------- " + test_name + " complete -------------")
 

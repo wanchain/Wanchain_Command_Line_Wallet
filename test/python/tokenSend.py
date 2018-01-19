@@ -36,7 +36,7 @@ class TokenSend(CreateKeystore):
         if commonUtil.show_logs:
             child.logfile = sys.stdout
 
-        commonUtil.check_expect_eof(child, test_name)
+        commonUtil.check_expect_eof(child, test_name, self.get_address())
 
         result = child.before
 
@@ -48,7 +48,7 @@ class TokenSend(CreateKeystore):
         if (tx_start != -1 & summary != -1):
             self.tx_hash = result[tx_start:tx_start + 66]
         else:
-            commonUtil.exit_test('Transaction hash not found', test_name, child)
+            commonUtil.exit_test('Transaction hash not found', test_name, child, self.get_address())
 
         print sys._getframe().f_code.co_name + ": end"
 
@@ -56,6 +56,7 @@ def main():
     tokenSend = TokenSend()
     print (" --------------- " + test_name + " start -------------")
     tokenSend.send_token_transaction()
+    commonUtil.cleanup(tokenSend.get_address())
     commonUtil.test_successful(test_name)
     print (" --------------- " + test_name + " complete -------------")
 

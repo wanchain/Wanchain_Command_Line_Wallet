@@ -4,6 +4,7 @@ import os
 import random
 import string
 import sys
+import subprocess
 
 import pexpect
 
@@ -13,16 +14,18 @@ status_title = 'status'
 error_title = 'error_message'
 
 
+
 def get_random_string():
     return ''.join([random.choice(string.ascii_letters + string.digits) for n in xrange(16)])
 
 
-def exit_test(error_message, test_name, process):
+def exit_test(error_message, test_name, process, address):
     data = {}
     data[test_name] = {status_title: 'failure', error_title: error_message}
     with open("temp.dat", "a+") as file:
         file.write(json.dumps(data) + "\n")
     write_results()
+    cleanup(address)
     process.close()
     sys.exit(-1)
 
@@ -34,20 +37,20 @@ def test_successful(test_name):
         file.write(json.dumps(data) + "\n")
 
 
-def check_expect_condition(condition, process, test_name, failure_message):
+def check_expect_condition(condition, process, test_name, failure_message, address):
     i = process.expect(['[\s\S]*(' + condition + ')[\s\S]*', pexpect.TIMEOUT, pexpect.EOF],
                        timeout=int(default_timeout))
     if i == 1:
         exit_test(
-            "Request timed out. (No response for " + default_timeout + " seconds)", test_name, process)
+            "Request timed out. (No response for " + default_timeout + " seconds)", test_name, process, address)
     if i == 2:
-        exit_test(failure_message, test_name, process)
+        exit_test(failure_message, test_name, process, address)
 
 
-def check_expect_eof(process, test_name):
+def check_expect_eof(process, test_name, address):
     i = process.expect([pexpect.EOF, pexpect.TIMEOUT], timeout=int(default_timeout))
     if i == 1:
-        exit_test("Request timed out. (No response for " + default_timeout + " seconds)", test_name, process)
+        exit_test("Request timed out. (No response for " + default_timeout + " seconds)", test_name, process, address)
 
 
 def write_results():
@@ -72,3 +75,10 @@ def write_results():
         f.write(json.dumps(result, ensure_ascii=False, indent=4))
 
     os.remove("temp.dat")
+
+
+def cleanup(address):
+    with open('../util/test_data.json') as json_file:
+        data = json.load(json_file)
+    subprocess.check_output("find " + data['general']['keystore path'] +" -name '*" + address[2:] + "*' -delete",
+                                     shell=True)

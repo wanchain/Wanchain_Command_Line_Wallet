@@ -30,7 +30,7 @@ class WatchToken(TokenSend):
 
         commonUtil.check_expect_condition(data['wallet']['token address'] + ")[\s\S]*(" + data['send']['amount'], child,
                                           test_name,
-                                          "Balance not found")
+                                          "Balance not found", self.get_address())
 
         print sys._getframe().f_code.co_name + ": end"
 
@@ -38,6 +38,7 @@ def main():
     watchToken = WatchToken()
     print (" --------------- " + test_name + " start -------------")
     watchToken.get_token_balance()
+    commonUtil.cleanup(watchToken.get_address())
     commonUtil.test_successful(test_name)
     print (" --------------- " + test_name + " complete -------------")
 

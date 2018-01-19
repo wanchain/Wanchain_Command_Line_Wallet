@@ -32,7 +32,7 @@ class SendTokenPrivacy(CreateKeystore):
                               ' --password ' + data['wallet']['password'], cwd='../../src/')
         if commonUtil.show_logs:
              child.logfile = sys.stdout
-        commonUtil.check_expect_eof(child, test_name)
+        commonUtil.check_expect_eof(child, test_name, self.get_address())
 
 
         # create a wallet with balance
@@ -50,7 +50,7 @@ class SendTokenPrivacy(CreateKeystore):
         if commonUtil.show_logs:
              child.logfile = sys.stdout
 
-        commonUtil.check_expect_condition("Input stamp OTA you want to us", child, test_name, "Input stamp OTA you want to us")
+        commonUtil.check_expect_condition("Input stamp OTA you want to us", child, test_name, "Input stamp OTA you want to us", self.get_address())
         result = child.after
         count = str(result.count("status"))
 
@@ -64,7 +64,7 @@ class SendTokenPrivacy(CreateKeystore):
         if commonUtil.show_logs:
              child.logfile = sys.stdout
         commonUtil.check_expect_condition(data['send']['txn_message'], child, test_name,
-                                          "Transaction hash not found")
+                                          "Transaction hash not found", self.get_address())
         print "tokenSendPrivacy end"
 
 
@@ -78,7 +78,7 @@ class SendTokenPrivacy(CreateKeystore):
         if commonUtil.show_logs:
             child.logfile = sys.stdout
 
-        commonUtil.check_expect_eof(child, test_name)
+        commonUtil.check_expect_eof(child, test_name, self.get_address())
 
         result = child.before
         summary = result.find(data['fetchOTA']['ota_message'])
@@ -89,7 +89,7 @@ class SendTokenPrivacy(CreateKeystore):
         if (ota_start != -1 & summary != -1):
             self.token_ota = result[ota_start:ota_start + 134]
         else:
-            commonUtil.exit_test('OTA not found', test_name, child)
+            commonUtil.exit_test('OTA not found', test_name, child, self.get_address())
         print "fetchTokenOTA end"
 
 
@@ -107,7 +107,7 @@ class SendTokenPrivacy(CreateKeystore):
         commonUtil.check_expect_condition(data['wallet']['token address'] + ")[\s\S]*(" + data['send']['amount'],
                                           child,
                                           test_name,
-                                          "Balance not found")
+                                          "Balance not found", self.get_address())
         print "watchTokenOTA end"
 
 
@@ -117,6 +117,7 @@ def main():
     sendTokenPrivacy = SendTokenPrivacy()
     print (" --------------- " + test_name + " start -------------")
     sendTokenPrivacy.send_token_privacy_transaction()
+    commonUtil.cleanup(sendTokenPrivacy.get_address())
     commonUtil.test_successful(test_name)
     print (" --------------- " + test_name + " complete -------------")
 

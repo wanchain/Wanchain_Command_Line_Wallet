@@ -29,13 +29,14 @@ class OrdinaryBalance(Send):
             child.logfile = sys.stdout
 
         commonUtil.check_expect_condition(data['ordinaryBalance']['message'] + data['send']['amount'], child, test_name,
-                                          "Balance not found")
+                                          "Balance not found", self.get_address())
         print sys._getframe().f_code.co_name + ": end"
 
 def main():
     ordinaryBalance = OrdinaryBalance()
     print (" --------------- " + test_name + " start -------------")
     ordinaryBalance.get_ordinary_balance()
+    commonUtil.cleanup(ordinaryBalance.get_address())
     commonUtil.test_successful(test_name)
     print (" --------------- " + test_name + " complete -------------")
 

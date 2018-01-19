@@ -35,7 +35,7 @@ class Send(CreateKeystore):
         if commonUtil.show_logs:
             child.logfile = sys.stdout
 
-        commonUtil.check_expect_eof(child, test_name)
+        commonUtil.check_expect_eof(child, test_name, self.get_address())
 
         result = child.before
 
@@ -47,13 +47,14 @@ class Send(CreateKeystore):
         if (tx_start != -1 & summary != -1):
             self.tx_hash = result[tx_start:tx_start + 66]
         else:
-            commonUtil.exit_test('Transaction hash not found', test_name, child)
+            commonUtil.exit_test('Transaction hash not found', test_name, child, self.get_address())
             print sys._getframe().f_code.co_name + ": end"
 
 def main():
     send = Send()
     print (" --------------- " + test_name + " start -------------")
     send.send_transaction()
+    commonUtil.cleanup(send.get_address())
     commonUtil.test_successful(test_name)
     print (" --------------- " + test_name + " complete -------------")
 

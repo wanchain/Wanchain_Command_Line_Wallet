@@ -37,7 +37,7 @@ class SendPrivacy(Send):
         if commonUtil.show_logs:
             child.logfile = sys.stdout
 
-        commonUtil.check_expect_eof(child, test_name)
+        commonUtil.check_expect_eof(child, test_name, self.get_address())
         result = child.before
 
         tx_start = -1
@@ -48,7 +48,7 @@ class SendPrivacy(Send):
         if (tx_start != -1 & summary != -1):
             self.tx_hash = result[tx_start:tx_start + 66]
         else:
-            commonUtil.exit_test('Transaction hash not found', test_name, child)
+            commonUtil.exit_test('Transaction hash not found', test_name, child, self.get_address())
 
 
 
@@ -62,7 +62,7 @@ class SendPrivacy(Send):
         if commonUtil.show_logs:
             child.logfile = sys.stdout
 
-        commonUtil.check_expect_eof(child, test_name)
+        commonUtil.check_expect_eof(child, test_name, self.get_address())
 
         result = child.before
         summary = result.find(data['fetchOTA']['ota_message'])
@@ -73,7 +73,7 @@ class SendPrivacy(Send):
         if (ota_start != -1 & summary != -1):
             self.ota = result[ota_start:ota_start + 134]
         else:
-            commonUtil.exit_test('OTA not found', test_name, child)
+            commonUtil.exit_test('OTA not found', test_name, child, self.get_address())
 
         # OTA fetched, now start refund process
         print "send refundOTA transaction"
@@ -87,7 +87,7 @@ class SendPrivacy(Send):
         if commonUtil.show_logs:
             child.logfile = sys.stdout
 
-        commonUtil.check_expect_eof(child, test_name)
+        commonUtil.check_expect_eof(child, test_name, self.get_address())
         result = child.before
 
         tx_start = -1
@@ -98,7 +98,7 @@ class SendPrivacy(Send):
         if (tx_start != -1 & summary != -1):
             self.tx_hash = result[tx_start:tx_start + 66]
         else:
-            commonUtil.exit_test('Transaction hash not found', test_name, child)
+            commonUtil.exit_test('Transaction hash not found', test_name, child, self.get_address())
 
         time.sleep(int(data['general']['balance sync sleep time']))
 
@@ -110,7 +110,7 @@ class SendPrivacy(Send):
         if commonUtil.show_logs:
             child.logfile = sys.stdout
 
-        commonUtil.check_expect_eof(child, test_name)
+        commonUtil.check_expect_eof(child, test_name, self.get_address())
 
         result = child.before
 
@@ -119,7 +119,7 @@ class SendPrivacy(Send):
         # The balance should be more than starting balance before privacy transaction
         # Can't predict exact balance as fees get deducted in refundOTA process
         if (float(result[message_start + len(data['ordinaryBalance']['message']):]) <= float(data['send']['amount'])):
-            commonUtil.exit_test('Balance not updated', test_name, child)
+            commonUtil.exit_test('Balance not updated', test_name, child, self.get_address())
 
         print sys._getframe().f_code.co_name + ": end"
 
@@ -127,6 +127,7 @@ def main():
     sendPrivacy = SendPrivacy()
     print (" --------------- " + test_name + " start -------------")
     sendPrivacy.send_privacy_transaction()
+    commonUtil.cleanup(sendPrivacy.get_address())
     commonUtil.test_successful(test_name)
     print (" --------------- " + test_name + " complete -------------")
 
