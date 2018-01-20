@@ -1,6 +1,6 @@
 import time
 
-from createKeystore import *
+from send import *
 
 test_name = "sendTokenPrivacy"
 data = None
@@ -9,7 +9,7 @@ with open('../util/test_data.json') as json_file:
     data = json.load(json_file)
 
 
-class SendTokenPrivacy(CreateKeystore):
+class SendTokenPrivacy(Send):
     """ Class to test send privacy transaction """
 
     def __init__(self):
@@ -33,10 +33,13 @@ class SendTokenPrivacy(CreateKeystore):
         if commonUtil.show_logs:
              child.logfile = sys.stdout
         commonUtil.check_expect_eof(child, test_name, self.get_address())
+        print "tokenBuyStamp end"
 
+        # to sync the stamp
+        time.sleep(float(data['general']['balance sync sleep time']))
 
         # create a wallet with balance
-        self.create_wallet()
+        self.send_transaction()
 
 
         # Start privacy transaction
@@ -50,7 +53,7 @@ class SendTokenPrivacy(CreateKeystore):
         if commonUtil.show_logs:
              child.logfile = sys.stdout
 
-        commonUtil.check_expect_condition("Input stamp OTA you want to us", child, test_name, "Input stamp OTA you want to us", self.get_address())
+        commonUtil.check_expect_condition("Input stamp OTA you want to us", child, test_name, "tokenSendPrivacy failed", self.get_address())
         result = child.after
         count = str(result.count("status"))
 
