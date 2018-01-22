@@ -1,12 +1,12 @@
 {
   "general": {
     "default timeout": "120",
-    "balance sync sleep time": "60",
+    "balance sync sleep time": "90",
     "keystore path": "~/.wanchain/testnet/keystore/"
   },
   "wallet": {
-    "address": "0xcAb6aD272D18A52ECd8fc1F37398AbA675145990",
-    "password": "viral123",
+    "address": "0x957BBf0267F6C0cE0a114f7a180611b144Fc99db",
+    "password": "~/.wanchain/cli_test_account_passwd",
     "token address": "0x3150894F182dc46555586C88C2d42c70ed4B32c6"
   },
   "createKeystore": {
@@ -14,18 +14,18 @@
     "waddress": "waddress:"
   },
   "send": {
-    "fee_selection": "1",
+    "fee selection": "1",
     "amount": "1",
-    "gas_limit": "200",
-    "gas_price": "500000",
+    "gas limit": "200",
+    "gas price": "500000",
     "submit": "Y",
-    "txn_message": "Transaction hash"
+    "txn message": "Transaction hash"
   },
   "ordinaryBalance": {
     "message": "balance : "
   },
   "fetchOTA": {
-    "ota_message": "find new OTA:"
+    "ota message": "find new OTA:"
   },
   "send privacy": {
     "fetch OTA wait time": "300"

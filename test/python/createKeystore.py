@@ -33,6 +33,7 @@ class CreateKeystore(object):
         with open('../util/test_data.json') as json_file:
             data = json.load(json_file)
 
+
         self.password = commonUtil.get_random_string()
         child = pexpect.spawn('node createKeystore --password ' + self.password + ' --repeatPass ' + self.password,
                               cwd='../../src/')

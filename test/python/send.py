@@ -27,11 +27,11 @@ class Send(CreateKeystore):
         child = pexpect.spawn('node send --address ' + data['wallet']['address'] +
                               ' --toaddress ' + self.get_address() +
                               ' --amount ' + data['send']['amount'] +
-                              ' --FeeSel ' + data['send']['fee_selection'] +
-                              ' --gasLimit ' + data['send']['gas_price'] +
-                              ' --gasPrice ' + data['send']['gas_limit'] +
+                              ' --FeeSel ' + data['send']['fee selection'] +
+                              ' --gasLimit ' + data['send']['gas price'] +
+                              ' --gasPrice ' + data['send']['gas limit'] +
                               ' --submit ' + data['send']['submit'] +
-                              ' --password ' + data['wallet']['password'], cwd='../../src/')
+                              ' --password ' + commonUtil.read_wallet_password(test_name), cwd='../../src/')
         if commonUtil.show_logs:
             child.logfile = sys.stdout
 
@@ -40,7 +40,7 @@ class Send(CreateKeystore):
         result = child.before
 
         tx_start = -1
-        summary = result.find(data['send']['txn_message'])
+        summary = result.find(data['send']['txn message'])
         if (summary != -1):
             tx_start = result.find('0x', summary)
 

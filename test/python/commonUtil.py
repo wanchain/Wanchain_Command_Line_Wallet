@@ -5,14 +5,21 @@ import random
 import string
 import sys
 import subprocess
-
 import pexpect
+import createKeystore
+import ordinaryBalance
+import send
+import sendPrivacy
+import tokenSend
+import transactionList
+import watchToken
+import sendTokenPrivacy
 
 default_timeout = '120'
 show_logs = True
 status_title = 'status'
 error_title = 'error_message'
-
+skip_test = "Test skipped"
 
 
 def get_random_string():
@@ -26,7 +33,8 @@ def exit_test(error_message, test_name, process, address):
         file.write(json.dumps(data) + "\n")
     write_results()
     cleanup(address)
-    process.close()
+    if process!= None:
+        process.close()
     sys.exit(-1)
 
 
@@ -53,14 +61,18 @@ def check_expect_eof(process, test_name, address):
         exit_test("Request timed out. (No response for " + default_timeout + " seconds)", test_name, process, address)
 
 
-def write_results():
+def write_results(type="individual"):
+
+    values = {}
+    if type == "all":
+        values = initialize_result()
+
+
     with open("temp.dat") as f:
         content = f.readlines()
-
     # remove whitespace characters like `\n` at the end of each line
     content = [x.strip() for x in content]
 
-    values = {}
     for x in content:
         dict = json.loads(x)
         for key, value in dict.items():
@@ -80,5 +92,35 @@ def write_results():
 def cleanup(address):
     with open('../util/test_data.json') as json_file:
         data = json.load(json_file)
-    subprocess.check_output("find " + data['general']['keystore path'] +" -name '*" + address[2:] + "*' -delete",
+
+    if address != "" and address!= None:
+        subprocess.check_output("find " + data['general']['keystore path'] +" -name '*" + address[2:] + "*' -delete",
                                      shell=True)
+
+def initialize_result():
+
+    initial_values = {}
+    initial_values[createKeystore.test_name] = {status_title: skip_test, error_title: "NA"}
+    initial_values[ordinaryBalance.test_name] = {status_title: skip_test, error_title: "NA"}
+    initial_values[send.test_name] = {status_title: skip_test, error_title: "NA"}
+    initial_values[sendPrivacy.test_name] = {status_title: skip_test, error_title: "NA"}
+    initial_values[sendTokenPrivacy.test_name] = {status_title: skip_test, error_title: "NA"}
+    initial_values[tokenSend.test_name] = {status_title: skip_test, error_title: "NA"}
+    initial_values[transactionList.test_name] = {status_title: skip_test, error_title: "NA"}
+    initial_values[watchToken.test_name] = {status_title: skip_test, error_title: "NA"}
+
+    return initial_values
+
+
+
+def read_wallet_password(testname):
+    with open('../util/test_data.json') as json_file:
+        data = json.load(json_file)
+    try:
+        with open(os.path.expanduser(data['wallet']['password']), 'r') as f:
+            password = f.readline()
+            if(password == ""):
+                exit_test("Test wallet password not found at path: " +data['wallet']['test data'],testname,None,"")
+    except IOError:
+        exit_test("Test wallet password file not present at path: " + data['wallet']['test data'], testname, None, "")
+    return password

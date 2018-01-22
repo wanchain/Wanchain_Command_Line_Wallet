@@ -25,11 +25,11 @@ class SendTokenPrivacy(Send):
         print "tokenBuyStamp start"
         child = pexpect.spawn('node tokenBuyStamp --address ' + data['wallet']['address'] +
                               ' --stampBalance 1' +
-                              ' --FeeSel ' + data['send']['fee_selection'] +
-                              ' --gasLimit ' + data['send']['gas_price'] +
-                              ' --gasPrice ' + data['send']['gas_limit'] +
+                              ' --FeeSel ' + data['send']['fee selection'] +
+                              ' --gasLimit ' + data['send']['gas price'] +
+                              ' --gasPrice ' + data['send']['gas limit'] +
                               ' --submit ' + data['send']['submit'] +
-                              ' --password ' + data['wallet']['password'], cwd='../../src/')
+                              ' --password ' + commonUtil.read_wallet_password(test_name), cwd='../../src/')
         if commonUtil.show_logs:
              child.logfile = sys.stdout
         commonUtil.check_expect_eof(child, test_name, self.get_address())
@@ -63,10 +63,10 @@ class SendTokenPrivacy(Send):
                               ' --amount ' + data['send']['amount'] +
                               ' --stampOTA ' + count +
                               ' --submit ' + data['send']['submit'] +
-                              ' --password ' + data['wallet']['password'], cwd='../../src/')
+                              ' --password ' + commonUtil.read_wallet_password(test_name), cwd='../../src/')
         if commonUtil.show_logs:
              child.logfile = sys.stdout
-        commonUtil.check_expect_condition(data['send']['txn_message'], child, test_name,
+        commonUtil.check_expect_condition(data['send']['txn message'], child, test_name,
                                           "Transaction hash not found", self.get_address())
         print "tokenSendPrivacy end"
 
@@ -84,7 +84,7 @@ class SendTokenPrivacy(Send):
         commonUtil.check_expect_eof(child, test_name, self.get_address())
 
         result = child.before
-        summary = result.find(data['fetchOTA']['ota_message'])
+        summary = result.find(data['fetchOTA']['ota message'])
         ota_start = ''
         if (summary != -1):
             ota_start = result.find('0x', summary)

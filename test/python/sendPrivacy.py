@@ -29,11 +29,11 @@ class SendPrivacy(Send):
         child = pexpect.spawn('node sendPrivacy --address ' + data['wallet']['address'] +
                               ' --waddress ' + self.get_wan_address() +
                               ' --PrivacyAmount ' + data['send']['amount'] +
-                              ' --FeeSel ' + data['send']['fee_selection'] +
-                              ' --gasLimit ' + data['send']['gas_price'] +
-                              ' --gasPrice ' + data['send']['gas_limit'] +
+                              ' --FeeSel ' + data['send']['fee selection'] +
+                              ' --gasLimit ' + data['send']['gas price'] +
+                              ' --gasPrice ' + data['send']['gas limit'] +
                               ' --submit ' + data['send']['submit'] +
-                              ' --password ' + data['wallet']['password'], cwd='../../src/')
+                              ' --password ' + commonUtil.read_wallet_password(test_name), cwd='../../src/')
         if commonUtil.show_logs:
             child.logfile = sys.stdout
 
@@ -41,7 +41,7 @@ class SendPrivacy(Send):
         result = child.before
 
         tx_start = -1
-        summary = result.find(data['send']['txn_message'])
+        summary = result.find(data['send']['txn message'])
         if (summary != -1):
             tx_start = result.find('0x', summary)
 
@@ -65,7 +65,7 @@ class SendPrivacy(Send):
         commonUtil.check_expect_eof(child, test_name, self.get_address())
 
         result = child.before
-        summary = result.find(data['fetchOTA']['ota_message'])
+        summary = result.find(data['fetchOTA']['ota message'])
         ota_start = ''
         if (summary != -1):
             ota_start = result.find('0x', summary)
@@ -79,9 +79,9 @@ class SendPrivacy(Send):
         print "send refundOTA transaction"
         child = pexpect.spawn('node refundOTAs --address ' + self.address +
                               ' --OTAaddress ' + self.ota +
-                              ' --FeeSel ' + data['send']['fee_selection'] +
-                              ' --gasLimit ' + data['send']['gas_price'] +
-                              ' --gasPrice ' + data['send']['gas_limit'] +
+                              ' --FeeSel ' + data['send']['fee selection'] +
+                              ' --gasLimit ' + data['send']['gas price'] +
+                              ' --gasPrice ' + data['send']['gas limit'] +
                               ' --submit ' + data['send']['submit'] +
                               ' --password ' + self.get_password(), cwd='../../src/')
         if commonUtil.show_logs:
@@ -91,7 +91,7 @@ class SendPrivacy(Send):
         result = child.before
 
         tx_start = -1
-        summary = result.find(data['send']['txn_message'])
+        summary = result.find(data['send']['txn message'])
         if (summary != -1):
             tx_start = result.find('0x', summary)
 
