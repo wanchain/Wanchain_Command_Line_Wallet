@@ -36,7 +36,6 @@ def main():
     ordinaryBalance = OrdinaryBalance()
     print (" --------------- " + test_name + " start -------------")
     ordinaryBalance.get_ordinary_balance()
-    commonUtil.cleanup(ordinaryBalance.get_address())
     commonUtil.test_successful(test_name)
     print (" --------------- " + test_name + " complete -------------")
 

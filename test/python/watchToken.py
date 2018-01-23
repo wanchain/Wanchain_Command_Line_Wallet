@@ -38,7 +38,6 @@ def main():
     watchToken = WatchToken()
     print (" --------------- " + test_name + " start -------------")
     watchToken.get_token_balance()
-    commonUtil.cleanup(watchToken.get_address())
     commonUtil.test_successful(test_name)
     print (" --------------- " + test_name + " complete -------------")
 

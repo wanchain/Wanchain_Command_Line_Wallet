@@ -60,7 +60,6 @@ def main():
     createKeystore = CreateKeystore()
     print (" --------------- " + test_name + " start -------------")
     createKeystore.create_wallet()
-    commonUtil.cleanup(createKeystore.get_address())
     commonUtil.test_successful(test_name)
     print (" --------------- " + test_name + " complete -------------")
 

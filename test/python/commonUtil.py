@@ -6,14 +6,7 @@ import string
 import sys
 import subprocess
 import pexpect
-import createKeystore
-import ordinaryBalance
-import send
-import sendPrivacy
-import tokenSend
-import transactionList
-import watchToken
-import sendTokenPrivacy
+
 
 default_timeout = '120'
 show_logs = True
@@ -32,7 +25,6 @@ def exit_test(error_message, test_name, process, address):
     with open("temp.dat", "a+") as file:
         file.write(json.dumps(data) + "\n")
     write_results()
-    cleanup(address)
     if process!= None:
         process.close()
     sys.exit(-1)
@@ -61,11 +53,9 @@ def check_expect_eof(process, test_name, address):
         exit_test("Request timed out. (No response for " + default_timeout + " seconds)", test_name, process, address)
 
 
-def write_results(type="individual"):
+def write_results():
 
-    values = {}
-    if type == "all":
-        values = initialize_result()
+    values = initialize_result()
 
 
     with open("temp.dat") as f:
@@ -88,16 +78,25 @@ def write_results(type="individual"):
 
     os.remove("temp.dat")
 
-
+'''
+!Don't use in mainnet!
 def cleanup(address):
     with open('../util/test_data.json') as json_file:
         data = json.load(json_file)
 
     if address != "" and address!= None:
         subprocess.check_output("find " + data['general']['keystore path'] +" -name '*" + address[2:] + "*' -delete",
-                                     shell=True)
-
+                                             shell=True)
+'''
 def initialize_result():
+    import createKeystore
+    import ordinaryBalance
+    import send
+    import sendPrivacy
+    import tokenSend
+    import transactionList
+    import watchToken
+    import sendTokenPrivacy
 
     initial_values = {}
     initial_values[createKeystore.test_name] = {status_title: skip_test, error_title: "NA"}

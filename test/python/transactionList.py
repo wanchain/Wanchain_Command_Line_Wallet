@@ -26,7 +26,6 @@ class TransactionList(Send, TokenSend):
         if commonUtil.show_logs:
             child.logfile = sys.stdout
 
-        commonUtil.cleanup(self.get_address())
 
         commonUtil.check_expect_condition(self.get_transaction_hash(), child, test_name,
                                           "Regular transaction's hash not found in the result", self.get_address())
@@ -42,7 +41,6 @@ class TransactionList(Send, TokenSend):
                                           test_name,
                                           "Token transaction summary mismatch", self.get_address())
 
-        commonUtil.cleanup(self.get_address())
         print sys._getframe().f_code.co_name + ": end"
 
 

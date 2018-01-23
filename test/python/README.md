@@ -11,7 +11,7 @@
     {
  		"address": Make sure this wallet with wan, token and privacy token balance
  		"password": "~/.wanchain/cli_test_account_passwd" #store password of above wallet on this path
- 		"token address" : The token and privacy token contract address
+ 		"token address" : The token and privacy token contract address associated with wallet
  	} 
 
 # Execute Test:

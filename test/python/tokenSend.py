@@ -21,16 +21,30 @@ class TokenSend(CreateKeystore):
         """ test token send transaction"""
 
         print sys._getframe().f_code.co_name + ": start"
-        self.create_wallet()
 
+
+        # This is to make sure our wallet's token balance is synced
+        print "watch token start"
+        child = pexpect.spawn('node watchToken --address ' + data['wallet']['address'] +
+                              ' --tokenAddress ' + data['wallet']['token address'], cwd='../../src/');
+
+        if commonUtil.show_logs:
+            child.logfile = sys.stdout
+
+        commonUtil.check_expect_condition(data['wallet']['token address'], child,
+                                          test_name,
+                                          "Watch token failed for source address", self.get_address())
+        print "watch token end"
+
+        self.create_wallet()
 
         child = pexpect.spawn('node tokensend --address ' + data['wallet']['address'] +
                               ' --tokenAddress 1 '+
                               ' --toaddress ' + self.get_address() +
                               ' --amount ' + data['send']['amount'] +
                               ' --FeeSel ' + data['send']['fee selection'] +
-                              ' --gasLimit ' + data['send']['gas price'] +
-                              ' --gasPrice ' + data['send']['gas limit'] +
+                              ' --gasLimit ' + data['send']['gas limit'] +
+                              ' --gasPrice ' + data['send']['gas price'] +
                               ' --submit ' + data['send']['submit'] +
                               ' --password ' + commonUtil.read_wallet_password(test_name), cwd='../../src/')
         if commonUtil.show_logs:
@@ -56,7 +70,6 @@ def main():
     tokenSend = TokenSend()
     print (" --------------- " + test_name + " start -------------")
     tokenSend.send_token_transaction()
-    commonUtil.cleanup(tokenSend.get_address())
     commonUtil.test_successful(test_name)
     print (" --------------- " + test_name + " complete -------------")
 

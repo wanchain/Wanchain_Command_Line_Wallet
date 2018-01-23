@@ -16,8 +16,8 @@
   "send": {
     "fee selection": "1",
     "amount": "1",
-    "gas limit": "200",
-    "gas price": "500000",
+    "gas limit": "500000",
+    "gas price": "200",
     "submit": "Y",
     "txn message": "Transaction hash"
   },

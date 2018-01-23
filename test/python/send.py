@@ -28,8 +28,8 @@ class Send(CreateKeystore):
                               ' --toaddress ' + self.get_address() +
                               ' --amount ' + data['send']['amount'] +
                               ' --FeeSel ' + data['send']['fee selection'] +
-                              ' --gasLimit ' + data['send']['gas price'] +
-                              ' --gasPrice ' + data['send']['gas limit'] +
+                              ' --gasLimit ' + data['send']['gas limit'] +
+                              ' --gasPrice ' + data['send']['gas price'] +
                               ' --submit ' + data['send']['submit'] +
                               ' --password ' + commonUtil.read_wallet_password(test_name), cwd='../../src/')
         if commonUtil.show_logs:
@@ -54,7 +54,6 @@ def main():
     send = Send()
     print (" --------------- " + test_name + " start -------------")
     send.send_transaction()
-    commonUtil.cleanup(send.get_address())
     commonUtil.test_successful(test_name)
     print (" --------------- " + test_name + " complete -------------")
 

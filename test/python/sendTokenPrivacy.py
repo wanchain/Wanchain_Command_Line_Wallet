@@ -26,8 +26,8 @@ class SendTokenPrivacy(Send):
         child = pexpect.spawn('node tokenBuyStamp --address ' + data['wallet']['address'] +
                               ' --stampBalance 1' +
                               ' --FeeSel ' + data['send']['fee selection'] +
-                              ' --gasLimit ' + data['send']['gas price'] +
-                              ' --gasPrice ' + data['send']['gas limit'] +
+                              ' --gasLimit ' + data['send']['gas limit'] +
+                              ' --gasPrice ' + data['send']['gas price'] +
                               ' --submit ' + data['send']['submit'] +
                               ' --password ' + commonUtil.read_wallet_password(test_name), cwd='../../src/')
         if commonUtil.show_logs:
@@ -120,7 +120,6 @@ def main():
     sendTokenPrivacy = SendTokenPrivacy()
     print (" --------------- " + test_name + " start -------------")
     sendTokenPrivacy.send_token_privacy_transaction()
-    commonUtil.cleanup(sendTokenPrivacy.get_address())
     commonUtil.test_successful(test_name)
     print (" --------------- " + test_name + " complete -------------")
 

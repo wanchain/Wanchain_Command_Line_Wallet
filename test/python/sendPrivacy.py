@@ -30,8 +30,8 @@ class SendPrivacy(Send):
                               ' --waddress ' + self.get_wan_address() +
                               ' --PrivacyAmount ' + data['send']['amount'] +
                               ' --FeeSel ' + data['send']['fee selection'] +
-                              ' --gasLimit ' + data['send']['gas price'] +
-                              ' --gasPrice ' + data['send']['gas limit'] +
+                              ' --gasLimit ' + data['send']['gas limit'] +
+                              ' --gasPrice ' + data['send']['gas price'] +
                               ' --submit ' + data['send']['submit'] +
                               ' --password ' + commonUtil.read_wallet_password(test_name), cwd='../../src/')
         if commonUtil.show_logs:
@@ -80,8 +80,8 @@ class SendPrivacy(Send):
         child = pexpect.spawn('node refundOTAs --address ' + self.address +
                               ' --OTAaddress ' + self.ota +
                               ' --FeeSel ' + data['send']['fee selection'] +
-                              ' --gasLimit ' + data['send']['gas price'] +
-                              ' --gasPrice ' + data['send']['gas limit'] +
+                              ' --gasLimit ' + data['send']['gas limit'] +
+                              ' --gasPrice ' + data['send']['gas price'] +
                               ' --submit ' + data['send']['submit'] +
                               ' --password ' + self.get_password(), cwd='../../src/')
         if commonUtil.show_logs:
@@ -127,7 +127,6 @@ def main():
     sendPrivacy = SendPrivacy()
     print (" --------------- " + test_name + " start -------------")
     sendPrivacy.send_privacy_transaction()
-    commonUtil.cleanup(sendPrivacy.get_address())
     commonUtil.test_successful(test_name)
     print (" --------------- " + test_name + " complete -------------")
 
