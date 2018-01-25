@@ -20,7 +20,7 @@ class TransactionList(Send, TokenSend):
 
         print sys._getframe().f_code.co_name + ": start"
         self.send_transaction()
-        child = pexpect.spawn('node transactionList --address ' + data['wallet']['address'] +
+        child = pexpect.spawn('node transactionList --address 1' +
                               ' --transHash ' + self.get_transaction_hash(), cwd='../../src/');
 
         if commonUtil.show_logs:
@@ -31,7 +31,7 @@ class TransactionList(Send, TokenSend):
                                           "Regular transaction's hash not found in the result", self.get_address())
 
         self.send_token_transaction()
-        child = pexpect.spawn('node transactionList --address ' + data['wallet']['address'] +
+        child = pexpect.spawn('node transactionList --address 1' +
                               ' --transHash ' + self.get_transaction_hash(), cwd='../../src/');
 
         if commonUtil.show_logs:

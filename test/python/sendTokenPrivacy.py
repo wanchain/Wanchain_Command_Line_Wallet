@@ -23,7 +23,7 @@ class SendTokenPrivacy(Send):
         print sys._getframe().f_code.co_name + ": start"
 
         print "tokenBuyStamp start"
-        child = pexpect.spawn('node tokenBuyStamp --address ' + data['wallet']['address'] +
+        child = pexpect.spawn('node tokenBuyStamp --address 1' +
                               ' --stampBalance 1' +
                               ' --FeeSel ' + data['send']['fee selection'] +
                               ' --gasLimit ' + data['send']['gas limit'] +
@@ -44,7 +44,7 @@ class SendTokenPrivacy(Send):
 
         # Start privacy transaction
         print "tokenSendPrivacy start"
-        child = pexpect.spawn('node tokenSendPrivacy --address ' + data['wallet']['address'] +
+        child = pexpect.spawn('node tokenSendPrivacy --address 1' +
                               ' --contractBalance 1' +
                               ' --waddress ' + self.get_wan_address() +
                               ' --amount ' + data['send']['amount']
@@ -57,7 +57,7 @@ class SendTokenPrivacy(Send):
         result = child.after
         count = str(result.count("status"))
 
-        child = pexpect.spawn('node tokenSendPrivacy --address ' + data['wallet']['address'] +
+        child = pexpect.spawn('node tokenSendPrivacy --address 1' +
                               ' --contractBalance 1' +
                               ' --waddress ' + self.get_wan_address() +
                               ' --amount ' + data['send']['amount'] +

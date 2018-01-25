@@ -24,7 +24,7 @@ class Send(CreateKeystore):
         self.create_wallet()
 
 
-        child = pexpect.spawn('node send --address ' + data['wallet']['address'] +
+        child = pexpect.spawn('node send --address 1' +
                               ' --toaddress ' + self.get_address() +
                               ' --amount ' + data['send']['amount'] +
                               ' --FeeSel ' + data['send']['fee selection'] +

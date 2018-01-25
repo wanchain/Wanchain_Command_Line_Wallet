@@ -24,9 +24,16 @@ class SendPrivacy(Send):
         # create a wallet with balance
         self.send_transaction()
 
-
+        print 'node sendPrivacy --address 1' + \
+                              ' --waddress ' + self.get_wan_address() + \
+                              ' --PrivacyAmount ' + data['send']['amount'] + \
+                              ' --FeeSel ' + data['send']['fee selection'] + \
+                              ' --gasLimit ' + data['send']['gas limit'] + \
+                              ' --gasPrice ' + data['send']['gas price'] + \
+                              ' --submit ' + data['send']['submit'] + \
+                              ' --password ' + commonUtil.read_wallet_password(test_name)
         # Start privacy transaction
-        child = pexpect.spawn('node sendPrivacy --address ' + data['wallet']['address'] +
+        child = pexpect.spawn('node sendPrivacy --address 1' +
                               ' --waddress ' + self.get_wan_address() +
                               ' --PrivacyAmount ' + data['send']['amount'] +
                               ' --FeeSel ' + data['send']['fee selection'] +

@@ -25,7 +25,7 @@ class TokenSend(CreateKeystore):
 
         # This is to make sure our wallet's token balance is synced
         print "watch token start"
-        child = pexpect.spawn('node watchToken --address ' + data['wallet']['address'] +
+        child = pexpect.spawn('node watchToken --address 1' +
                               ' --tokenAddress ' + data['wallet']['token address'], cwd='../../src/');
 
         if commonUtil.show_logs:
@@ -38,7 +38,7 @@ class TokenSend(CreateKeystore):
 
         self.create_wallet()
 
-        child = pexpect.spawn('node tokensend --address ' + data['wallet']['address'] +
+        child = pexpect.spawn('node tokensend --address 1' +
                               ' --tokenAddress 1 '+
                               ' --toaddress ' + self.get_address() +
                               ' --amount ' + data['send']['amount'] +
