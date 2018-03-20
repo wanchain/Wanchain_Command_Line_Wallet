@@ -5,7 +5,7 @@
     "keystore path": "~/.wanchain/testnet/keystore/"
   },
   "wallet": {
-    "address": "0x957BBf0267F6C0cE0a114f7a180611b144Fc99db",
+    "address": "0xcAb6aD272D18A52ECd8fc1F37398AbA675145990",
     "password": "~/.wanchain/cli_test_account_passwd",
     "token address": "0x3150894F182dc46555586C88C2d42c70ed4B32c6"
   },
