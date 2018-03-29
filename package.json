@@ -18,7 +18,7 @@
     "underscore": "^1.8.3",
     "underscore-deep-extend": "^1.1.5",
     "uuid": "^3.1.0",
-    "wanchain-util": "^1.0.7",
+    "wanchain-util": "^1.1.0",
     "web3": "^0.20.2"
   },
   "keywords": [
