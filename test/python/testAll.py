@@ -11,6 +11,7 @@ import sendTokenPrivacy
 createKeystore.main()
 send.main()
 transactionList.main()
+tokenTransactionList.main()
 ordinaryBalance.main()
 tokenSend.main()
 watchToken.main()

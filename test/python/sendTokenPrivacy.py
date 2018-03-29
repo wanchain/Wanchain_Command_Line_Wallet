@@ -41,6 +41,24 @@ class SendTokenPrivacy(Send):
         # create a wallet with balance
         self.send_transaction()
 
+        #Init privacy token asset
+        print 'initPrivacyAsset start'
+        child = pexpect.spawn('node initPrivacyAsset --address ' + data['wallet']['address'] +
+                              ' --tokenAddress ' + data['wallet']['token address'] +
+                              ' --FeeSel ' + data['send']['fee selection'] +
+                              ' --gasLimit ' + data['send']['gas limit'] +
+                              ' --gasPrice ' + data['send']['gas price'] +
+                              ' --submit ' + data['send']['submit'] +
+                              ' --password ' + commonUtil.read_wallet_password(test_name), cwd='../')        
+
+        if commonUtil.show_logs:
+            child.logfile = sys.stdout
+
+        commonUtil.check_expect_condition('Transaction hash:', child,
+                                          test_name,
+                                          "initPrivacyAsset failed", self.get_address())
+
+        print 'initPrivacyAsset end'
 
         # Start privacy transaction
         print "tokenSendPrivacy start"

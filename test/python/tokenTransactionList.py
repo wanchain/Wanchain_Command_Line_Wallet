@@ -1,14 +1,14 @@
 from send import *
 from tokenSend import *
 
-test_name = "transactionList"
+test_name = "tokenTransactionList"
 data = None
 
 with open('../util/test_data.json') as json_file:
     data = json.load(json_file)
 
 
-class TransactionList(Send):
+class TransactionList(Send, TokenSend):
     """ Class to test transaction list"""
 
     def __init__(self):
@@ -19,16 +19,17 @@ class TransactionList(Send):
         """ get transaction list details"""
 
         print sys._getframe().f_code.co_name + ": start"
-        self.send_transaction()
+
+        self.send_token_transaction()
         child = pexpect.spawn('node transactionList --address 1' +
                               ' --transHash ' + self.get_transaction_hash(), cwd='../../src/');
 
         if commonUtil.show_logs:
             child.logfile = sys.stdout
 
-
-        commonUtil.check_expect_condition(self.get_transaction_hash(), child, test_name,
-                                          "Regular transaction's hash not found in the result", self.get_address())
+        commonUtil.check_expect_condition(self.get_token_transaction_hash() + ")[\s\S]*(" + '"Type":"token"', child,
+                                          test_name,
+                                          "Token transaction summary mismatch", self.get_address())
 
         print sys._getframe().f_code.co_name + ": end"
 

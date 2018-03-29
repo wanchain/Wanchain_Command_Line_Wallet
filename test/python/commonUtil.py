@@ -95,6 +95,7 @@ def initialize_result():
     import sendPrivacy
     import tokenSend
     import transactionList
+    import tokenTransactionList
     import watchToken
     import sendTokenPrivacy
 
@@ -106,6 +107,7 @@ def initialize_result():
     initial_values[sendTokenPrivacy.test_name] = {status_title: skip_test, error_title: "NA"}
     initial_values[tokenSend.test_name] = {status_title: skip_test, error_title: "NA"}
     initial_values[transactionList.test_name] = {status_title: skip_test, error_title: "NA"}
+    initial_values[tokenTransactionList.test_name] = {status_title: skip_test, error_title: "NA"}
     initial_values[watchToken.test_name] = {status_title: skip_test, error_title: "NA"}
 
     return initial_values
