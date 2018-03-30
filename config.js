@@ -1,5 +1,5 @@
 const config = {};
-var wanchainNet = 'testnet';
+var wanchainNet = '';
 config.dataName = wanchainNet;
 if(wanchainNet.length)
 {
