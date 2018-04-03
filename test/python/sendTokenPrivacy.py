@@ -41,6 +41,24 @@ class SendTokenPrivacy(Send):
         # create a wallet with balance
         self.send_transaction()
 
+
+
+        print "watchTokenOTA start"
+        child = pexpect.spawn('node watchTokenOTA --address ' + self.get_address() +
+                              ' --tokenAddress ' + data['wallet']['token address'] +
+                              ' --OTAAddress ' + '0x02529bdb23df2f1f6730a960da4b8cacd027037f8581697651eb9b8c9667549400033baad5a5b1aae530ed86235f2182fb8a4e9caabc939e622a97641e9a415b6f0f', cwd='../../src/')
+
+        if commonUtil.show_logs:
+            child.logfile = sys.stdout
+
+        commonUtil.check_expect_condition(data['wallet']['token address'] + ")[\s\S]*(" + data['send']['amount'],
+                                          child,
+                                          test_name,
+                                          "Balance not found", self.get_address())
+        print "watchTokenOTA end"
+
+
+
         #Init privacy token asset
         #print 'initPrivacyAsset start'
         #child = pexpect.spawn('node initPrivacyAsset --address ' + data['wallet']['address'] +
