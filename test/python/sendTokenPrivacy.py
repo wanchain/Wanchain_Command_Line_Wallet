@@ -51,7 +51,7 @@ class SendTokenPrivacy(Send):
         if commonUtil.show_logs:
             child.logfile = sys.stdout
 
-        commonUtil.check_expect_condition(data['wallet']['token address'] + ")[\s\S]*(" + data['send']['amount'],
+        commonUtil.check_expect_condition('add new token balance',
                                           child,
                                           test_name,
                                           "Balance not found", self.get_address())
