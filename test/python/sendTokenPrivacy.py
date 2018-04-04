@@ -42,20 +42,19 @@ class SendTokenPrivacy(Send):
         self.send_transaction()
 
 
+       # print "watchTokenOTA start"
+       # child = pexpect.spawn('node watchTokenOTA --address ' + self.get_address() +
+       #                       ' --tokenAddress ' + data['wallet']['token address'] +
+       #                       ' --OTAAddress 1',  cwd='../../src/')
 
-        print "watchTokenOTA start"
-        child = pexpect.spawn('node watchTokenOTA --address ' + self.get_address() +
-                              ' --tokenAddress ' + data['wallet']['token address'] +
-                              ' --OTAAddress ' + '0x02529bdb23df2f1f6730a960da4b8cacd027037f8581697651eb9b8c9667549400033baad5a5b1aae530ed86235f2182fb8a4e9caabc939e622a97641e9a415b6f0f', cwd='../../src/')
+       # if commonUtil.show_logs:
+       #     child.logfile = sys.stdout
 
-        if commonUtil.show_logs:
-            child.logfile = sys.stdout
-
-        commonUtil.check_expect_condition('add new token balance',
-                                          child,
-                                          test_name,
-                                          "Balance not found", self.get_address())
-        print "watchTokenOTA end"
+       # commonUtil.check_expect_condition('add new token balance',
+       #                                   child,
+       #                                   test_name,
+       #                                   "Balance not found", self.get_address())
+       # print "watchTokenOTA end"
 
 
 
@@ -79,25 +78,11 @@ class SendTokenPrivacy(Send):
         #print 'initPrivacyAsset end'
 
         # Start privacy transaction
-        print "tokenSendPrivacy start"
-        child = pexpect.spawn('node tokenSendPrivacy --address 1' +
-                              ' --contractBalance 0x02529bdb23df2f1f6730a960da4b8cacd027037f8581697651eb9b8c9667549400033baad5a5b1aae530ed86235f2182fb8a4e9caabc939e622a97641e9a415b6f0f' +
-                              ' --waddress ' + self.get_wan_address() +
-                              ' --amount ' + data['send']['amount']
-                              , cwd='../../src/')
-
-        if commonUtil.show_logs:
-             child.logfile = sys.stdout
-
-        commonUtil.check_expect_condition("Input stamp OTA you want to us", child, test_name, "tokenSendPrivacy failed", self.get_address())
-        result = child.after
-        count = str(result.count("status"))
-
         child = pexpect.spawn('node tokenSendPrivacy --address 1' +
                               ' --contractBalance 1' +
                               ' --waddress ' + self.get_wan_address() +
                               ' --amount ' + data['send']['amount'] +
-                              ' --stampOTA ' + count +
+                              ' --stampOTA 1' +
                               ' --submit ' + data['send']['submit'] +
                               ' --password ' + commonUtil.read_wallet_password(test_name), cwd='../../src/')
         if commonUtil.show_logs:
