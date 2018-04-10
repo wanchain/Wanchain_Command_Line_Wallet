@@ -7,7 +7,8 @@
   "wallet": {
     "address": "0xcAb6aD272D18A52ECd8fc1F37398AbA675145990",
     "password": "~/.wanchain/cli_test_account_passwd",
-    "token address": "0x3150894F182dc46555586C88C2d42c70ed4B32c6"
+    "token address": "0x3150894F182dc46555586C88C2d42c70ed4B32c6",
+    "token_ota": "0x025e97f8827e5394a1ed371d7236ed33cd1b5e89bab78217c0fd24811047d4473b026b938a887d391ccc4b9bb77fb86aadc99b2760471c0a13a8ae12a62a2576b915"
   },
   "createKeystore": {
     "address": "address:",
