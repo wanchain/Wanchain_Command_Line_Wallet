@@ -3,11 +3,6 @@ import time
 from send import *
 
 test_name = "ordinaryBalance"
-data = None
-
-with open('../util/test_data.json') as json_file:
-    data = json.load(json_file)
-
 
 class OrdinaryBalance(Send):
     """ Class to test transaction list"""
@@ -22,13 +17,13 @@ class OrdinaryBalance(Send):
 
         self.send_transaction()
 
-        time.sleep(float(data['general']['balance sync sleep time']))
+        time.sleep(float(self.data['general']['balance sync sleep time']))
         child = pexpect.spawn('node ordinaryBalance --address ' + self.get_address(), cwd='../../src/');
 
         if commonUtil.show_logs:
             child.logfile = sys.stdout
 
-        commonUtil.check_expect_condition(data['ordinaryBalance']['message'] + data['send']['amount'], child, test_name,
+        commonUtil.check_expect_condition(self.data['ordinaryBalance']['message'] + self.data['send']['amount'], child, test_name,
                                           "Balance not found", self.get_address())
         print sys._getframe().f_code.co_name + ": end"
 

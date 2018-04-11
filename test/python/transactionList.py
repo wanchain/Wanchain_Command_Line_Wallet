@@ -2,11 +2,6 @@ from send import *
 from tokenSend import *
 
 test_name = "transactionList"
-data = None
-
-with open('../util/test_data.json') as json_file:
-    data = json.load(json_file)
-
 
 class TransactionList(Send):
     """ Class to test transaction list"""

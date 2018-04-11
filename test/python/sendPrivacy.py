@@ -3,11 +3,6 @@ import time
 from send import *
 
 test_name = "sendPrivacy"
-data = None
-
-with open('../util/test_data.json') as json_file:
-    data = json.load(json_file)
-
 
 class SendPrivacy(Send):
     """ Class to test send privacy transaction """
@@ -26,20 +21,20 @@ class SendPrivacy(Send):
 
         print 'node sendPrivacy --address 1' + \
                               ' --waddress ' + self.get_wan_address() + \
-                              ' --PrivacyAmount ' + data['send']['amount'] + \
-                              ' --FeeSel ' + data['send']['fee selection'] + \
-                              ' --gasLimit ' + data['send']['gas limit'] + \
-                              ' --gasPrice ' + data['send']['gas price'] + \
-                              ' --submit ' + data['send']['submit'] + \
+                              ' --PrivacyAmount ' + self.data['send']['amount'] + \
+                              ' --FeeSel ' + self.data['send']['fee selection'] + \
+                              ' --gasLimit ' + self.data['send']['gas limit'] + \
+                              ' --gasPrice ' + self.data['send']['gas price'] + \
+                              ' --submit ' + self.data['send']['submit'] + \
                               ' --password ' + commonUtil.read_wallet_password(test_name)
         # Start privacy transaction
         child = pexpect.spawn('node sendPrivacy --address 1' +
                               ' --waddress ' + self.get_wan_address() +
-                              ' --PrivacyAmount ' + data['send']['amount'] +
-                              ' --FeeSel ' + data['send']['fee selection'] +
-                              ' --gasLimit ' + data['send']['gas limit'] +
-                              ' --gasPrice ' + data['send']['gas price'] +
-                              ' --submit ' + data['send']['submit'] +
+                              ' --PrivacyAmount ' + self.data['send']['amount'] +
+                              ' --FeeSel ' + self.data['send']['fee selection'] +
+                              ' --gasLimit ' + self.data['send']['gas limit'] +
+                              ' --gasPrice ' + self.data['send']['gas price'] +
+                              ' --submit ' + self.data['send']['submit'] +
                               ' --password ' + commonUtil.read_wallet_password(test_name), cwd='../../src/')
         if commonUtil.show_logs:
             child.logfile = sys.stdout
@@ -48,7 +43,7 @@ class SendPrivacy(Send):
         result = child.before
 
         tx_start = -1
-        summary = result.find(data['send']['txn message'])
+        summary = result.find(self.data['send']['txn message'])
         if (summary != -1):
             tx_start = result.find('0x', summary)
 
@@ -61,7 +56,7 @@ class SendPrivacy(Send):
 
         # Transaction successful, now wait for block to get scanned
         print "send a privacy transaction"
-        time.sleep(int(data['send privacy']['fetch OTA wait time']))
+        time.sleep(int(self.data['send privacy']['fetch OTA wait time']))
 
         child = pexpect.spawn('node fetchMyOTA --address ' + self.get_address() +
                               ' --password ' + self.get_password(), cwd='../../src/')
@@ -72,7 +67,7 @@ class SendPrivacy(Send):
         commonUtil.check_expect_eof(child, test_name, self.get_address())
 
         result = child.before
-        summary = result.find(data['fetchOTA']['ota message'])
+        summary = result.find(self.data['fetchOTA']['ota message'])
         ota_start = ''
         if (summary != -1):
             ota_start = result.find('0x', summary)
@@ -86,10 +81,10 @@ class SendPrivacy(Send):
         print "send refundOTA transaction"
         child = pexpect.spawn('node refundOTAs --address ' + self.address +
                               ' --OTAaddress ' + self.ota +
-                              ' --FeeSel ' + data['send']['fee selection'] +
-                              ' --gasLimit ' + data['send']['gas limit'] +
-                              ' --gasPrice ' + data['send']['gas price'] +
-                              ' --submit ' + data['send']['submit'] +
+                              ' --FeeSel ' + self.data['send']['fee selection'] +
+                              ' --gasLimit ' + self.data['send']['gas limit'] +
+                              ' --gasPrice ' + self.data['send']['gas price'] +
+                              ' --submit ' + self.data['send']['submit'] +
                               ' --password ' + self.get_password(), cwd='../../src/')
         if commonUtil.show_logs:
             child.logfile = sys.stdout
@@ -98,7 +93,7 @@ class SendPrivacy(Send):
         result = child.before
 
         tx_start = -1
-        summary = result.find(data['send']['txn message'])
+        summary = result.find(self.data['send']['txn message'])
         if (summary != -1):
             tx_start = result.find('0x', summary)
 
@@ -107,7 +102,7 @@ class SendPrivacy(Send):
         else:
             commonUtil.exit_test('Transaction hash not found', test_name, child, self.get_address())
 
-        time.sleep(int(data['general']['balance sync sleep time']))
+        time.sleep(int(self.data['general']['balance sync sleep time']))
 
         # Confirm the balance
         print "send ordinaryBalance transaction"
@@ -121,13 +116,13 @@ class SendPrivacy(Send):
 
         result = child.before
 
-        message_start = result.find(data['ordinaryBalance']['message'])
+        message_start = result.find(self.data['ordinaryBalance']['message'])
 
         # The balance should be more than starting balance before privacy transaction
         # Can't predict exact balance as fees get deducted in refundOTA process
-        #if (float(result[message_start + len(data['ordinaryBalance']['message']):]) <= float(data['send']['amount'])):
-        print 'Balance is %s' % float(result[message_start + len(data['ordinaryBalance']['message']):])
-        if (float(result[message_start + len(data['ordinaryBalance']['message']):]) <= 10):
+        #if (float(result[message_start + len(self.data['ordinaryBalance']['message']):]) <= float(self.data['send']['amount'])):
+        print 'Balance is %s' % float(result[message_start + len(self.data['ordinaryBalance']['message']):])
+        if (float(result[message_start + len(self.data['ordinaryBalance']['message']):]) <= 10):
             commonUtil.exit_test('Balance not updated', test_name, child, self.get_address())
 
         print sys._getframe().f_code.co_name + ": end"

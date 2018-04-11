@@ -1,11 +1,6 @@
 from createKeystore import *
 
 test_name = "tokensend"
-data = None
-
-with open('../util/test_data.json') as json_file:
-    data = json.load(json_file)
-
 
 class TokenSend(CreateKeystore):
     """ Class to test send token transaction """
@@ -13,6 +8,8 @@ class TokenSend(CreateKeystore):
     def __init__(self):
         super(TokenSend, self).__init__()
         self.tx_hash = ''
+        with open('../util/test_data.json', 'r') as json_file:
+            self.data = json.load(json_file)        
 
     def get_token_transaction_hash(self):
         return self.tx_hash
@@ -26,12 +23,12 @@ class TokenSend(CreateKeystore):
         # This is to make sure our wallet's token balance is synced
         print "watch token start"
         child = pexpect.spawn('node watchToken --address 1' +
-                              ' --tokenAddress ' + data['wallet']['token address'], cwd='../../src/');
+                              ' --tokenAddress ' + self.data['wallet']['token address'], cwd='../../src/');
 
         if commonUtil.show_logs:
             child.logfile = sys.stdout
 
-        commonUtil.check_expect_condition(data['wallet']['token address'], child,
+        commonUtil.check_expect_condition(self.data['wallet']['token address'], child,
                                           test_name,
                                           "Watch token failed for source address", self.get_address())
         print "watch token end"
@@ -41,11 +38,11 @@ class TokenSend(CreateKeystore):
         child = pexpect.spawn('node tokensend --address 1' +
                               ' --tokenAddress 1 '+
                               ' --toaddress ' + self.get_address() +
-                              ' --amount ' + data['send']['amount'] +
-                              ' --FeeSel ' + data['send']['fee selection'] +
-                              ' --gasLimit ' + data['send']['gas limit'] +
-                              ' --gasPrice ' + data['send']['gas price'] +
-                              ' --submit ' + data['send']['submit'] +
+                              ' --amount ' + self.data['send']['amount'] +
+                              ' --FeeSel ' + self.data['send']['fee selection'] +
+                              ' --gasLimit ' + self.data['send']['gas limit'] +
+                              ' --gasPrice ' + self.data['send']['gas price'] +
+                              ' --submit ' + self.data['send']['submit'] +
                               ' --password ' + commonUtil.read_wallet_password(test_name), cwd='../../src/')
         if commonUtil.show_logs:
             child.logfile = sys.stdout
@@ -55,7 +52,7 @@ class TokenSend(CreateKeystore):
         result = child.before
 
         tx_start = -1
-        summary = result.find(data['send']['txn message'])
+        summary = result.find(self.data['send']['txn message'])
         if (summary != -1):
             tx_start = result.find('0x', summary)
 

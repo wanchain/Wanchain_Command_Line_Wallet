@@ -78,16 +78,6 @@ def write_results():
 
     os.remove("temp.dat")
 
-'''
-!Don't use in mainnet!
-def cleanup(address):
-    with open('../util/test_data.json') as json_file:
-        data = json.load(json_file)
-
-    if address != "" and address!= None:
-        subprocess.check_output("find " + data['general']['keystore path'] +" -name '*" + address[2:] + "*' -delete",
-                                             shell=True)
-'''
 def initialize_result():
     import createKeystore
     import ordinaryBalance
@@ -104,7 +94,7 @@ def initialize_result():
     initial_values[ordinaryBalance.test_name] = {status_title: skip_test, error_title: "NA"}
     initial_values[send.test_name] = {status_title: skip_test, error_title: "NA"}
     initial_values[sendPrivacy.test_name] = {status_title: skip_test, error_title: "NA"}
-    initial_values[sendTokenPrivacy.test_name] = {status_title: skip_test, error_title: "NA"}
+    #initial_values[sendTokenPrivacy.test_name] = {status_title: skip_test, error_title: "NA"}
     initial_values[tokenSend.test_name] = {status_title: skip_test, error_title: "NA"}
     initial_values[transactionList.test_name] = {status_title: skip_test, error_title: "NA"}
     initial_values[tokenTransactionList.test_name] = {status_title: skip_test, error_title: "NA"}
@@ -112,16 +102,19 @@ def initialize_result():
 
     return initial_values
 
-
-
 def read_wallet_password(testname):
-    with open('../util/test_data.json') as json_file:
+    with open('../util/test_data.json', 'r') as json_file:
         data = json.load(json_file)
     try:
         with open(os.path.expanduser(data['wallet']['password']), 'r') as f:
             password = f.readline()
             if(password == ""):
-                exit_test("Test wallet password not found at path: " +data['wallet']['test data'],testname,None,"")
+                exit_test("Test wallet password not found at path: " +data['wallet']['password'],testname,None,"")
     except IOError:
-        exit_test("Test wallet password file not present at path: " + data['wallet']['test data'], testname, None, "")
+        exit_test("Test wallet password file not present at path: " + data['wallet']['password'], testname, None, "")
     return password
+
+
+
+
+

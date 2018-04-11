@@ -2,17 +2,12 @@ from send import *
 from tokenSend import *
 
 test_name = "tokenTransactionList"
-data = None
 
-with open('../util/test_data.json') as json_file:
-    data = json.load(json_file)
-
-
-class TransactionList(Send, TokenSend):
+class TokenTransactionList(Send, TokenSend):
     """ Class to test transaction list"""
 
     def __init__(self):
-        super(TransactionList, self).__init__()
+        super(TokenTransactionList, self).__init__()
         self.tx_hash = ''
 
     def get_transaction_list(self):
@@ -35,9 +30,9 @@ class TransactionList(Send, TokenSend):
 
 
 def main():
-    tranasactionList = TransactionList()
+    tokenTranasactionList = TokenTransactionList()
     print (" --------------- " + test_name + " start -------------")
-    tranasactionList.get_transaction_list()
+    tokenTranasactionList.get_transaction_list()
 
     commonUtil.test_successful(test_name)
     print (" --------------- " + test_name + " complete -------------")

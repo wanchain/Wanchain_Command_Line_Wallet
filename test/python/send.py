@@ -1,11 +1,6 @@
 from createKeystore import *
 
 test_name = "send"
-data = None
-
-with open('../util/test_data.json') as json_file:
-    data = json.load(json_file)
-
 
 class Send(CreateKeystore):
     """ Class to test send transaction """
@@ -13,6 +8,8 @@ class Send(CreateKeystore):
     def __init__(self):
         super(Send, self).__init__()
         self.tx_hash = ''
+        with open('../util/test_data.json', 'r') as json_file:
+            self.data = json.load(json_file)
 
     def get_transaction_hash(self):
         return self.tx_hash
@@ -26,11 +23,11 @@ class Send(CreateKeystore):
 
         child = pexpect.spawn('node send --address 1' +
                               ' --toaddress ' + self.get_address() +
-                              ' --amount ' + data['send']['amount'] +
-                              ' --FeeSel ' + data['send']['fee selection'] +
-                              ' --gasLimit ' + data['send']['gas limit'] +
-                              ' --gasPrice ' + data['send']['gas price'] +
-                              ' --submit ' + data['send']['submit'] +
+                              ' --amount ' + self.data['send']['amount'] +
+                              ' --FeeSel ' + self.data['send']['fee selection'] +
+                              ' --gasLimit ' + self.data['send']['gas limit'] +
+                              ' --gasPrice ' + self.data['send']['gas price'] +
+                              ' --submit ' + self.data['send']['submit'] +
                               ' --password ' + commonUtil.read_wallet_password(test_name), cwd='../../src/')
         if commonUtil.show_logs:
             child.logfile = sys.stdout
@@ -40,7 +37,7 @@ class Send(CreateKeystore):
         result = child.before
 
         tx_start = -1
-        summary = result.find(data['send']['txn message'])
+        summary = result.find(self.data['send']['txn message'])
         if (summary != -1):
             tx_start = result.find('0x', summary)
 
