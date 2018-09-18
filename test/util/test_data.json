@@ -1,7 +1,7 @@
 {
   "general": {
     "default timeout": "120",
-    "balance sync sleep time": "90",
+    "balance sync sleep time": "120",
     "keystore path": "~/.wanchain/testnet/keystore/"
   },
   "wallet": {
