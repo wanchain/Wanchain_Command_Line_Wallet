@@ -1,0 +1,33 @@
+{
+  "general": {
+    "default timeout": "300",
+    "balance sync sleep time": "90",
+    "keystore path": "/workspace/gwanDataDir/testnet/keystore/"
+  },
+  "wallet": {
+    "address": "0xcAb6aD272D18A52ECd8fc1F37398AbA675145990",
+    "password": "/workspace/gwanDataDir/testnet/keystore/testnet.pwd",
+    "token address": "0x3150894F182dc46555586C88C2d42c70ed4B32c6"
+  },
+  "createKeystore": {
+    "address": "address:",
+    "waddress": "waddress:"
+  },
+  "send": {
+    "fee selection": "2",
+    "amount": "1",
+    "gas limit": "500000",
+    "gas price": "200",
+    "submit": "Y",
+    "txn message": "Transaction hash"
+  },
+  "ordinaryBalance": {
+    "message": "balance : "
+  },
+  "fetchOTA": {
+    "ota message": "find new OTA:"
+  },
+  "send privacy": {
+    "fetch OTA wait time": "600"
+  }
+}
